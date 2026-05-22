@@ -1,0 +1,9 @@
+<svg width="24" height="24" viewBox="0 0 24 24" 
+     xmlns="http://www.w3.org/2000/svg">
+  <!-- Thanh ngang trên -->
+  <line x1="8" y1="4" x2="16" y2="4" stroke="#c40016" stroke-width="2"/>
+  <!-- Thanh dọc giữa -->
+  <line x1="12" y1="4" x2="12" y2="20" stroke="#c40016" stroke-width="2"/>
+  <!-- Thanh ngang dưới -->
+  <line x1="8" y1="20" x2="16" y2="20" stroke="#c40016" stroke-width="2"/>
+</svg>

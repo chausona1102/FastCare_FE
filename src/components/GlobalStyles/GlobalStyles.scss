@@ -1,0 +1,171 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+
+// Root variables
+:root {
+    --color-fastcare-50: #fbe6e8;
+    --color-fastcare-100: #f3b0b7;
+    --color-fastcare-200: #ed8a95;
+    --color-fastcare-300: #e45464;
+    --color-fastcare-400: #df3346;
+    --color-fastcare-500: #d70018;
+    --color-fastcare-600: #c40016;
+    --color-fastcare-700: #990011;
+    --color-fastcare-800: #76000d;
+    --color-fastcare-900: #5a000a;
+    --color-lightblue-50: #f7faff;
+    --color-lightblue-100: #dbe7ff;
+    --color-lightblue-200: #609afa;
+    --color-lightblue-500: #3b82f6;
+
+    --default-layout-header-height: 80px;
+    --default-layout-horizontal-spacer: 20px;
+    --default-layout-width: 1125px;
+
+    --primary-clr: #fff;
+    --secondary-clr: #000;
+    --active-clr: #05a;
+
+    --bg-primary: #fff;
+    --bg-secondary: #000;
+
+    --bg-sub-footer: #f7f7f8;
+    --bg-footer: #f2f2f3;
+
+    --star-clr: #ffbc1c;
+
+    --fw-light: 300;
+    --fw-regular: 400;
+    --fw-medium: 500;
+    --fw-bold: 700;
+
+    --myfont-bold: MyFont-Bold, system-ui, -apple-system, sans-serif;
+    --myfont-regular: MyFont-Regular, system-ui, -apple-system, sans-serif;
+    --myfont-semibold: MyFont-Semibold, system-ui, -apple-system, sans-serif;
+}
+
+// Tippy tooltip styles
+body {
+    .tippy-box {
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1.6rem;
+        line-height: 2.2rem;
+        background-color: var(--color-fastcare-400);
+    }
+    
+    .tippy-arrow {
+        color: var(--color-fastcare-400);
+    }
+    
+    .tippy-box[data-placement^='bottom']>.tippy-arrow {
+        top: -1px;
+    }
+    
+    .tippy-content {
+        padding: 8px 9px;
+    }
+}
+
+
+@font-face {
+    font-family: MyFont-Bold;
+    src: url('/assets/fonts/myfonts/Font-Bold.woff2');
+    font-weight: 700;
+}
+
+@font-face {
+    font-family: MyFont-Regular;
+    src: url('/assets/fonts/myfonts/Font-Regular.woff2');
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: MyFont-Semibold;
+    src: url('/assets/fonts/myfonts/Font-Semibold.woff2');
+    font-weight: 600;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    cursor: url('/src/assets/icons/default_cursor.svg') 2 1, auto;
+}
+
+html {
+    font-size: 62.5%;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    @media (max-width: 768px) {
+        font-size: 50%;
+    }
+}
+
+
+
+body {
+    background-color: #f5f5f5;
+    font-family: var(--myfont-regular), serif;
+    font-size: 1.6rem;
+    line-height: 1.5;
+    text-rendering: optimizeSpeed;
+}
+
+ul {
+    list-style: none;
+}
+
+[href] {
+    color: black;
+    text-decoration: none;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+    cursor: url("/src/assets/icons/typing_cursor.svg") 4 12, text;
+}
+
+a, img, button {
+    cursor: url("/src/assets/icons/full_fill_cursor.svg") 1 2, auto !important;
+    span {
+        cursor: url("/src/assets/icons/full_fill_cursor.svg") 1 2, auto !important;
+    }
+}
+
+h1,h2,h3,h4,h5 {
+    margin: 0;
+}
+
+
+
+
+::selection {
+    background-color: var(--color-fastcare-500);
+    color: var(--primary-clr);
+}
+
+
+/* Toàn bộ thanh scroll */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: var(--color-fastcare-50);
+    border-radius: 10px;
+}
+
+/* thumb) */
+::-webkit-scrollbar-thumb {
+    background: var(--color-fastcare-200);
+    border-radius: 10px;
+}
+
+/* thumb:hover */
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-fastcare-500);
+}

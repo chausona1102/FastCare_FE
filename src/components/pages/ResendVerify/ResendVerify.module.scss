@@ -1,0 +1,121 @@
+.wrapper {
+    position: relative;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f0f4ff 0%, #e8f5e9 100%);
+
+    .container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        padding: 40px;
+        width: 100%;
+        max-width: 420px;
+
+        h1 {
+            padding: 0 0 8px;
+            color: var(--color-fastcare-500);
+            font-size: 2.5rem;
+        }
+
+        h2 {
+            padding: 0 0 24px;
+            opacity: 0.6;
+            font-size: 1.4rem;
+            font-weight: normal;
+            line-height: 1.5;
+        }
+
+        form {
+            padding: 0;
+
+            .form-group {
+                display: flex;
+                flex-direction: column;
+
+                label {
+                    padding: 5px 0;
+                    font-weight: var(--fw-medium);
+                    font-size: 1.5rem;
+                    color: #333;
+                }
+
+                input {
+                    border-radius: 8px;
+                    border: 1.5px solid #ccc;
+                    padding: 10px 14px;
+                    font-size: 1.5rem;
+                    transition: border-color 0.2s;
+                    outline: none;
+
+                    &:focus {
+                        border-color: var(--color-fastcare-500);
+                        box-shadow: 0 0 0 3px rgba(var(--color-fastcare-500), 0.15);
+                    }
+                }
+            }
+
+            .btn-submit {
+                margin-top: 20px;
+                width: 100%;
+                padding: 11px;
+                border: none;
+                border-radius: 8px;
+                background: var(--color-fastcare-500);
+                color: #fff;
+                font-size: 1.5rem;
+                font-weight: var(--fw-medium);
+                cursor: pointer;
+                transition: opacity 0.2s, transform 0.1s;
+
+                &:hover {
+                    opacity: 0.9;
+                }
+
+                &:active {
+                    transform: scale(0.98);
+                }
+            }
+            .error-log {
+                color: var(--color-fastcare-500);
+                font-weight: var(--fw-medium);
+            }
+        }
+    }
+}
+
+.modal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    z-index: 1000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5);
+
+    .content {
+        background-color: #fff;
+        min-width: 30vw;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+
+        .icon-checked {
+            font-size: 5rem;
+            color: var(--color-fastcare-500);
+            padding: 20px;
+        }
+    }
+}
+
+.show {
+    display: flex;
+}
