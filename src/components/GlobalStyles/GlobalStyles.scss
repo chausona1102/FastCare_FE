@@ -19,11 +19,18 @@
 
     --default-layout-header-height: 80px;
     --default-layout-horizontal-spacer: 20px;
-    --default-layout-width: 1125px;
+    --default-layout-width: 1200px;
 
     --primary-clr: #fff;
     --secondary-clr: #000;
     --active-clr: #05a;
+
+    --color-white: #fff;
+    --color-black: #000;
+    --color-gray: #888;
+
+    --border-white-100: #e7ecf5;
+    --border-white-200: #f7faff;
 
     --bg-primary: #fff;
     --bg-secondary: #000;
@@ -36,7 +43,8 @@
     --fw-light: 300;
     --fw-regular: 400;
     --fw-medium: 500;
-    --fw-bold: 700;
+    --fw-bold: 600;
+    --fw-sbold: 700;
 
     --myfont-bold: MyFont-Bold, system-ui, -apple-system, sans-serif;
     --myfont-regular: MyFont-Regular, system-ui, -apple-system, sans-serif;
@@ -69,19 +77,19 @@ body {
 
 @font-face {
     font-family: MyFont-Bold;
-    src: url('/assets/fonts/myfonts/Font-Bold.woff2');
+    src: url('/assets/fonts/Font-Bold.woff2');
     font-weight: 700;
 }
 
 @font-face {
     font-family: MyFont-Regular;
-    src: url('/assets/fonts/myfonts/Font-Regular.woff2');
+    src: url('/assets/fonts/Font-Regular.woff2');
     font-weight: 400;
 }
 
 @font-face {
     font-family: MyFont-Semibold;
-    src: url('/assets/fonts/myfonts/Font-Semibold.woff2');
+    src: url('/assets/fonts/Font-Semibold.woff2');
     font-weight: 600;
 }
 
@@ -113,6 +121,8 @@ body {
 
 ul {
     list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
 [href] {

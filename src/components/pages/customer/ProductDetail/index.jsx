@@ -5,11 +5,15 @@ import { iphone17promax, avatar } from "~/assets/images";
 import Title from "~/components/Title";
 import Button from "~/components/Button";
 import Cart from "~/components/Cart";
+import Loading from "~/components/Loading";
 import {
   converseVND,
   converseKilo,
   formatDateHour,
 } from "~/utils/functions.jsx";
+
+import api from "~/api";
+import axios from "axios";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -24,80 +28,10 @@ import {
 import Tippy from "@tippyjs/react";
 
 import { useEffect, useState, useRef } from "react";
-import { Link } from "react-router-dom";
-
-var product = [
-  {
-    id: "prod_001",
-    title: "iPhone 17 Pro Max 255GB",
-    avatar: iphone17promax,
-    images: [iphone17promax, iphone17promax, iphone17promax],
-    sold: 200000,
-    minPrice: 36000000,
-    discount: 30,
-    installment: 2,
-    brand: "iPhone",
-    ram: "16GB",
-    rom: "256GB",
-    screenSize: 6.9,
-    displayTech: "Oled",
-    rearCamera: "Rear Camera",
-    frontCamera: "Front Camera",
-    chipset: "Chipset",
-    nfc: "NFC Tech",
-    sim: "2 Sim",
-    os: "iOS",
-    screenResolution: "2868 x 1320 pixels",
-    cpu: "CPU 6 lõi với 2 lõi hiệu năng và 4 lõi tiết kiệm điện",
-    category: {
-      id: "ip_001",
-      name: "iPhone",
-      parentCategory: {
-        id: "1",
-        name: "Điện thoại",
-        parentID: null,
-      },
-    },
-    variants: [
-      {
-        id: "var_001",
-        colors: ["Đen Titan", "Trắng Titan", "Sa Mạc"],
-        images: [iphone17promax, iphone17promax, iphone17promax],
-        storage: "256GB",
-        price: 36000000,
-        stockQuantity: 100,
-        sku: "IPH17PM-256GB",
-      },
-      {
-        id: "var_002",
-        colors: ["Đen Titan", "Trắng Titan"],
-        images: [iphone17promax, iphone17promax],
-        storage: "512GB",
-        price: 46000000,
-        stockQuantity: 80,
-        sku: "IPH17PM-512GB",
-      },
-      {
-        id: "var_003",
-        colors: ["Đen Titan", "Trắng Titan"],
-        images: [iphone17promax, iphone17promax],
-        storage: "1TB",
-        price: 56000000,
-        stockQuantity: 17,
-        sku: "IPH17PM-1TB",
-      },
-      {
-        id: "var_004",
-        colors: ["Đen Titan", "Trắng Titan"],
-        images: [iphone17promax, iphone17promax],
-        storage: "2TB",
-        price: 66000000,
-        stockQuantity: 0,
-        sku: "IPH17PM-2TB",
-      },
-    ],
-  },
-];
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { addToCart } from "~/store/slices/cartSlice.jsx";
+import { useToast } from "~/contexts/ToastContext.jsx";
 
 var feedbacks = [
   {
@@ -551,18 +485,25 @@ var moreProducts = [
 ];
 
 function ProductDetail() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { showToast } = useToast();
+  const { loading, error } = useSelector((state) => state.cart);
+  const { id } = useParams();
+
   // const { type, id } = useParams();
-  const variants = product[0].variants;
-  const images = product[0].images;
   const timerRef = useRef(null);
   // const moreProductsRowRef = useRef(null);
   // const { type, id } = useParams();
   const itemsPerPage = 3;
 
   // State
+  const [product, setProduct] = useState(null);
+  const [variants, setVariants] = useState([]);
+  const [images, setImages] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [currentVersion, setCurrentVersion] = useState(variants[0]);
+  const [currentVersion, setCurrentVersion] = useState(null);
   const [currentColor, setCurrentColor] = useState({});
   const [quantity, setQuantity] = useState(1);
   const [feedBack, setFeedBack] = useState("all");
@@ -606,13 +547,77 @@ function ProductDetail() {
   const prev = () => goTo((currentSlide - 1 + images.length) % images.length);
   const next = () => goTo((currentSlide + 1) % images.length);
 
+  // Add to cart Function
+  const handleAddToCart = async () => {
+    if (!currentVersion || !currentColor.color) {
+      showToast({ title: "Vui lòng chọn phiên bản và màu sắc trước khi thêm vào giỏ hàng", type: "warning" });
+      return;
+    }
+    const result = await dispatch(
+      addToCart({
+        product: product._id,
+        variant: currentVersion._id,
+        color: currentColor.color,
+        currentPrice: currentColor.price,
+        quantity: quantity,
+      })
+    );
+    if (addToCart.fulfilled.match(result)) {
+      showToast({ title: "Đã thêm vào giỏ hàng", type: "success" });
+    } else if (addToCart.rejected.match(result)) {
+      showToast({ title: result.payload?.message || "Thêm vào giỏ hàng thất bại", type: "error" });
+    }
+  };
+
+  const handleBuyNow = () => {
+    if (!currentVersion || !currentColor.color) {
+      showToast({ title: "Vui lòng chọn phiên bản và màu sắc trước khi mua ngay", type: "warning" });
+      return;
+    }
+
+    const checkoutItem = {
+      product: product._id,
+      variant: currentVersion._id,
+      color: currentColor.color,
+      title: product.title,
+      quantity,
+      currentPrice: currentColor.price,
+      weight: product.weight || 500,
+      height: product.height || 20,
+      length: product.length || 15,
+      width: product.width || 20,
+    };
+
+    navigate("/checkout", { state: { checkoutItems: [checkoutItem] } });
+  };
+
+  // useEffect
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const [{ data: productData }, { data: variantData }] = await axios.all([
+          axios.get(`${api.product}/${id}`),
+          axios.get(`${api.variant}/product/${id}`),
+        ]);
+
+        setProduct(productData);
+        setVariants(variantData);
+        setCurrentVersion(variantData[0]);
+        setImages(productData.images);
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    fetchProduct();
+  }, []);
+
   // useEffect - Slider
   useEffect(() => {
     startTimer();
     return () => clearInterval(timerRef.currentSlide);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
+  if (!product || !currentVersion) return Loading();
   return (
     <div className={cx("wrapper")}>
       {/* Breadcrumb */}
@@ -622,11 +627,11 @@ function ProductDetail() {
           <FontAwesomeIcon className={cx("icon")} icon={faAngleRight} />
           <Link to="/product">Sản phẩm</Link>
           <FontAwesomeIcon className={cx("icon")} icon={faAngleRight} />
-          <Link to={`/product/${product[0].category.parentCategory.id}`}>
-            {product[0].category.parentCategory.name}
+          <Link to={`/product/${product.category.parentCategory._id}`}>
+            {product.category.parentCategory.name}
           </Link>
           <FontAwesomeIcon className={cx("icon")} icon={faAngleRight} />
-          <span>{product[0].title}</span>
+          <span>{product.title}</span>
         </nav>
       </div>
       {/* Image + Info */}
@@ -675,7 +680,7 @@ function ProductDetail() {
         </div>
         <div className={cx("section-2")}>
           <Title
-            title={`${product[0].title} | Chính hãng`}
+            title={`${product.title} | Chính hãng`}
             className={cx("title")}
           />
           <div className={cx("d-flex")}>
@@ -684,13 +689,13 @@ function ProductDetail() {
               <FontAwesomeIcon icon={faStar} className={cx("star")} />
             </span>
             <span> | {feedbacks.length} Đánh giá</span>
-            <span> | Lượt bán: {converseKilo(product[0].sold)}</span>
+            <span> | Lượt bán: {converseKilo(product.sold)}</span>
           </div>
           {/* Version */}
           <div className={cx("version")}>
             <Title title="Phiên bản" className={cx("sub-title")} />
             <div className={cx("version-grid")}>
-              {product[0].variants.map((ver, index) => (
+              {variants.map((ver, index) => (
                 <Button
                   key={index}
                   className={cx("color-btn", {
@@ -713,6 +718,7 @@ function ProductDetail() {
             <div className={cx("version-color")}>
               {currentVersion.colors.map((color, index) => (
                 <button
+                  key={index}
                   className={cx("color-btn", {
                     active: currentColor.color === color,
                   })}
@@ -761,12 +767,6 @@ function ProductDetail() {
         <Title className={cx("title")} title="Chi tiết sản phẩm" />
         <div className={cx("table")}>
           <table className="table caption-top">
-            {/* <thead>
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">First</th>
-              </tr>
-            </thead> */}
             <tbody>
               <tr>
                 <th scope="row">Danh mục</th>
@@ -781,7 +781,7 @@ function ProductDetail() {
                     />
                     <Tippy content="Trang sản phẩm" placement="bottom">
                       <Link
-                        to={`/products/${product[0].category.parentCategory.id}`}
+                        to={`/products/${product.category.parentCategory._id}`}
                       >
                         Sản phẩm
                       </Link>
@@ -790,18 +790,18 @@ function ProductDetail() {
                       className={cx("icon")}
                       icon={faAngleRight}
                     />
-                    <Tippy content="🔎 Điện thoại" placement="bottom">
+                    <Tippy content="Điện thoại" placement="bottom">
                       <Link
-                        to={`/products/${product[0].category.parentCategory.id}`}
+                        to={`/products/${product.category.parentCategory._id}`}
                       >
-                        {product[0].category.parentCategory.name}
+                        {product.category.parentCategory.name}
                       </Link>
                     </Tippy>
                     <FontAwesomeIcon
                       className={cx("icon")}
                       icon={faAngleRight}
                     />
-                    <span>{product[0].title}</span>
+                    <span>{product.title}</span>
                   </nav>
                 </td>
               </tr>
@@ -811,7 +811,7 @@ function ProductDetail() {
               </tr>
               <tr>
                 <th scope="row">Thương hiệu</th>
-                <td>{product[0].brand}</td>
+                <td>{product.brand}</td>
               </tr>
               <tr>
                 <th scope="row">Gửi từ</th>
@@ -830,78 +830,78 @@ function ProductDetail() {
               <tbody>
                 <tr>
                   <th scope="row">Kích thước màn hình</th>
-                  <td>{product[0].screenSize} inches</td>
+                  <td>{product.screenSize} inches</td>
                 </tr>
                 <tr>
                   <th scope="row">Công nghệ màn hình</th>
-                  <td>{product[0].displayTech}</td>
+                  <td>{product.displayTech}</td>
                 </tr>
                 <tr>
                   <th scope="row">Cam trước</th>
-                  <td>{product[0].frontCamera}</td>
+                  <td>{product.frontCamera}</td>
                 </tr>
                 <tr>
                   <th scope="row">Cam sau</th>
-                  <td>{product[0].rearCamera}</td>
+                  <td>{product.rearCamera}</td>
                 </tr>
                 <tr>
                   <th scope="row">Chipset</th>
-                  <td>{product[0].chipset}</td>
+                  <td>{product.chipset}</td>
                 </tr>
                 <tr>
                   <th scope="row">Công nghệ NFC</th>
-                  <td>{product[0].nfc}</td>
+                  <td>{product.nfc}</td>
                 </tr>
                 <tr>
                   <th scope="row">Ram</th>
-                  <td>{product[0].ram}</td>
+                  <td>{product.ram}</td>
                 </tr>
                 <tr>
                   <th scope="row">Bộ nhớ trong</th>
-                  <td>{product[0].rom}</td>
+                  <td>{product.storage}</td>
                 </tr>
                 <tr>
                   <th scope="row">Sim</th>
-                  <td>{product[0].sim}</td>
+                  <td>{product.sim}</td>
                 </tr>
                 <tr>
                   <th scope="row">Hệ điều hành</th>
-                  <td>{product[0].os}</td>
+                  <td>{product.os}</td>
                 </tr>
                 <tr>
                   <th scope="row">Độ phân giải</th>
-                  <td>{product[0].screenResolution}</td>
+                  <td>{product.screenResolution}</td>
                 </tr>
                 <tr>
                   <th scope="row">CPU</th>
-                  <td>{product[0].cpu}</td>
+                  <td>{product.cpu}</td>
                 </tr>
               </tbody>
             </table>
           </div>
           {/* Discount + installment */}
           <div className={cx("preferential")}>
-            {product[0].discount > 0 && (
+            {product.discount > 0 && (
               <div className={cx("discount")}>
                 <h3>
                   <FontAwesomeIcon icon={faGift} />
                   <span>Ưu đãi</span>
                 </h3>
-                <span>- Giảm giá {product[0].discount}%</span>
+                <span>- Giảm giá {product.discount}%</span>
               </div>
             )}
             <div className={cx("actions")}>
-              {product[0].installment > 0 && (
+              {product.installment > 0 && (
                 <>
                   <button className={cx("installment")}>
-                    <span>Trả góp {product[0].installment}%</span>
+                    <span>Trả góp {product.installment}%</span>
                   </button>
-                  <button className={cx("buy-now")}>
+                  <button className={cx("buy-now")} onClick={handleBuyNow}>
                     <h2>Mua ngay</h2>
                     <span>Giao hàng online hoặc nhận tại cửa hàng</span>
                   </button>
                   <Tippy>
-                    <button className={cx("add-cart")}>
+                    <button className={cx("add-cart")} onClick={handleAddToCart}>
                       <FontAwesomeIcon icon={faCartPlus} />
                     </button>
                   </Tippy>
@@ -1087,7 +1087,7 @@ function ProductDetail() {
             />
           ))}
           <Link
-            to={`/products/${product[0].category.parentCategory.id}`}
+            to={`/products/${product.category.parentCategory._id}`}
             className={cx("more-btn")}
           >
             Xem thêm
@@ -1098,12 +1098,12 @@ function ProductDetail() {
       {/* Modal */}
       <div className={cx("modal", { show: showModal })}>
         <div className={cx("container")}>
-          <img src={currentColor.image || product[0].avatar} />
+          <img src={currentColor.image || product.avatar} />
           <Title
             className={cx("modal-title")}
-            title={`${product[0].title} | Chính hãng ${
-              currentVersion.storage
-            }-${currentColor.color || "Chưa chọn màu"}`}
+            title={`${product.title} | Chính hãng ${currentVersion.storage}-${
+              currentColor.color || "Chưa chọn màu"
+            }`}
           />
           <span>(x{quantity})</span>
           <div className={cx("modal-price")}>
@@ -1114,12 +1114,12 @@ function ProductDetail() {
                     ? converseVND(
                         currentColor.price *
                           quantity *
-                          (1 - product[0].discount / 100)
+                          (1 - product.discount / 100)
                       )
                     : "Chưa chọn màu"}
                 </span>
                 <span className={cx("origin-price")}>
-                  {product[0].discount > 0 && (
+                  {product.discount > 0 && (
                     <h4>{converseVND(currentColor.price * quantity)}</h4>
                   )}
                 </span>
@@ -1127,10 +1127,10 @@ function ProductDetail() {
             )}
           </div>
           <div className={cx("actions")}>
-            <Button secondary size="medium" className={cx("buy-btn")}>
+            <Button secondary size="medium" className={cx("buy-btn")} onClick={handleBuyNow}>
               Mua ngay
             </Button>
-            <button className={cx("cart-btn")}>
+            <button className={cx("cart-btn")} onClick={handleAddToCart} disabled={loading}>
               <FontAwesomeIcon icon={faCartPlus} />
             </button>
           </div>

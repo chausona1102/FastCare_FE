@@ -1,0 +1,28 @@
+.container {
+    margin: 10px 0 0 0;
+    display: flex;
+    justify-content: center; 
+    background-color: #e4e4e7;
+    min-height: 98vh;
+}
+.header {
+    z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+.container .content {
+    margin-top: var(--default-layout-header-height); 
+    width: var(--default-layout-width);   
+    max-width: var(--default-layout-width);
+    
+}
+@media (max-width: 768px) {
+    .header {
+        position: relative;
+    }
+    .container .content {
+        margin-top: -15px;
+    }
+}

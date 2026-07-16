@@ -1,0 +1,135 @@
+.shopping-cart-page {
+  background-color: #f7faff;
+}
+
+.shopping-cart-page h1 {
+  color: #1d1d1d;
+}
+
+.cart-list-card {
+  background: #ffffff;
+  border-radius: 1rem;
+  border: 1px solid transparent;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cart-list-card:hover {
+  border-color: #dbe7ff;
+  box-shadow: 0 24px 55px rgba(16, 24, 40, 0.08);
+}
+
+.summary-card {
+  background: #ffffff;
+  border-radius: 1rem;
+  border: 1px solid transparent;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.summary-card:hover {
+  border-color: #dbe7ff;
+}
+
+.cart-item-card {
+  background: #ffffff;
+  border-radius: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.cart-item-card:hover {
+  border-color: #dbe7ff;
+  box-shadow: 0 18px 40px rgba(16, 24, 40, 0.08);
+}
+
+.cart-item-card.unavailable {
+  opacity: 0.65;
+}
+
+.quantity-group .form-control {
+  min-width: 72px;
+}
+
+.empty-cart-wrapper {
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 4rem 2rem;
+  box-shadow: 0 14px 34px rgba(16, 24, 40, 0.08);
+}
+
+.empty-cart-illustration svg {
+  max-width: 240px;
+}
+
+.summary-wrapper {
+  position: sticky;
+  top: 1.5rem;
+}
+
+@media (max-width: 991.98px) {
+  .summary-wrapper {
+    position: static;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .shopping-cart-page .container {
+    padding-bottom: 8rem;
+  }
+
+  .summary-card {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0.5rem;
+    z-index: 1050;
+    border-radius: 1rem 1rem 0 0;
+    box-shadow: 0 -12px 30px rgba(16, 24, 40, 0.12);
+  }
+}
+
+.skeleton-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.skeleton-checkbox,
+.skeleton-image,
+.skeleton-line {
+  background: linear-gradient(90deg, rgba(219, 231, 255, 0.8), rgba(243, 243, 245, 0.8), rgba(219, 231, 255, 0.8));
+  animation: shimmer 1.2s infinite ease-in-out;
+}
+
+.skeleton-checkbox {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  margin-top: 12px;
+}
+
+.skeleton-image {
+  width: 110px;
+  height: 110px;
+  border-radius: 1rem;
+}
+
+.skeleton-line {
+  height: 12px;
+  border-radius: 999px;
+}
+
+.skeleton-line.short {
+  width: 45%;
+}
+
+.skeleton-line.small {
+  width: 30%;
+}
+
+.skeleton-line.smaller {
+  width: 22%;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: 200px 0; }
+}

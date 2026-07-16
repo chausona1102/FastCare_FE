@@ -71,8 +71,6 @@ function Login() {
       }
 
       // Lưu trữ user, token vào localStorage, Redux
-      localStorage.setItem("fastcare_access_token", data.token);
-      localStorage.setItem("fastcare_user", JSON.stringify(data.user));
       dispatch(setCredentials({ user: data.user, token: data.token }));
 
       setShowModal(true);
@@ -83,10 +81,18 @@ function Login() {
       }, 1000);
       setTimeout(() => {
         clearInterval(countdownTimer);
-        if (data.user.role === "admin") {
-          window.location.href = "/admin";
-        } else {
-          window.location.href = "/";
+        switch (data.user.role) {
+          case "admin":
+            window.location.href = "/admin";
+            break;
+          case "staff":
+            window.location.href = "/staff";
+            break;
+          case "customer":
+            window.location.href = "/";
+            break;
+          default:
+            window.location.href = "/";
         }
       }, 3000);
     } catch (error) {
@@ -131,6 +137,7 @@ function Login() {
                     required
                   />
                   <button
+                    type="button"
                     className={cx("btn-eye")}
                     onClick={() => setShowPass(!showPass)}
                   >

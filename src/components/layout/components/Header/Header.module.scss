@@ -1,84 +1,227 @@
+$header-gradient-start: var(--color-fastcare-500);
+$header-gradient-middle: var(--color-fastcare-400);
+$header-gradient-end: var(--color-fastcare-100);
+$badge-color: #d70018;
+$badge-shadow: rgba(215, 0, 24, 0.25);
+
 .wrapper {
-    background: linear-gradient(to top,
-                var(--color-fastcare-500) 0%,
-                var(--color-fastcare-400) 65%,
-                var(--color-fastcare-100) 115%);
+    // background: linear-gradient(90deg, $header-gradient-start 0%, $header-gradient-middle 60%, $header-gradient-end 100%);
+    background-color: var(--color-fastcare-500);
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
 }
+
 .header {
+    position: relative;
     height: var(--default-layout-header-height);
     min-width: 300px;
-    width: var(--default-layout-width);
-    max-width: 1150px;
+    width: min(100%, var(--default-layout-width));
+    // max-width: 1200px;
     margin: 0 auto;
     display: flex;
-    flex-direction: row;
-    gap: 20px;
     align-items: center;
-    padding: 10px 0;
+    gap: 14px;
+    padding: 10px 16px;
+    box-sizing: border-box;
+
     @media (max-width: 1024px) {
-        width: 90%;
-        padding: 10px 16px;
-        gap: 8px;
+        gap: 10px;
+        padding: 10px 14px;
     }
-    
-    @media (max-width: 768px) { 
-        justify-content: space-around;
+
+    @media (max-width: 768px) {
+        min-width: unset;
         width: 100%;
-        padding: 8px 12px;
-        gap: 6px;
+        gap: 8px;
+        padding: 8px 10px;
+        justify-content: space-between;
     }
 }
-
 
 .logo {
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 5px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 6px 16px;
     border-radius: 999px 0 999px 0;
-    background-image: linear-gradient(to right,
-            var(--color-fastcare-400),
-            rgba(255, 255, 255, 0.8));
-    background-size: 200% 100%;
-    background-position: right center;
-    transition: background-position 0.4s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 
     &:hover {
-        background-position: left center;
-    }
-    
-    @media (max-width: 768px) {
-        padding: 4px 12px;
-        width: 80px;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
     }
 
+    @media (max-width: 768px) {
+        padding: 4px 10px;
+        border-radius: 999px;
+    }
+
+    img {
+        width: 12rem;
+        height: auto;
+        display: block;
+
+        @media (max-width: 1024px) {
+            width: 9rem;
+        }
+
+        @media (max-width: 768px) {
+            width: 6.2rem;
+            margin-right: 0;
+        }
+    }
 }
 
-.logo img{
-    width: 14rem;
-    margin-right: 20px;
-    height: auto;
+.category-wrapper {
     @media (max-width: 768px) {
-        width: 6rem;
-    }
-}
-
-@media (max-width: 768px) {
-    .header {
-        gap: 8px;
-    }
-    .header .category-btn, .cart-text {
         display: none;
     }
+}
 
-    .header .cart-btn {
-        min-width: 40px !important;
-        padding: 8px 8px !important;
-        font-size: 1.5rem !important;
-    }
-    .header .login-btn {
-        min-width: 40px !important;
-        padding: 10px 10px;
-        min-width: 100px !important;
+.search {
+    flex: 1;
+    min-width: 0;
+
+    @media (max-width: 768px) {
+        flex: 1 1 auto;
     }
 }
 
+.cart-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.cart-btn {
+    white-space: nowrap;
+
+    @media (max-width: 768px) {
+        min-width: 42px !important;
+        padding: 8px !important;
+        border-radius: 999px !important;
+    }
+}
+
+.cart-text {
+    @media (max-width: 768px) {
+        display: none;
+    }
+}
+
+.cart-badge {
+    position: absolute;
+    top: -5px;
+    right: 5px;
+    background: linear-gradient(135deg, $badge-color, #ff4d62);
+    color: white;
+    border-radius: 999px;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 700;
+    border: 2px solid white;
+    box-shadow: 0 4px 10px $badge-shadow;
+    animation: badgePulse 0.25s ease-out;
+
+    @media (max-width: 768px) {
+        top: -6px;
+        right: -6px;
+    }
+}
+
+.login-btn {
+    white-space: nowrap;
+
+    @media (max-width: 768px) {
+        min-width: 42px !important;
+        padding: 8px 10px !important;
+        border-radius: 999px !important;
+    }
+}
+
+.login-text {
+    @media (max-width: 768px) {
+        display: none;
+    }
+}
+
+.profile-btn {
+    position: relative;
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    overflow: hidden;
+    border: 2px solid white;
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+.profile-dropdown {
+    display: none;
+    position: absolute;
+    top: 1;
+    right: 1;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin-top: 8px;
+    min-width: 220px;
+    z-index: 1000;
+    padding: 4px 0;
+    li {
+        padding: 10px 16px;
+        &:hover {
+            background-color: rgba(0, 0, 0, 0.06);
+        }
+    }
+    li button {
+        border: none;
+        margin-left: 4px;
+        font-weight: var(--fw-medium);
+        background-color: transparent;
+    }
+    .logout-btn {
+        color: var(--color-fastcare-500);
+        button {
+            color: var(--color-fastcare-500);
+        }
+    }
+}
+
+.open {
+    display: block;
+}
+
+@keyframes badgePulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    z-index: 999;
+}
 

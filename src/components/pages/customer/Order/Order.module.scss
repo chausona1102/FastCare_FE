@@ -1,0 +1,200 @@
+
+.summary {
+    margin: 10px 0;
+    .row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        .section {
+            padding: 10px;
+            display: inline-flex;
+            .info {
+                margin-left: 10px;
+                display: flex;
+                flex-direction: column;
+                .title {
+                    font-size: 1.5rem;
+                    letter-spacing: 0.3px;
+                    font-weight: var(--fw-sbold);
+                }
+                .sub-title {
+                    font-size: 1.4rem;
+                    font-weight: var(--fw-light);
+                    color: var(--color-gray);
+                }
+            }
+        }
+        .section-1 {
+            img {
+                width: 70px;
+                height: 70px;
+                border-radius: 999px;
+                object-fit: cover;
+            }
+        }
+        .section-2, .section-3 {
+            border-left: 3px solid var(--color-fastcare-600);
+            height: min-content;
+            align-items: center;
+            .icon {
+                width: 48px;
+                height: 48px;
+                display: flex;
+                border-radius: 999px;
+                align-items: center;
+                justify-content: center;
+                color: var(--color-fastcare-600);
+                background: linear-gradient(#fff5f0, #f4c8d0);
+                svg {
+                    font-size: 1.9rem;
+                }
+            }
+        }
+    }
+}
+
+.order, .summary {
+	padding: 20px 24px;
+    border-radius: 15px;
+    background-color: var(--bg-primary);
+    box-shadow: 0 0 5px #ccc;
+}
+
+.controls {
+	margin-bottom: 16px;
+}
+
+.tabs {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.tab {
+	background: transparent;
+	border: 1px solid #eee;
+	padding: 8px 12px;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 14px;
+	color: #444;
+}
+
+.tab.active {
+	background: var(--color-fastcare-500);
+	color: var(--color-white);
+    font-weight: var(--fw-medium);
+	border-color: var(--color-fastcare-400);
+}
+
+.content {
+	min-height: 240px;
+}
+
+.loader {
+	padding: 40px 0;
+	text-align: center;
+	color: #777;
+}
+
+.empty {
+	padding: 48px 0;
+	text-align: center;
+	color: #888;
+}
+
+.emptyIcon {
+	width: 120px;
+	height: 120px;
+	margin: 0 auto 16px auto;
+	border-radius: 50%;
+	background: linear-gradient(135deg,#ffecec,#ffdede);
+}
+
+.emptyText {
+	font-size: 16px;
+	font-weight: 600;
+	margin-bottom: 6px;
+}
+
+.emptySub {
+	font-size: 13px;
+}
+
+.orderList {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.orderCard {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 14px 16px;
+	border: 1px solid #f0f0f0;
+	border-radius: 8px;
+	background: #fff;
+}
+
+.orderCard:hover {
+	box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+	transform: translateY(-2px);
+	transition: all 120ms ease-in-out;
+	cursor: pointer;
+}
+
+.cardLeft {
+	display: flex;
+	flex-direction: column;
+}
+
+.orderCode {
+	font-weight: 600;
+	margin-bottom: 6px;
+}
+
+.orderDate {
+	font-size: 12px;
+	color: #888;
+	margin-bottom: 6px;
+}
+
+.orderItems {
+	font-size: 13px;
+	color: #666;
+}
+
+.cardRight {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+}
+
+.orderTotal {
+	font-weight: 700;
+	color: #111;
+	margin-bottom: 6px;
+}
+
+.orderStatus {
+	font-size: 13px;
+	padding: 6px 10px;
+	border-radius: 999px;
+	background: #f5f5f5;
+	color: #333;
+}
+
+.loadMoreWrap {
+	display: flex;
+	justify-content: center;
+	margin-top: 12px;
+}
+
+.loadMore {
+	padding: 8px 14px;
+	border-radius: 6px;
+	border: 1px solid #eee;
+	background: #fff;
+	cursor: pointer;
+}
+

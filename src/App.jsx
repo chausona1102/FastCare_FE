@@ -1,7 +1,8 @@
 import { Routes, Route } from "react-router-dom";
-import { userRoutes, adminRoutes } from "./routes";
+import { userRoutes, adminRoutes, staffRoutes } from "./routes";
 import NotFound from "~/components/pages/NotFound";
-import ProtectedRoute from "~/components/ProtectedRoute";
+import ProtectedAdminRoute from "~/components/ProtectedAdminRoute";
+import ProtectedStaffRoute from "~/components/ProtectedStaffRoute";
 
 function App() {
   return (
@@ -23,14 +24,28 @@ function App() {
           key={index}
           path={route.path}
           element={
-            <ProtectedRoute>
+            <ProtectedAdminRoute>
               <route.Layout>
                 <route.component />
               </route.Layout>
-            </ProtectedRoute>
+            </ProtectedAdminRoute>
           }
         />
       ))}
+      {staffRoutes.map((route, index) => (
+        <Route
+          key={index}
+          path={route.path}
+          element={
+            <ProtectedStaffRoute>
+              <route.Layout>
+                <route.component />
+              </route.Layout>
+            </ProtectedStaffRoute>
+          }
+        />
+      ))}
+
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
