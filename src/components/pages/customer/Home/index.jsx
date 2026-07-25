@@ -1,6 +1,8 @@
 import styles from "./Home.module.scss";
 import classNames from "classnames/bind";
 import Cart from "~/components/Cart";
+import SecondCart from "~/components/SecondCart";
+import Loading from "~/components/Loading";
 import axios from "axios";
 import { banner_samsumS26plus } from "~/assets/banner";
 import { keyboard, iphone17promax, hotGif } from "~/assets/images";
@@ -19,170 +21,13 @@ import api from "~/api";
 
 const cx = classNames.bind(styles);
 
-var hotProducts = [
-  {
-    id: "prod_001",
-    title: "Sản phẩm hot 1",
-    avatar: iphone17promax,
-    images: [iphone17promax],
-    sold: 100,
-    minPrice: 1000000,
-    discount: 20,
-    installment: 2,
-    brand: "iPhone",
-    ram: "8GB",
-    rom: "128GB",
-    screenSize: 6.1,
-    displayTech: "OLED",
-    rearCamera: "48MP",
-    frontCamera: "12MP",
-    chipset: "A18",
-    nfc: "NFC",
-    sim: "2 Sim",
-    os: "iOS 18",
-    screenResolution: "2556 x 1179 pixels",
-    cpu: "CPU 6 lõi với 2 lõi hiệu năng và 4 lõi tiết kiệm điện",
-    category: {
-      id: "cat_003",
-      name: "iPhone",
-      parentCategory: { id: "cat_001", name: "Điện thoại", parentID: null },
-    },
-    variants: [
-      {
-        id: "var_001",
-        colors: ["Mặc định"],
-        images: [iphone17promax],
-        storage: "128GB",
-        price: 1000000,
-        stockQuantity: 100,
-        sku: "HOT-001-DEFAULT",
-      },
-    ],
-  },
-  {
-    id: "prod_002",
-    title: "Sản phẩm hot 2",
-    avatar: iphone17promax,
-    images: [iphone17promax],
-    sold: 100,
-    minPrice: 1000000,
-    discount: 0,
-    installment: 0,
-    brand: "iPhone",
-    ram: "8GB",
-    rom: "128GB",
-    screenSize: 6.1,
-    displayTech: "OLED",
-    rearCamera: "48MP",
-    frontCamera: "12MP",
-    chipset: "A18",
-    nfc: "NFC",
-    sim: "2 Sim",
-    os: "iOS 18",
-    screenResolution: "2556 x 1179 pixels",
-    cpu: "CPU 6 lõi với 2 lõi hiệu năng và 4 lõi tiết kiệm điện",
-    category: {
-      id: "cat_003",
-      name: "iPhone",
-      parentCategory: { id: "cat_001", name: "Điện thoại", parentID: null },
-    },
-    variants: [
-      {
-        id: "var_002",
-        colors: ["Mặc định"],
-        images: [iphone17promax],
-        storage: "128GB",
-        price: 1000000,
-        stockQuantity: 100,
-        sku: "HOT-002-DEFAULT",
-      },
-    ],
-  },
-  {
-    id: "prod_003",
-    title: "Sản phẩm hot 3",
-    avatar: iphone17promax,
-    images: [iphone17promax],
-    sold: 100,
-    minPrice: 1000000,
-    discount: 0,
-    installment: 0,
-    brand: "iPhone",
-    ram: "8GB",
-    rom: "128GB",
-    screenSize: 6.1,
-    displayTech: "OLED",
-    rearCamera: "48MP",
-    frontCamera: "12MP",
-    chipset: "A18",
-    nfc: "NFC",
-    sim: "2 Sim",
-    os: "iOS 18",
-    screenResolution: "2556 x 1179 pixels",
-    cpu: "CPU 6 lõi với 2 lõi hiệu năng và 4 lõi tiết kiệm điện",
-    category: {
-      id: "cat_003",
-      name: "iPhone",
-      parentCategory: { id: "cat_001", name: "Điện thoại", parentID: null },
-    },
-    variants: [
-      {
-        id: "var_003",
-        colors: ["Mặc định"],
-        images: [iphone17promax],
-        storage: "128GB",
-        price: 1000000,
-        stockQuantity: 100,
-        sku: "HOT-003-DEFAULT",
-      },
-    ],
-  },
-  {
-    id: "prod_004",
-    title: "Sản phẩm hot 4",
-    avatar: iphone17promax,
-    images: [iphone17promax],
-    sold: 100,
-    minPrice: 1000000,
-    discount: 0,
-    installment: 0,
-    brand: "iPhone",
-    ram: "8GB",
-    rom: "128GB",
-    screenSize: 6.1,
-    displayTech: "OLED",
-    rearCamera: "48MP",
-    frontCamera: "12MP",
-    chipset: "A18",
-    nfc: "NFC",
-    sim: "2 Sim",
-    os: "iOS 18",
-    screenResolution: "2556 x 1179 pixels",
-    cpu: "CPU 6 lõi với 2 lõi hiệu năng và 4 lõi tiết kiệm điện",
-    category: {
-      id: "cat_003",
-      name: "iPhone",
-      parentCategory: { id: "cat_001", name: "Điện thoại", parentID: null },
-    },
-    variants: [
-      {
-        id: "var_004",
-        colors: ["Mặc định"],
-        images: [iphone17promax],
-        storage: "128GB",
-        price: 1000000,
-        stockQuantity: 100,
-        sku: "HOT-004-DEFAULT",
-      },
-    ],
-  },
-];
-
 function Home() {
   const [phones, setPhones] = useState([]);
   const [laptops, setLaptops] = useState([]);
+  const [hotProducts, setHotProduct] = useState([]);
   const [accessories, setAccessories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("phone");
+  const [loading, setLoading] = useState(true);
   const verticalGridRef = useRef(null);
   const accessoriesRef = useRef(null);
 
@@ -206,8 +51,18 @@ function Home() {
         console.log(e);
       }
     };
-
+    const fetchHotProduct = async () => {
+      try {
+        const {data: hotProductData} = await axios.get(`${api.product}/hot/${4}`);
+        setHotProduct(hotProductData);
+      } catch(e) {
+        console.log(e);
+      }
+    }
+    setLoading(true);
+    fetchHotProduct();
     fetchProducts();
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -227,7 +82,7 @@ function Home() {
     };
   }, []);
 
-  return (
+  return loading ? Loading() : (
     <div className={cx("wrapper")}>
       <div className={cx("content")}>
         {/* Slogan */}
@@ -251,10 +106,10 @@ function Home() {
         <div className={cx("hot-products")}>
           <div className={cx("hot-products-overlay")}>
             <img src={hotGif} alt="Hot" className={cx("hot-gif")} />
-            <Title title="Sản phẩm hot" className={cx("section-title")} />
+            {/* <Title title="Siêu sale" className={cx("section-title")} /> */}
             <div className={cx("products-grid")}>
               {hotProducts.map((product, index) => (
-                <Cart
+                <SecondCart
                   key={index}
                   id={product.id}
                   title={product.title}

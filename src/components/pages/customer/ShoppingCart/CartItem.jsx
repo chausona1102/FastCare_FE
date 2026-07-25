@@ -73,7 +73,7 @@ export default function CartItem({
           <div className="flex-grow-1">
             <div className="d-flex justify-content-between align-items-start mb-2">
               <div>
-                <h5 className="mb-1 fs-6 text-dark">{productTitle}</h5>
+                <h5 className="mb-1 fs-5 text-dark">{productTitle}</h5>
                 <div className="text-secondary small">{variantText.join(' • ')}</div>
                 {unavailable && (
                   <span className="badge bg-danger-subtle text-danger mt-2">
@@ -84,7 +84,7 @@ export default function CartItem({
 
               <button
                 type="button"
-                className="btn btn-sm btn-link text-danger p-0"
+                className="btn btn-sm btn-link text-danger p-0 fs-5"
                 onClick={() => onRemove(item._id)}
                 aria-label={`Xóa ${productTitle}`}
               >

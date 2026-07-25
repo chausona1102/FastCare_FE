@@ -7,7 +7,7 @@ const converseVND = (price) => {
 
 const converseKilo = (num) => {
   if (num < 100) return num;
-  return `${num / 1000}K`;
+  return `${(num / 1000).toFixed(1)}K`;
 };
 
 const formatDate = (date) => {
@@ -26,6 +26,8 @@ const formatDateHour = (date) => {
 
 const converseStatus = (status) => {
   switch(status) {
+    case "pending": 
+      return "Đang chờ xác nhận";
     case "ready_to_pick": 
       return "Chờ lấy hàng";
     case "picking": 
@@ -43,7 +45,7 @@ const converseStatus = (status) => {
     case "sorting": 
       return "Đang phân loại hàng";
     case "delivering": 
-      return "Đang giao hàng";
+      return "Đang giao đến bạn";
     case "money_collect_delivering": 
       return "Đang thu tiền giao hàng";
     case "delivered": 
@@ -84,4 +86,10 @@ const hideNumberPhone = (phone) => {
     .join("");
 }
 
-export { converseVND, converseKilo, formatDate, formatDateHour, converseStatus, hideNumberPhone };
+function totalPrice(orders) {
+  const total = 0;
+  return orders.reduce((total, o) => total + o.totalPrice, 0);
+}
+
+
+export { converseVND, converseKilo, formatDate, formatDateHour, converseStatus, hideNumberPhone, totalPrice };

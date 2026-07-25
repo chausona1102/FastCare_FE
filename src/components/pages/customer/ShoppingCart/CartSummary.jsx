@@ -26,7 +26,7 @@ export default function CartSummary({
 
         <button
           type="button"
-          className="btn btn-outline-danger w-100 mb-2"
+          className="btn btn-outline-danger w-100 mb-2 fs-5"
           onClick={onRemoveSelected}
           disabled={selectedItemIds.length === 0}
         >
@@ -35,7 +35,7 @@ export default function CartSummary({
 
         <button
           type="button"
-          className="btn btn-danger w-100 rounded-pill py-2"
+          className="btn btn-danger w-100 rounded-pill py-2 fs-4"
           onClick={() => onCheckout(selectedItemIds)}
           disabled={selectedItemIds.length === 0}
           style={{ backgroundColor: '#d70018', borderColor: '#d70018' }}

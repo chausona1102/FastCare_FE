@@ -120,14 +120,8 @@ function Header() {
               <img src={user?.avatar} alt="Avatar" />
             </button>
             <ul className={cx("profile-dropdown", { open: isProfileOpen })}>
-              <li>
-                <FontAwesomeIcon icon={faBagShopping} className={cx("profile-icon")} />
-                <button onClick={() => (window.location.href = "/order")}>Đơn hàng của tôi</button>
-              </li>
-              <li className={cx("logout-btn")}>
-                <FontAwesomeIcon icon={faSignOut} className={cx("profile-icon")} />
-                <button onClick={handleLogout}>Đăng xuất</button>
-              </li>
+                <button onClick={() => (window.location.href = "/order")}><FontAwesomeIcon icon={faBagShopping} className={cx("profile-icon")} /> Đơn hàng của tôi</button>
+                <button onClick={handleLogout} className={cx("logout-btn")}><FontAwesomeIcon icon={faSignOut} className={cx("profile-icon")} /> Đăng xuất</button>
             </ul>
             {isProfileOpen && (
               <div

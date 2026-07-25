@@ -146,9 +146,9 @@
     background: linear-gradient(to right,
                 var(--color-fastcare-500) 0%,
                 var(--color-fastcare-400) 60%,
-                    var(--color-fastcare-200) 120%,
+                var(--color-fastcare-200) 120%,
                     transparent 100%);
-    padding: 10px 60px 20px 60px;
+    padding: 20px 60px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, .3);
     @media (max-width: 768px) {
         padding: 0 24px;
@@ -337,16 +337,14 @@
 }
 
 .products-selection {
-    display: grid;
+    display: flex;
     overflow-y: scroll;
     scroll-behavior: smooth;
     height: 670px;
-    grid-template-columns: repeat(4, 1fr);
     flex-wrap: wrap;
     padding: 10px 0;
     gap: 10px;
     @media (max-width: 768px) {
-        grid-template-columns: repeat(2, 1fr);
         height: auto;
         overflow: hidden;
     }

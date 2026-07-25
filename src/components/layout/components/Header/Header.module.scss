@@ -174,26 +174,32 @@ $badge-shadow: rgba(215, 0, 24, 0.25);
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     margin-top: 8px;
-    min-width: 220px;
     z-index: 1000;
-    padding: 4px 0;
-    li {
-        padding: 10px 16px;
-        &:hover {
-            background-color: rgba(0, 0, 0, 0.06);
-        }
-    }
-    li button {
+    width: fit-content;
+    // padding: 4px 0;
+    button {
         border: none;
-        margin-left: 4px;
+        padding: 8px 10px;
         font-weight: var(--fw-medium);
         background-color: transparent;
-    }
-    .logout-btn {
-        color: var(--color-fastcare-500);
-        button {
+        min-width: 100%;
+        width: max-content;
+        svg {
             color: var(--color-fastcare-500);
         }
+        &:hover {
+            background-color: #ccc;
+        }
+        &:first-child {
+            border-radius: 8px 8px 0 0;
+        }
+        &:last-child {
+            border-radius: 0 0 8px 8px;
+        }
+    }
+    .logout-btn {
+        text-align: left;
+        color: var(--color-fastcare-500);
     }
 }
 

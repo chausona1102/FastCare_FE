@@ -2,10 +2,11 @@ import style from "./Order.module.scss";
 import classNames from "classnames/bind";
 const cx = classNames.bind(style);
 
-import { converseStatus, hideNumberPhone, converseVND } from "~/utils/functions.jsx"
+import { converseStatus, hideNumberPhone, converseVND, totalPrice } from "~/utils/functions.jsx"
 import React, { useState, useEffect } from "react";
 
-import axios from 'axios';
+import axiosClient from '~/utils/axiosClient';
+import {} from "~/utils/axiosClient"
 import api from "~/api";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -28,26 +29,24 @@ function Order() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [visibleCount, setVisibleCount] = useState(8);
+  const [completedOrder, setCompletedOrder] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("fastcare_access_token");
     setLoading(true);
-    axios
-      .get(`${api.order}/user`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+    axiosClient
+      .get(`${api.order}/user`)
       .then((response) => {
         const data = Array.isArray(response.data) ? response.data : [];
         setOrders(data);
+        setCompletedOrder(data.filter((o) => statusMatches(o, "delivered")));
       })
       .catch(() => {
         setOrders([]);
       })
       .finally(() => setLoading(false));
   }, []);
+
 
   function statusMatches(order, filterKey) {
     if (filterKey === "all") return true;
@@ -59,8 +58,8 @@ function Order() {
   const filters = [
     { key: "all", label: "Tất cả" },
     { key: "pending", label: "Chờ xác nhận" },
-    { key: "processing", label: "Đang xử lý" },
-    { key: "shipping", label: "Đang vận chuyển" },
+    { key: "ready_to_pick", label: "Đang xử lý" },
+    { key: "picked", label: "Đang vận chuyển" },
     { key: "delivered", label: "Đã nhận hàng" },
     { key: "cancel", label: "Đã hủy" },
   ];
@@ -73,7 +72,7 @@ function Order() {
     <div className={cx("summary")}>
         <div className={cx("row")}>
           <div className={cx("section-1", "section")}>
-            <img src={user?.avatar}/>
+            <img src={user?.avatar} className="mx-2"/>
             <div className={cx("info")}>
               <span className={cx("title")}>{user?.fullname}</span>
               <span className={cx('sub-title')}>{hideNumberPhone(user?.phone)}</span>
@@ -84,7 +83,7 @@ function Order() {
               <FontAwesomeIcon icon={faCartShopping} />
             </div>
             <div className={cx("info")}>
-              <span className={cx("title"), "fs-3 fw-bold"}>0</span>
+              <span className={cx("title"), "fs-3 fw-bold"}>{completedOrder.length}</span>
               <span className={cx("sub-title")}>Tổng số đơn hàng đã mua</span>
             </div>
           </div>
@@ -93,7 +92,7 @@ function Order() {
               <FontAwesomeIcon icon={faDongSign} />
             </div>
             <div className={cx("info")}>
-              <span className={cx("title"), "fs-3 fw-bold"}>0 <FontAwesomeIcon icon={faDongSign} /></span>
+              <span className={cx("title"), "fs-3 fw-bold"}>{converseVND(totalPrice(completedOrder))}</span>
               <span className={cx("sub-title")}>Tổng tiền tích lũy</span>
             </div>
           </div>
@@ -120,7 +119,7 @@ function Order() {
           <div className={cx("loader")}>Đang tải đơn hàng...</div>
         ) : !filtered || filtered.length === 0 ? (
           <div className={cx("empty")}>
-            <div className={cx("emptyIcon")} />
+            <div className={cx("emptyIcon")}></div>
             <p className={cx("emptyText")}>Bạn chưa có đơn hàng nào.</p>
             <p className={cx("emptySub")}>Hãy mua sắm để tạo đơn hàng đầu tiên.</p>
           </div>
@@ -130,7 +129,7 @@ function Order() {
                 <div
                   role="button"
                   tabIndex={0}
-                  onClick={() => navigate(`/order/${o._id || o.id}`)}
+                  onClick={() => navigate(`/order/${o._id || o.id}`, {state: {order: o}})}
                   onKeyDown={(e) => { if (e.key === 'Enter') navigate(`/order/${o._id || o.id}`); }}
                   className={cx("orderCard")}
                   key={o._id || o.id || Math.random()}

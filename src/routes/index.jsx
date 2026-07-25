@@ -19,6 +19,7 @@ import ResendVerify from "~/components/pages/ResendVerify";
 import ShoppingCart from "~/components/pages/customer/ShoppingCart";
 import CheckoutOrder from "~/components/pages/customer/CheckoutOrder";
 import Order from "~/components/pages/customer/Order";
+import OrderDetail from "~/components/pages/customer/OrderDetail";
 
 // Admin Pages
 import Dashboard from "~/components/pages/admin/Dashboard";
@@ -51,7 +52,7 @@ const userRoutes = [
     Layout: SecondaryLayout,
   },
   {
-    path: "/products/:id",
+    path: "/products/:slug",
     component: Products,
     Layout: DefaultLayout,
   },
@@ -78,6 +79,11 @@ const userRoutes = [
   {
     path: "/order",
     component: Order,
+    Layout: HeaderOnly,
+  },
+  {
+    path: "/order/:id",
+    component: OrderDetail,
     Layout: HeaderOnly,
   }
 ];
