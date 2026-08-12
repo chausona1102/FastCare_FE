@@ -7,6 +7,7 @@ import store from "~/store";
 import { Provider } from "react-redux";
 import App from "~/App.jsx";
 import { ToastProvider } from "~/contexts/ToastContext.jsx";
+import AuthInitializer from "~/components/AuthInitializer/index.jsx";
 
 createRoot(document.getElementById("root")).render(
   // <StrictMode>
@@ -15,7 +16,9 @@ createRoot(document.getElementById("root")).render(
       <BrowserRouter>
         <ScrollToTop />
         <ToastProvider>  
-          <App />
+          <AuthInitializer>
+            <App />
+          </AuthInitializer>
         </ToastProvider>
       </BrowserRouter>
     </GlobalStyles>

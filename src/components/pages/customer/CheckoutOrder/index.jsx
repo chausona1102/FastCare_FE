@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
-import axiosClient from '~/utils/axiosClient';
+import axiosClient from '~/api/axiosClient';
 import api from '~/api';
 import { useToast } from '~/contexts/ToastContext.jsx';
 

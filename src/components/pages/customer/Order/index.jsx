@@ -5,9 +5,9 @@ const cx = classNames.bind(style);
 import { converseStatus, hideNumberPhone, converseVND, totalPrice } from "~/utils/functions.jsx"
 import React, { useState, useEffect } from "react";
 
-import axiosClient from '~/utils/axiosClient';
-import {} from "~/utils/axiosClient"
+import axiosClient from '~/api/axiosClient';
 import api from "~/api";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCartShopping, faDongSign } from "@fortawesome/free-solid-svg-icons";
@@ -24,7 +24,7 @@ function formatDate(dateVal, locale = 'vi-VN') {
 }
 
 function Order() {
-  const user = JSON.parse(localStorage.getItem("fastcare_user"));
+  const user = useSelector((state) => state.auth.user);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
@@ -83,7 +83,7 @@ function Order() {
               <FontAwesomeIcon icon={faCartShopping} />
             </div>
             <div className={cx("info")}>
-              <span className={cx("title"), "fs-3 fw-bold"}>{completedOrder.length}</span>
+              <span className={cx("title", "fs-3 fw-bold")}>{completedOrder.length}</span>
               <span className={cx("sub-title")}>Tổng số đơn hàng đã mua</span>
             </div>
           </div>
@@ -92,14 +92,14 @@ function Order() {
               <FontAwesomeIcon icon={faDongSign} />
             </div>
             <div className={cx("info")}>
-              <span className={cx("title"), "fs-3 fw-bold"}>{converseVND(totalPrice(completedOrder))}</span>
+              <span className={cx("title", "fs-3 fw-bold")}>{converseVND(totalPrice(completedOrder))}</span>
               <span className={cx("sub-title")}>Tổng tiền tích lũy</span>
             </div>
           </div>
         </div>
       </div>
     <div className={cx("order")}>
-      <h1 className={cx("title"), "fs-2 mb-4"}>Đơn hàng của tôi</h1>
+      <h1 className={cx("title", "fs-2 mb-4")}>Đơn hàng của tôi</h1>
       <div className={cx("controls")}> 
         <div className={cx("tabs")}>
           {filters.map((f) => (

@@ -24,6 +24,19 @@ const formatDateHour = (date) => {
   });
 };
 
+const formatSlugToName = (slug) => {
+  switch (slug) {
+    case "dien-thoai":
+      return "Điện thoại";
+    case "laptop":
+      return "Laptop";
+    case "phu-kien":
+      return "Phụ kiện";
+    default:
+      return "Sản phẩm";
+  }
+}
+
 const converseStatus = (status) => {
   switch(status) {
     case "pending": 
@@ -92,4 +105,4 @@ function totalPrice(orders) {
 }
 
 
-export { converseVND, converseKilo, formatDate, formatDateHour, converseStatus, hideNumberPhone, totalPrice };
+export { converseVND, converseKilo, formatDate, formatDateHour, converseStatus, hideNumberPhone, totalPrice, formatSlugToName };

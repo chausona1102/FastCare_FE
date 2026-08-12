@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axiosClient from '~/utils/axiosClient';
+import axiosClient from '~/api/axiosClient';
 import api from '~/api';
 
 const CART_URL = api.cart || 'http://localhost:5000/api/cart';

@@ -39,9 +39,9 @@ function Home() {
           { data: laptopData },
           { data: accessoriesData },
         ] = await axios.all([
-          axios.get(`${api.productBySlug}/dien-thoai`),
-          axios.get(`${api.productBySlug}/laptop`),
-          axios.get(`${api.productBySlug}/phu-kien`),
+          axios.get(`${api.productBySlug}/dien-thoai/20`),
+          axios.get(`${api.productBySlug}/laptop/20`),
+          axios.get(`${api.productBySlug}/phu-kien/20`),
         ]);
 
         setPhones(phoneData);

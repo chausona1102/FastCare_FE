@@ -6,10 +6,9 @@ import { google, facebook } from "~/assets/icons";
 import api from "~/api";
 
 import Title from "~/components/Title";
-
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setCredentials } from "~/store/slices/authSlice";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Tippy from "@tippyjs/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -21,6 +20,7 @@ import {
 
 function Login() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
@@ -28,9 +28,9 @@ function Login() {
   const [countdown, setCountdown] = useState(3);
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const token = useSelector((state) => state.auth.token);
 
   useEffect(() => {
-    const token = localStorage.getItem("fastcare_access_token");
     let timer;
     let countdownTimer;
     if (token) {
@@ -39,7 +39,7 @@ function Login() {
         setCountdown((prev) => prev - 1);
       }, 1000);
       timer = setTimeout(() => {
-        window.location.href = "/";
+        navigate("/");
       }, 3000);
     }
     return () => {
@@ -53,6 +53,7 @@ function Login() {
     try {
       const response = await fetch(api.login, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -65,13 +66,13 @@ function Login() {
         setErrorMessage(data.message);
         setShowError(true);
         if (response.status === 403) {
-          window.location.href = "/resend-verify";
+          navigate("/resend-verify");
         }
         return;
       }
 
       // Lưu trữ user, token vào localStorage, Redux
-      dispatch(setCredentials({ user: data.user, token: data.token }));
+      dispatch(setCredentials({ user: data.user, token: data.accessToken }));
 
       setShowModal(true);
       let count = 3;
@@ -83,16 +84,16 @@ function Login() {
         clearInterval(countdownTimer);
         switch (data.user.role) {
           case "admin":
-            window.location.href = "/admin";
+            navigate("/admin");
             break;
           case "staff":
-            window.location.href = "/staff";
+            navigate("/staff");
             break;
           case "customer":
-            window.location.href = "/";
+            navigate("/");
             break;
           default:
-            window.location.href = "/";
+            navigate("/");
         }
       }, 3000);
     } catch (error) {

@@ -8,7 +8,7 @@ import CategoryPopper from "./Category";
 import Tippy from "@tippyjs/react";
 import { Link } from "react-router-dom";
 import "tippy.js/dist/tippy.css";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logout } from "~/store/slices/authSlice"
 import {
   faBars,
@@ -21,6 +21,7 @@ import {
 import { useEffect, useState } from "react";
 import api from "~/api";
 import axios from "axios";
+import axiosClient from "~/api/axiosClient";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 const cx = classNames.bind(styles);
 
@@ -30,8 +31,10 @@ function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-
   const [categories, setCategories] = useState();
+  const token = useSelector((state) => state.auth.token);
+  const user = useSelector((state) => state.auth.user);
+
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -45,22 +48,23 @@ function Header() {
     fetchCategories();
   }, []);
 
-  const user = JSON.parse(localStorage.getItem("fastcare_user"));
 
   useEffect(() => {
-    const token = localStorage.getItem("fastcare_access_token");
     if (token) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoggedIn(true);
     }
-  }, []);
+  }, [token]);
 
-  const handleLogout = () => {
-    // localStorage.removeItem("fastcare_access_token");
-    // localStorage.removeItem("fastcare_user");
-    setIsLoggedIn(false);
-    dispatch(logout());
-    window.location.href = "/login";
+  const handleLogout = async () => {
+    try {
+      await axiosClient.post("/api/auth/logout"); 
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      dispatch(logout());
+      window.location.href = "/login";
+    }
   };
 
   return (

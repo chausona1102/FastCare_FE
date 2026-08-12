@@ -4,7 +4,7 @@ const cx = classNames.bind(style);
 
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import axiosClient from "~/utils/axiosClient";
+import axiosClient from "~/api/axiosClient";
 import api from "~/api";
 import { converseStatus, converseVND, formatDateHour } from "~/utils/functions.jsx";
 

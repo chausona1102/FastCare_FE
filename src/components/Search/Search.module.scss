@@ -85,3 +85,53 @@
     right: 6px;
   }
 }
+
+.modal {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  margin-top: 5px;
+  display: none;
+
+  &.open {
+    display: block;
+  }
+
+  h3 {
+    margin: 0 0 10px 0;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    font-size: 1.8rem;
+    color: var(--secondary-clr);
+  }
+  .options {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+        color: var(--secondary-clr) !important;
+      }
+      svg {
+        float: right;
+        font-weight: 600;
+        color: #ccc;
+        &:hover {
+          color: var(--secondary-clr);
+        }
+      }
+    }
+  }
+}
