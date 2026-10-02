@@ -12,11 +12,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { logout } from "~/store/slices/authSlice"
 import {
   faBars,
-  faGrip,
   faUserCircle,
   faShoppingCart,
   faSignOut,
   faBagShopping,
+  faInfoCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
 import api from "~/api";
@@ -124,6 +124,7 @@ function Header() {
               <img src={user?.avatar} alt="Avatar" />
             </button>
             <ul className={cx("profile-dropdown", { open: isProfileOpen })}>
+                <button onClick={() => (window.location.href = "/profile")}><FontAwesomeIcon icon={faInfoCircle} className={cx("profile-icon")} /> Thông tin cá nhân</button>
                 <button onClick={() => (window.location.href = "/order")}><FontAwesomeIcon icon={faBagShopping} className={cx("profile-icon")} /> Đơn hàng của tôi</button>
                 <button onClick={handleLogout} className={cx("logout-btn")}><FontAwesomeIcon icon={faSignOut} className={cx("profile-icon")} /> Đăng xuất</button>
             </ul>

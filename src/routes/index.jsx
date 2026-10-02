@@ -14,15 +14,19 @@ import ProductDetail from "~/components/pages/customer/ProductDetail";
 import Login from "~/components/pages/Login";
 import Signup from "~/components/pages/Signup";
 import Products from "~/components/pages/customer/Products";
+import Categories from "~/components/pages/customer/Categories";
 import VerifyEmail from "~/components/pages/VerifyEmail";
 import ResendVerify from "~/components/pages/ResendVerify";
 import ShoppingCart from "~/components/pages/customer/ShoppingCart";
 import CheckoutOrder from "~/components/pages/customer/CheckoutOrder";
 import Order from "~/components/pages/customer/Order";
 import OrderDetail from "~/components/pages/customer/OrderDetail";
+import Profile from "~/components/pages/customer/Profile";
 
 // Admin Pages
 import Dashboard from "~/components/pages/admin/Dashboard";
+import UserManagement from "~/components/pages/admin/Users";
+import AdminOrders from "~/components/pages/admin/Orders";
 
 // Staff Pages
 import StaffDashboard from "~/components/pages/staff/Dashboard";
@@ -52,7 +56,22 @@ const userRoutes = [
     Layout: SecondaryLayout,
   },
   {
-    path: "/products/:slug",
+    path: "/products/:slug?",
+    component: Products,
+    Layout: DefaultLayout,
+  },
+  {
+    path: "/category",
+    component: Categories,
+    Layout: DefaultLayout,
+  },
+  {
+    path: "/category/:id",
+    component: Products,
+    Layout: DefaultLayout,
+  },
+  {
+    path: "/prices/:range",
     component: Products,
     Layout: DefaultLayout,
   },
@@ -85,6 +104,11 @@ const userRoutes = [
     path: "/order/:id",
     component: OrderDetail,
     Layout: HeaderOnly,
+  },
+  {
+    path: "/profile",
+    component: Profile,
+    Layout: HeaderOnly,
   }
 ];
 
@@ -92,6 +116,21 @@ const adminRoutes = [
   {
     path: "/admin",
     component: Dashboard,
+    Layout: AdminLayout,
+  },
+  {
+    path: "/admin/User",
+    component: UserManagement,
+    Layout: AdminLayout,
+  },
+  {
+    path: "/admin/users",
+    component: UserManagement,
+    Layout: AdminLayout,
+  },
+  {
+    path: "/admin/orders",
+    component: AdminOrders,
     Layout: AdminLayout,
   },
 ];

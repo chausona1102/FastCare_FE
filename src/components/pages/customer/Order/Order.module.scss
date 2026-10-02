@@ -136,21 +136,51 @@
 	gap: 12px;
 }
 
+.orderItem {
+	display: flex;
+	align-items: stretch;
+	gap: 12px;
+	width: 100%;
+}
+
 .orderCard {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	padding: 14px 16px;
-	border: 1px solid #f0f0f0;
-	border-radius: 8px;
-	background: #fff;
+	border: 1px solid rgba(215, 0, 24, 0.2);
+	border-radius: 12px;
+	background: linear-gradient(135deg, rgba(243, 176, 183, 0.18), rgba(255, 255, 255, 0.95));
+	box-shadow: 0 2px 8px rgba(215, 0, 24, 0.05);
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.actions {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 8px;
+	min-width: 90px;
+	width: 100px;
+	flex-shrink: 0;
+}
+
+.actions button {
+	width: 100%;
+	min-height: 38px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	white-space: nowrap;
 }
 
 .orderCard:hover {
-	box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+	box-shadow: 0 8px 20px rgba(215, 0, 24, 0.12);
 	transform: translateY(-2px);
 	transition: all 120ms ease-in-out;
 	cursor: pointer;
+	border-color: rgba(215, 0, 24, 0.4);
 }
 
 .cardLeft {
@@ -190,8 +220,10 @@
 	font-size: 13px;
 	padding: 6px 10px;
 	border-radius: 999px;
-	background: #f5f5f5;
-	color: #333;
+	background: rgba(243, 176, 183, 0.18);
+	border: 1px solid rgba(215, 0, 24, 0.15);
+	color: var(--color-fastcare-600);
+	font-weight: 600;
 }
 
 .loadMoreWrap {
@@ -206,6 +238,173 @@
 	border: 1px solid #eee;
 	background: #fff;
 	cursor: pointer;
+}
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(28, 20, 22, 0.55);
+}
+
+.reviewModal,
+.confirmModal {
+  width: min(100%, 560px);
+  max-height: min(720px, calc(100vh - 40px));
+  overflow-y: auto;
+  padding: 24px;
+  border-radius: 16px;
+  background: var(--bg-primary);
+  box-shadow: 0 18px 60px rgba(28, 20, 22, 0.25);
+}
+
+.confirmModal {
+  width: min(100%, 440px);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 10px;
+
+  h2 {
+  margin: 0;
+  font-size: 22px;
+  }
+
+  p {
+  margin: 6px 0 0;
+  color: #777;
+  font-size: 13px;
+  }
+}
+
+.closeModal {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: #f6f1f1;
+  color: #555;
+  cursor: pointer;
+}
+
+.fieldLabel {
+  display: block;
+  margin: 16px 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+}
+
+.reviewSelect,
+.reviewTextarea {
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font: inherit;
+  background: #fff;
+}
+
+.reviewTextarea {
+  resize: vertical;
+}
+
+.stars {
+  display: flex;
+  gap: 5px;
+}
+
+.starButton {
+  padding: 2px;
+  border: 0;
+  background: transparent;
+  color: #d8d8d8;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.starButton.selected {
+  color: #f3ad20;
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.reviewTag {
+  padding: 8px 11px;
+  border: 1px solid #ddd;
+  border-radius: 999px;
+  background: #fff;
+  color: #555;
+  cursor: pointer;
+}
+
+.reviewTag.active {
+  border-color: var(--color-fastcare-400);
+  background: var(--color-fastcare-50);
+  color: var(--color-fastcare-600);
+}
+
+.imageInput {
+  display: block;
+  margin-top: 16px;
+  font-size: 13px;
+  color: #555;
+}
+
+.confirmMessage {
+  margin: 0;
+  color: #555;
+  line-height: 1.6;
+}
+
+.reviewError {
+  margin: 12px 0 0;
+  color: #d00018;
+  font-size: 13px;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.secondaryButton,
+.submitReview {
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.secondaryButton {
+  border: 1px solid #ddd;
+  background: #fff;
+  color: #555;
+}
+
+.submitReview {
+  border: 1px solid var(--color-fastcare-500);
+  background: var(--color-fastcare-500);
+  color: var(--color-white);
+}
+
+.submitReview:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
 
 @media (max-width: 1199px) {
@@ -227,6 +426,10 @@
   .cardRight {
     align-items: flex-start;
     margin-top: 10px;
+  }
+
+  .orderItem {
+    align-items: stretch;
   }
 }
 
@@ -265,6 +468,20 @@
     justify-content: flex-start;
   }
 
+  .orderItem {
+    flex-direction: column;
+  }
+
+  .actions {
+    flex-direction: row;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .actions button {
+    flex: 1 1 0;
+  }
+
   .orderCard {
     flex-direction: column;
     align-items: stretch;
@@ -289,5 +506,16 @@
   .emptyIcon {
     width: 90px;
     height: 90px;
+  }
+
+  .modalBackdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .reviewModal {
+    max-height: calc(100vh - 20px);
+    border-radius: 16px 16px 0 0;
+    padding: 20px 16px;
   }
 }

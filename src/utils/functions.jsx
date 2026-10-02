@@ -47,6 +47,8 @@ const converseStatus = (status) => {
       return "Đang lấy hàng";
     case "cancel": 
       return "Đã hủy";
+    case "cancelled": 
+      return "Đã hủy";
     case "money_collect_picking": 
       return "Đang thu tiền lấy hàng";
     case "picked": 
@@ -100,7 +102,7 @@ const hideNumberPhone = (phone) => {
 }
 
 function totalPrice(orders) {
-  const total = 0;
+  // const total = 0;
   return orders.reduce((total, o) => total + o.totalPrice, 0);
 }
 

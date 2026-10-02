@@ -212,7 +212,6 @@ $badge-shadow: rgba(215, 0, 24, 0.25);
         transform: scale(0.8);
         opacity: 0;
     }
-
     50% {
         transform: scale(1.1);
     }
@@ -227,7 +226,7 @@ $badge-shadow: rgba(215, 0, 24, 0.25);
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(2px);
+    backdrop-filter: blur(1px);
     z-index: 999;
 }
 

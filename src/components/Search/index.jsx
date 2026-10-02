@@ -1,15 +1,27 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import styles from "./Search.module.scss";
 import classNames from "classnames/bind";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch, faXmark } from "@fortawesome/free-solid-svg-icons";
 
 const cx = classNames.bind(styles);
+const suggestedKeywords = [
+  "iPhone",
+  "Laptop gaming",
+  "Tai nghe",
+  "Apple Watch",
+  "Máy tính bảng",
+];
 
 function Search() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const inputRef = useRef(null);
+
+  const currentSearch = searchParams.get("search") || "";
 
   useEffect(() => {
     if (isOpen) {
@@ -17,9 +29,37 @@ function Search() {
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.value = currentSearch;
+    }
+  }, [currentSearch]);
+
+  const handleSearch = () => {
+    const keyword = inputRef.current?.value.trim();
+
+    if (!keyword) {
+      return;
+    }
+
+    setShowModal(false);
+    navigate(`/products?search=${encodeURIComponent(keyword)}`);
+  };
+
   const handleClose = () => {
     setIsOpen(false);
-    inputRef.current.value = "";
+    setShowModal(false);
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
+    navigate("/products");
+  };
+
+  const handleSelectKeyword = (keyword) => {
+    if (inputRef.current) {
+      inputRef.current.value = keyword;
+    }
+    handleSearch();
   };
 
   return (
@@ -29,31 +69,32 @@ function Search() {
         type="text"
         placeholder="Bạn muốn tìm gì?"
         className={cx("search-input")}
+        defaultValue={currentSearch}
         onFocus={() => setShowModal(true)}
         onBlur={() => setTimeout(() => setShowModal(false), 200)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            handleSearch();
+          }
+        }}
       />
-      {/* {isOpen ? (
-        <button className={cx("search-btn")} onClick={handleClose}>
+      {currentSearch ? (
+        <button type="button" className={cx("search-btn", "close-btn")} onClick={handleClose}>
           <FontAwesomeIcon icon={faXmark} />
         </button>
       ) : (
-        
-      )} */}
-      <button className={cx("search-btn")} onClick={() => console.log("input value:", inputRef.current?.value)}>
-        <FontAwesomeIcon icon={faSearch} />
-      </button>
+        <button type="button" className={cx("search-btn")} onClick={handleSearch}>
+          <FontAwesomeIcon icon={faSearch} />
+        </button>
+      )}
       <div className={cx("modal", { open: showModal })}>
         <h3>Tìm kiếm</h3>
         <ul className={cx("options")}>
-          <li value="option1" onClick={() => inputRef.current && (inputRef.current.value = "Option 1")}>
-            Option 1 <FontAwesomeIcon icon={faSearch} />
-          </li>
-          <li value="option2" onClick={() => inputRef.current && (inputRef.current.value = "Option 2")}>
-            Option 2 <FontAwesomeIcon icon={faSearch} />
-          </li>
-          <li value="option3" onClick={() => inputRef.current && (inputRef.current.value = "Option 3")}>
-            Option 3 <FontAwesomeIcon icon={faSearch} />
-          </li>
+          {suggestedKeywords.map((keyword) => (
+            <li key={keyword} value={keyword} onClick={() => handleSelectKeyword(keyword)}>
+              {keyword} <FontAwesomeIcon icon={faSearch} />
+            </li>
+          ))}
         </ul>
       </div>
     </div>

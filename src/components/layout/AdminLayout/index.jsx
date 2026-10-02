@@ -23,7 +23,7 @@ function AdminLayout({ children }) {
 
   const navItems = [
     { id: "dashboard", label: "Dashboard", icon: faHome, path: "/admin" },
-    { id: "users", label: "Users", icon: faUsers, path: "/admin/users" },
+    { id: "users", label: "Users", icon: faUsers, path: "/admin/User" },
     { id: "products", label: "Products", icon: faBox, path: "/admin/products" },
     {
       id: "orders",

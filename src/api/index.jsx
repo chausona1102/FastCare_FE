@@ -33,6 +33,7 @@ const api = {
 
   // Product API:
   product: "http://localhost:5000/api/product",
+  productSearch: "http://localhost:5000/api/product/search",
 
   /* 
   Ex: http://localhost:5000/api/cart
@@ -68,6 +69,16 @@ const api = {
   category: "http://localhost:5000/api/category",
 
   /*
+  Ex: http://localhost:5000/api/feedback/productId 
+  Method: GET
+  Params:
+    - productId: ID of the product
+  Response: Array of feedbacks
+  */
+  feedback: "http://localhost:5000/api/feedback",
+
+
+  /*
   Ex: http://localhost:5000/api/parent/category
   Method: GET
   Response: Array of parent categories
@@ -79,6 +90,9 @@ const api = {
 
   // Order
   order: "http://localhost:5000/api/order",
+
+  // User management (admin)
+  user: "http://localhost:5000/api/user",
 };
 
 export default api;

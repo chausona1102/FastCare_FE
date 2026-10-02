@@ -111,7 +111,7 @@ function Home() {
               {hotProducts.map((product, index) => (
                 <SecondCart
                   key={index}
-                  id={product.id}
+                  id={product._id}
                   title={product.title}
                   minPrice={product.minPrice}
                   avatar={product.avatar}
@@ -120,7 +120,7 @@ function Home() {
                   installment={product.installment}
                   screenSize={product.screenSize}
                   rom={product.rom}
-                  to={`/product-detail/${product.id}`}
+                  to={`/product-detail/${product._id}`}
                 />
               ))}
             </div>
