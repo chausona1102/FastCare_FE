@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import classNames from "classnames/bind";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -33,6 +34,8 @@ const ROLE_LABELS = {
 };
 
 function Users() {
+  const isStaff = useSelector((state) => state.auth.role === "staff");
+  const userEndpoint = isStaff ? `${api.user}/staff` : api.user;
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
@@ -53,7 +56,7 @@ function Users() {
     const timeoutId = window.setTimeout(async () => {
       setError("");
       try {
-        const { data } = await axiosClient.get(api.user, {
+        const { data } = await axiosClient.get(userEndpoint, {
           params: { limit: 50, search: search.trim(), role: selectedRole },
           signal: controller.signal,
         });
@@ -68,13 +71,13 @@ function Users() {
           setSearching(false);
         }
       }
-    }, 300);
+    }, 500);
 
     return () => {
       window.clearTimeout(timeoutId);
       controller.abort();
     };
-  }, [search, selectedRole, refreshKey]);
+  }, [search, selectedRole, refreshKey, userEndpoint]);
 
   const filteredUsers = users;
   const totalPages = Math.max(1, Math.ceil(filteredUsers.length / USERS_PER_PAGE));
@@ -112,19 +115,25 @@ function Users() {
     try {
       if (editingUser) {
         const userId = editingUser._id || editingUser.id;
-        const { data } = await axiosClient.patch(`${api.user}/${userId}`, {
-          username: formData.username,
-          fullname: formData.fullname,
-          email: formData.email,
-          phone: formData.phone,
-        });
+        const { data } = await axiosClient.patch(
+          isStaff ? `${userEndpoint}/${userId}` : `${api.user}/${userId}`,
+          {
+            username: formData.username,
+            fullname: formData.fullname,
+            email: formData.email,
+            phone: formData.phone,
+          },
+        );
         setUsers((current) => current.map((user) =>
           (user._id || user.id) === userId ? data : user
         ));
         setNotice("Đã cập nhật thông tin người dùng.");
         setRefreshKey((current) => current + 1);
       } else {
-        const { data } = await axiosClient.post(api.user, formData);
+        const { data } = await axiosClient.post(
+          userEndpoint,
+          isStaff ? { ...formData, role: undefined } : formData
+        );
         const currentSearch = search.trim().toLocaleLowerCase("vi");
         const newUserText = `${data.fullname || ""} ${data.username || ""} ${data.email || ""}`
           .toLocaleLowerCase("vi");
@@ -150,7 +159,9 @@ function Users() {
     setError("");
     setNotice("");
     try {
-      const { data } = await axiosClient.patch(api.user, { userId });
+      const { data } = isStaff
+        ? await axiosClient.patch(`${userEndpoint}/${userId}/status`)
+        : await axiosClient.patch(api.user, { userId });
       setUsers((current) => current.map((item) =>
         (item._id || item.id) === userId ? data : item
       ));
@@ -163,7 +174,7 @@ function Users() {
   };
 
   const handleChangeRole = async (user, role) => {
-    if (user.role === role) return;
+    if (isStaff || user.role === role) return;
     const userId = user._id || user.id;
     setActionUserId(userId);
     setError("");
@@ -189,7 +200,7 @@ function Users() {
     setError("");
     setNotice("");
     try {
-      await axiosClient.delete(`${api.user}/${userId}`);
+      await axiosClient.delete(isStaff ? `${userEndpoint}/${userId}` : `${api.user}/${userId}`);
       setUsers((current) => current.filter((item) => (item._id || item.id) !== userId));
       setCurrentPage(1);
       setNotice("Đã xóa mềm tài khoản.");
@@ -208,8 +219,12 @@ function Users() {
     <section className={cx("page")}>
       <header className={cx("page-header")}>
         <div>
-          <p className={cx("eyebrow")}>Quản trị người dùng</p>
-          <p className={cx("summary")}>Tối đa 50 tài khoản mới nhất, không bao gồm quản trị viên</p>
+          <p className={cx("eyebrow")}>{isStaff ? "Quản lý khách hàng" : "Quản trị người dùng"}</p>
+          <p className={cx("summary")}>
+            {isStaff
+              ? "Tối đa 50 khách hàng mới nhất; nhân viên không thể thay đổi vai trò."
+              : "Tối đa 50 tài khoản mới nhất, không bao gồm quản trị viên"}
+          </p>
         </div>
         <button
           className={cx("create-button")}
@@ -260,13 +275,13 @@ function Users() {
                   Mật khẩu *
                   <input name="password" type="password" value={formData.password} onChange={handleFormChange} autoComplete="new-password" minLength={6} required />
                 </label>
-                <label>
+                {!isStaff && <label>
                   Vai trò *
                   <select name="role" value={formData.role} onChange={handleFormChange}>
                     <option value="customer">Khách hàng</option>
                     <option value="staff">Nhân viên</option>
                   </select>
-                </label>
+                </label>}
               </>
             )}
           </div>
@@ -306,7 +321,7 @@ function Users() {
             }}
           />
         </label>
-        <select
+        {!isStaff && <select
           className={cx("role-filter")}
           value={selectedRole}
           aria-label="Lọc theo vai trò"
@@ -319,7 +334,7 @@ function Users() {
           <option value="">Tất cả vai trò</option>
           <option value="staff">Nhân viên</option>
           <option value="customer">Khách hàng</option>
-        </select>
+        </select>}
         <span className={cx("result-count")} aria-live="polite">
           {searching ? "Đang tìm..." : `${filteredUsers.length} người dùng`}
         </span>
@@ -332,7 +347,7 @@ function Users() {
               <th>Người dùng</th>
               <th>Email</th>
               <th>Số điện thoại</th>
-              <th>Vai trò</th>
+              {!isStaff && <th>Vai trò</th>}
               <th>Trạng thái</th>
               <th>Thao tác</th>
             </tr>
@@ -357,7 +372,7 @@ function Users() {
                 </td>
                 <td>{user.email}</td>
                 <td>{user.phone || "-"}</td>
-                <td>
+                {!isStaff && <td>
                   <select
                     className={cx("row-role")}
                     value={user.role}
@@ -368,7 +383,7 @@ function Users() {
                     <option value="customer">{ROLE_LABELS.customer}</option>
                     <option value="staff">{ROLE_LABELS.staff}</option>
                   </select>
-                </td>
+                </td>}
                 <td>
                   <span className={cx("status", user.isActive ? "active" : "inactive")}>
                     {user.isActive ? "Hoạt động" : "Đã khóa"}
@@ -410,7 +425,7 @@ function Users() {
               </tr>
             ))}
             {visibleUsers.length === 0 && (
-              <tr><td className={cx("empty-state")} colSpan="6">Không tìm thấy người dùng phù hợp.</td></tr>
+              <tr><td className={cx("empty-state")} colSpan={isStaff ? 5 : 6}>Không tìm thấy người dùng phù hợp.</td></tr>
             )}
           </tbody>
         </table>

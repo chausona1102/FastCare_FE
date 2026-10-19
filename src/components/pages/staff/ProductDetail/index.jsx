@@ -16,6 +16,7 @@ function ProductDetail() {
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const nfc = product?.specifications?.phone?.nfc ?? product?.nfc;
   const [error, setError] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -218,11 +219,15 @@ function ProductDetail() {
                   <span className={cx("value")}>{product.sim}</span>
                 </div>
               )}
-              {product.nfc !== undefined && (
+              {nfc !== undefined && nfc !== null && nfc !== "" && (
                 <div className={cx("spec-item")}>
                   <span className={cx("label")}>NFC:</span>
                   <span className={cx("value")}>
-                    {product.nfc ? "Có" : "Không"}
+                    {nfc === true || nfc === "true"
+                      ? "Có"
+                      : nfc === false || nfc === "false"
+                        ? "Không"
+                        : nfc}
                   </span>
                 </div>
               )}

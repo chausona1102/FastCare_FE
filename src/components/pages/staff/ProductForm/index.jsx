@@ -34,7 +34,7 @@ function ProductForm() {
     rearCamera: "",
     frontCamera: "",
     chipset: "",
-    nfc: false,
+    nfc: "Không",
     sim: "",
     os: "",
     screenResolution: "",
@@ -51,9 +51,17 @@ function ProductForm() {
     try {
       setLoading(true);
       const response = await axios.get(`${api.product}/${id}`);
+      const nfc =
+        response.data.nfc ?? response.data.specifications?.phone?.nfc;
       setFormData((prev) => ({
         ...prev,
         ...response.data,
+        nfc:
+          nfc === true || nfc === "true" || nfc === "Có"
+            ? "Có"
+            : nfc === false || nfc === "false"
+              ? "Không"
+              : nfc ?? "Không",
       }));
     } catch (err) {
       setError("Lỗi khi tải thông tin sản phẩm");
@@ -67,7 +75,7 @@ function ProductForm() {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: type === "checkbox" ? (checked ? "Có" : "Không") : value,
     }));
   };
 
@@ -338,7 +346,11 @@ function ProductForm() {
               <input
                 type="checkbox"
                 name="nfc"
-                checked={formData.nfc}
+                checked={
+                  formData.nfc === true ||
+                  formData.nfc === "true" ||
+                  formData.nfc === "Có"
+                }
                 onChange={handleChange}
               />
             </label>

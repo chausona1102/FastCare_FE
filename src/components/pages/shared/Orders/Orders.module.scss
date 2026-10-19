@@ -15,7 +15,7 @@
 
 .eyebrow {
   margin: 0;
-  color: #b42332;
+  color: var(--color-fastcare-400);
   font-size: 1.4rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -229,6 +229,28 @@
   color: #6b3fa0;
 }
 
+.status-return_request,
+.status-return_approved {
+  background: #fff7e6;
+  color: #9a5b00;
+}
+
+.status-return_rejected {
+  background: #fff1f2;
+  color: #b42332;
+}
+
+.status-return_expired {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.status-return_received,
+.status-return_completed {
+  background: #eaf7ef;
+  color: #247144;
+}
+
 .view-button,
 .close-button {
   display: inline-grid;
@@ -301,6 +323,32 @@
       cursor: default;
       opacity: 0.45;
     }
+  }
+}
+
+.load-more-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.load-more {
+  min-height: 38px;
+  padding: 0 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  background: #fff;
+  color: #334155;
+  font-size: 1.3rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: #f8fafc;
+  }
+
+  &:disabled {
+    cursor: wait;
+    opacity: 0.55;
   }
 }
 
@@ -423,6 +471,82 @@
 .item-quantity,
 .note {
   color: #64748b;
+}
+
+.return-detail {
+  border-color: #f0d99e;
+  background: #fffdf6;
+}
+
+.return-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+
+  img {
+    width: 72px;
+    height: 72px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    object-fit: cover;
+  }
+}
+
+.return-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e8edf2;
+
+  textarea,
+  select {
+    width: min(100%, 440px);
+    padding: 9px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    color: #334155;
+    font: inherit;
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
+  button {
+    min-height: 36px;
+    padding: 0 12px;
+    border-radius: 4px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  }
+}
+
+.return-reason-label {
+  color: #334155;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.return-approve {
+  border: 1px solid #9cc9ad;
+  background: #eff9f2;
+  color: #247144;
+}
+
+.return-reject {
+  border: 1px solid #fecaca;
+  background: #fff1f2;
+  color: #b42332;
 }
 
 .detail-total {

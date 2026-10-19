@@ -1,7 +1,6 @@
 import style from "./ProductDetail.module.scss";
 import classNames from "classnames/bind";
 const cx = classNames.bind(style);
-import { iphone17promax, avatar } from "~/assets/images";
 import Title from "~/components/Title";
 import Button from "~/components/Button";
 import Cart from "~/components/Cart";
@@ -10,16 +9,19 @@ import { converseVND, converseKilo } from "~/utils/functions.jsx";
 
 import api from "~/api";
 import axios from "axios";
+import axiosClient from "~/api/axiosClient";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faAngleRight,
   faCartPlus,
-  faGift,
+  faHeart,
   faMinus,
   faPlus,
   faStar,
 } from "@fortawesome/free-solid-svg-icons";
+
+import { faHeart as faHeartOutline } from "@fortawesome/free-regular-svg-icons";
 
 import Tippy from "@tippyjs/react";
 
@@ -40,6 +42,7 @@ function ProductDetail() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { loading, error } = useSelector((state) => state.cart);
+  const { token } = useSelector((state) => state.auth);
   const { id } = useParams();
 
   const timerRef = useRef(null);
@@ -57,6 +60,12 @@ function ProductDetail() {
   const [feedBack, setFeedBack] = useState("all");
   const [currentFeedBack, setCurrentFeedBack] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
+  const [favoriteState, setFavoriteState] = useState(null);
+  const [favoriteSubmitting, setFavoriteSubmitting] = useState(false);
+  const favoriteStateMatchesProduct = favoriteState?.productId === id
+    && favoriteState?.token === token;
+  const isFavorite = Boolean(token && favoriteStateMatchesProduct && favoriteState.isFavorite);
+  const favoriteLoading = Boolean(token) && !favoriteStateMatchesProduct;
 
   // Functions
   const startTimer = () => {
@@ -68,6 +77,7 @@ function ProductDetail() {
     }, 3000);
   };
   const starRating = () => {
+    if (!feedbacks.length) return "0.0";
     const total = feedbacks.reduce((total, fb) => {
       return total + fb.star;
     }, 0);
@@ -82,6 +92,73 @@ function ProductDetail() {
   };
   const setFeedBackByStar = (feedbacks, star) => {
     return feedbacks.filter((feed) => feed.star === star);
+  };
+
+  useEffect(() => {
+    let isCurrentRequest = true;
+
+    if (!token) {
+      return () => {
+        isCurrentRequest = false;
+      };
+    }
+
+    axiosClient
+      .get(`${api.favorite}/user`)
+      .then(({ data }) => {
+        if (!Array.isArray(data)) {
+          throw new Error("Dữ liệu yêu thích không hợp lệ.");
+        }
+        const productIsFavorite = data.some((favorite) => {
+          const favoriteProduct = favorite.product?._id || favorite.product?.id || favorite.product;
+          return String(favoriteProduct) === String(id);
+        });
+        if (isCurrentRequest) {
+          setFavoriteState({ productId: id, token, isFavorite: productIsFavorite });
+        }
+      })
+      .catch((requestError) => {
+        if (isCurrentRequest) {
+          setFavoriteState({ productId: id, token, isFavorite: false });
+          showToast({
+            title: requestError.response?.data?.message || "Không thể tải trạng thái yêu thích.",
+            type: "error",
+          });
+        }
+      });
+
+    return () => {
+      isCurrentRequest = false;
+    };
+  }, [id, showToast, token]);
+
+  const handleToggleFavorite = async () => {
+    if (!token) {
+      showToast({ title: "Vui lòng đăng nhập để thêm sản phẩm vào yêu thích.", type: "warning" });
+      navigate("/login");
+      return;
+    }
+
+    setFavoriteSubmitting(true);
+    try {
+      if (isFavorite) {
+        await axiosClient.delete(api.favorite, { data: { product: product._id } });
+      } else {
+        await axiosClient.post(api.favorite, { product: product._id });
+      }
+      setFavoriteState({ productId: id, token, isFavorite: !isFavorite });
+      showToast({
+        title: isFavorite ? "Đã xóa khỏi danh sách yêu thích." : "Đã thêm vào danh sách yêu thích.",
+        type: "success",
+      });
+    } catch (requestError) {
+      showToast({
+        title: requestError.response?.data?.message || "Không thể cập nhật danh sách yêu thích.",
+        type: "error",
+      });
+    } finally {
+      setFavoriteSubmitting(false);
+    }
   };
 
   const goTo = (index) => {
@@ -193,9 +270,9 @@ function ProductDetail() {
         <nav className="d-flex flex-direction-row align-items-center gap-1 text-sm text-gray-500">
           <Link to="/">Trang chủ</Link>
           <FontAwesomeIcon className={cx("icon")} icon={faAngleRight} />
-          <Link to="/product">Sản phẩm</Link>
+          <Link to="/products">Sản phẩm</Link>
           <FontAwesomeIcon className={cx("icon")} icon={faAngleRight} />
-          <Link to={`/product/${product.category.parentCategory._id}`}>
+          <Link to={`/products/${product.category.parentCategory.slug}`}>
             {product.category.parentCategory.name}
           </Link>
           <FontAwesomeIcon className={cx("icon")} icon={faAngleRight} />
@@ -259,6 +336,16 @@ function ProductDetail() {
             <span> | {feedbacks.length} Đánh giá</span>
             <span> | Lượt bán: {converseKilo(product.sold)}</span>
           </div>
+          <button
+            type="button"
+            className={cx("favorite-button", { active: isFavorite })}
+            onClick={handleToggleFavorite}
+            disabled={favoriteLoading || favoriteSubmitting}
+            aria-pressed={isFavorite}
+          >
+            <FontAwesomeIcon icon={isFavorite ? faHeart : faHeartOutline} />
+            {isFavorite ? "Đã thêm vào yêu thích" : "Thêm vào yêu thích"}
+          </button>
           {/* Version */}
           <div className={cx("version")}>
             <Title title="Phiên bản" className={cx("sub-title")} />
@@ -422,7 +509,10 @@ function ProductDetail() {
               sold={product.sold}
               discount={product.discount}
               installment={product.installment}
-              screenSize={product.screenSize}
+              screenSize={
+                product.specifications?.[product.productType]?.screenSize ||
+                product.screenSize
+              }
               rom={product.rom}
               to={`/product-detail/${product.id}`}
             />

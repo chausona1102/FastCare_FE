@@ -105,32 +105,23 @@ body {
     text-align: center;
 }
 
-.pagination {
+.load-more {
     display: flex;
     justify-content: center;
-    align-items: center;
-    gap: 6px;
     margin: 28px 0 10px;
 
     button {
-        min-width: 36px;
-        height: 36px;
-        padding: 0 10px;
+        padding: 10px 24px;
         border: 1px solid #d7dee8;
         border-radius: 5px;
         background: #fff;
         color: #334155;
         cursor: pointer;
 
-        &:hover:not(:disabled), &.active {
+        &:hover {
             border-color: var(--active-clr);
             background: var(--active-clr);
             color: #fff;
-        }
-
-        &:disabled {
-            cursor: not-allowed;
-            opacity: .45;
         }
     }
 }

@@ -10,7 +10,106 @@ import Tippy from "@tippyjs/react";
 
 import Title from "~/components/Title";
 
+const SPECIFICATION_LABELS = {
+  phone: {
+    screenSize: "Kích thước màn hình",
+    displayTech: "Công nghệ màn hình",
+    screenFeatures: "Tính năng màn hình",
+    frontCamera: "Camera trước",
+    rearCamera: "Camera sau",
+    chipset: "Chipset",
+    cpu: "CPU",
+    nfc: "Công nghệ NFC",
+    ram: "RAM",
+    storage: "Bộ nhớ trong",
+    sim: "SIM",
+    os: "Hệ điều hành",
+    screenResolution: "Độ phân giải",
+  },
+  laptop: {
+    cpu: "CPU",
+    gpu: "GPU",
+    ram: "RAM",
+    storage: "Bộ nhớ",
+    screenSize: "Kích thước màn hình",
+    displayTech: "Công nghệ màn hình",
+    screenFeatures: "Tính năng màn hình",
+    screenResolution: "Độ phân giải",
+    os: "Hệ điều hành",
+    battery: "Pin",
+  },
+  accessory: {
+    compatibility: "Thiết bị tương thích",
+    connection: "Kết nối",
+    material: "Chất liệu",
+    capacity: "Dung lượng",
+    connector: "Cổng kết nối",
+    power: "Công suất",
+  },
+};
+
+const PRODUCT_TYPES = ["phone", "laptop", "accessory"];
+const CATEGORY_TYPES = {
+  "dien-thoai": "phone",
+  laptop: "laptop",
+  "phu-kien": "accessory",
+};
+
+const hasSpecifications = (specifications) =>
+  specifications &&
+  typeof specifications === "object" &&
+  Object.values(specifications).some(
+    (value) => value !== undefined && value !== null && value !== ""
+  );
+
+const getProductType = (product) => {
+  if (PRODUCT_TYPES.includes(product.productType)) return product.productType;
+
+  const categoryType = CATEGORY_TYPES[product.category?.parentCategory?.slug];
+  if (categoryType) return categoryType;
+
+  const groupedTypes = PRODUCT_TYPES.filter((type) =>
+    hasSpecifications(product.specifications?.[type])
+  );
+  if (groupedTypes.length === 1) return groupedTypes[0];
+
+  if (product.rearCamera || product.frontCamera || product.chipset || product.sim) {
+    return "phone";
+  }
+  if (product.gpu || product.battery) return "laptop";
+
+  return null;
+};
+
 function Specifications({ product, handleBuyNow, handleAddToCart }) {
+  const productType = getProductType(product);
+  const productSpecifications = productType
+    ? product.specifications?.[productType] || product
+    : {};
+  const specificationRows = Object.entries(
+    productType ? SPECIFICATION_LABELS[productType] : {}
+  )
+    .filter(([field]) => {
+      const value = productSpecifications[field];
+      return value !== undefined && value !== null && value !== "";
+    })
+    .map(([field, label]) => {
+      const value = productSpecifications[field];
+      return {
+        label,
+        value:
+          field === "nfc"
+            ? value === true || value === "true"
+              ? "Có"
+              : value === false || value === "false"
+                ? "Không"
+                : value
+            : field === "screenSize"
+              ? `${value} inches`
+              : value,
+      };
+    });
+
   return (
     <div className={cx("specifications")}>
       <div className={cx("container")}>
@@ -18,54 +117,18 @@ function Specifications({ product, handleBuyNow, handleAddToCart }) {
           <Title className={cx("title")} title="Thông số kỹ thuật" />
           <table>
             <tbody>
-              <tr>
-                <th scope="row">Kích thước màn hình</th>
-                <td>{product.screenSize} inches</td>
-              </tr>
-              <tr>
-                <th scope="row">Công nghệ màn hình</th>
-                <td>{product.displayTech}</td>
-              </tr>
-              <tr>
-                <th scope="row">Cam trước</th>
-                <td>{product.frontCamera}</td>
-              </tr>
-              <tr>
-                <th scope="row">Cam sau</th>
-                <td>{product.rearCamera}</td>
-              </tr>
-              <tr>
-                <th scope="row">Chipset</th>
-                <td>{product.chipset}</td>
-              </tr>
-              <tr>
-                <th scope="row">Công nghệ NFC</th>
-                <td>{product.nfc}</td>
-              </tr>
-              <tr>
-                <th scope="row">Ram</th>
-                <td>{product.ram}</td>
-              </tr>
-              <tr>
-                <th scope="row">Bộ nhớ trong</th>
-                <td>{product.storage}</td>
-              </tr>
-              <tr>
-                <th scope="row">Sim</th>
-                <td>{product.sim}</td>
-              </tr>
-              <tr>
-                <th scope="row">Hệ điều hành</th>
-                <td>{product.os}</td>
-              </tr>
-              <tr>
-                <th scope="row">Độ phân giải</th>
-                <td>{product.screenResolution}</td>
-              </tr>
-              <tr>
-                <th scope="row">CPU</th>
-                <td>{product.cpu}</td>
-              </tr>
+              {specificationRows.length > 0 ? (
+                specificationRows.map(({ label, value }) => (
+                  <tr key={label}>
+                    <th scope="row">{label}</th>
+                    <td>{value}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="2">Chưa có thông số kỹ thuật.</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

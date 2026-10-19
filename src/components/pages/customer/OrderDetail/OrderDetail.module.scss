@@ -96,6 +96,33 @@
   margin-bottom: 18px;
 }
 
+.returnSection {
+  border-color: #f0d99e;
+  background: #fffdf6;
+
+  p {
+    margin: 8px 0;
+    color: #475569;
+    font-size: 1.3rem;
+    line-height: 1.5;
+  }
+}
+
+.returnImages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+
+  img {
+    width: 72px;
+    height: 72px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    object-fit: cover;
+  }
+}
+
 .sectionRow {
   display: flex;
   justify-content: space-between;

@@ -2,6 +2,7 @@ import styles from "./DefaultLayout.module.scss";
 import classNames from "classnames/bind";
 import Header from "~/components/layout/components/Header";
 import Footer from "~/components/layout/components/Footer";
+import Chatbot from "~/components/Chatbot";
 // import SideBar from "./Sidebar";
 
 const cx = classNames.bind(styles);
@@ -17,6 +18,7 @@ function DefaultLayout({ children }) {
       <div className={cx("footer")}>
         <Footer />
       </div>
+      <Chatbot />
     </div>
   );
 }

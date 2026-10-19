@@ -2,7 +2,7 @@ import styles from "./Header.module.scss";
 import classNames from "classnames/bind";
 import { logo } from "~/assets/images";
 import Button from "~/components/Button";
-import Search from "../../../Search";
+import Search from "~/components/Search";
 import useCart from "~/hook/useCart.jsx";
 import CategoryPopper from "./Category";
 import Tippy from "@tippyjs/react";
@@ -14,9 +14,9 @@ import {
   faBars,
   faUserCircle,
   faShoppingCart,
+  faHeart,
   faSignOut,
   faBagShopping,
-  faInfoCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
 import api from "~/api";
@@ -124,9 +124,11 @@ function Header() {
               <img src={user?.avatar} alt="Avatar" />
             </button>
             <ul className={cx("profile-dropdown", { open: isProfileOpen })}>
-                <button onClick={() => (window.location.href = "/profile")}><FontAwesomeIcon icon={faInfoCircle} className={cx("profile-icon")} /> Thông tin cá nhân</button>
-                <button onClick={() => (window.location.href = "/order")}><FontAwesomeIcon icon={faBagShopping} className={cx("profile-icon")} /> Đơn hàng của tôi</button>
-                <button onClick={handleLogout} className={cx("logout-btn")}><FontAwesomeIcon icon={faSignOut} className={cx("profile-icon")} /> Đăng xuất</button>
+                <button onClick={() => (window.location.href = "/wishlist")}><FontAwesomeIcon icon={faHeart} className={cx("profile-icon")} /><span>Yêu thích</span></button>
+                <button onClick={() => (window.location.href = "/cart")}><FontAwesomeIcon icon={faShoppingCart} className={cx("profile-icon")} /><span>Giỏ hàng</span></button>
+                <button onClick={() => (window.location.href = "/order")}><FontAwesomeIcon icon={faBagShopping} className={cx("profile-icon")} /><span>Đơn hàng của tôi</span></button>
+                <button onClick={() => (window.location.href = "/profile")}><FontAwesomeIcon icon={faUserCircle} className={cx("profile-icon")} /><span>Thông tin cá nhân</span></button>
+                <button onClick={handleLogout} className={cx("logout-btn")}><FontAwesomeIcon icon={faSignOut} className={cx("profile-icon")} /><span>Đăng xuất</span></button>
             </ul>
             {isProfileOpen && (
               <div

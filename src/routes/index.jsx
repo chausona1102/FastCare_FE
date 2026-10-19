@@ -22,21 +22,28 @@ import CheckoutOrder from "~/components/pages/customer/CheckoutOrder";
 import Order from "~/components/pages/customer/Order";
 import OrderDetail from "~/components/pages/customer/OrderDetail";
 import Profile from "~/components/pages/customer/Profile";
+import Favorites from "~/components/pages/customer/Favorites";
 
-// Admin Pages
-import Dashboard from "~/components/pages/admin/Dashboard";
-import UserManagement from "~/components/pages/admin/Users";
-import AdminOrders from "~/components/pages/admin/Orders";
+// Shared admin and staff pages
+import Dashboard from "~/components/pages/shared/Dashboard";
+import UserManagement from "~/components/pages/shared/Users";
+import AdminOrders from "~/components/pages/shared/Orders";
+import ParentCategories from "~/components/pages/shared/ParentCategories";
+import CategoriesManagement from "~/components/pages/shared/Categories";
+import ProductsManagement from "~/components/pages/shared/Products";
+import ActivityLogs from "~/components/pages/admin/Logs";
 
-// Staff Pages
-import StaffDashboard from "~/components/pages/staff/Dashboard";
-import ProductStaff from "~/components/pages/staff/Product";
+// Staff-only pages
 import ProductDetailStaff from "~/components/pages/staff/ProductDetail";
 import ProductForm from "~/components/pages/staff/ProductForm";
+import Inventory from "~/components/pages/staff/Inventory";
+import Imports from "~/components/pages/staff/Imports";
+import ImportList from "~/components/pages/staff/ImportList";
+import OrderHistory from "~/components/pages/staff/OrderHistory";
 
 const userRoutes = [
   {
-    path: "/",
+    path: "/home",
     component: Home,
     Layout: DefaultLayout,
   },
@@ -109,6 +116,11 @@ const userRoutes = [
     path: "/profile",
     component: Profile,
     Layout: HeaderOnly,
+  },
+  {
+    path: "/wishlist",
+    component: Favorites,
+    Layout: HeaderOnly,
   }
 ];
 
@@ -133,22 +145,82 @@ const adminRoutes = [
     component: AdminOrders,
     Layout: AdminLayout,
   },
+  {
+    path: "/admin/parent-categories",
+    component: ParentCategories,
+    Layout: AdminLayout,
+  },
+  {
+    path: "/admin/categories",
+    component: CategoriesManagement,
+    Layout: AdminLayout,
+  },
+  {
+    path: "/admin/products",
+    component: ProductsManagement,
+    Layout: AdminLayout,
+  },
+  {
+    path: "/admin/logs",
+    component: ActivityLogs,
+    Layout: AdminLayout,
+  },
 ];
 
 const staffRoutes = [
   {
     path: "/staff/dashboard",
-    component: StaffDashboard,
+    component: Dashboard,
     Layout: StaffLayout,
   },
   {
     path: "/staff",
-    component: StaffDashboard,
+    component: Dashboard,
     Layout: StaffLayout,
   },
   {
     path: "/staff/products",
-    component: ProductStaff,
+    component: ProductsManagement,
+    Layout: StaffLayout,
+  },
+  {
+    path: "/staff/products/inventory",
+    component: Inventory,
+    Layout: StaffLayout,
+  },
+  {
+    path: "/staff/products/categories",
+    component: CategoriesManagement,
+    Layout: StaffLayout,
+  },
+  {
+    path: "/staff/products/parent-categories",
+    component: ParentCategories,
+    Layout: StaffLayout,
+  },
+  {
+    path: "/staff/imports",
+    component: ImportList,
+    Layout: StaffLayout,
+  },
+  {
+    path: "/staff/imports/create",
+    component: Imports,
+    Layout: StaffLayout,
+  },
+  {
+    path: "/staff/users",
+    component: UserManagement,
+    Layout: StaffLayout,
+  },
+  {
+    path: "/staff/orders",
+    component: AdminOrders,
+    Layout: StaffLayout,
+  },
+  {
+    path: "/staff/orders/history",
+    component: OrderHistory,
     Layout: StaffLayout,
   },
   {

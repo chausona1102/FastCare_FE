@@ -33,7 +33,12 @@ function Cart({
         {/* Ảnh */}
         <div className={cx("image-wrap")}>
           <img src={avatar} alt={title} className={cx("image")} />
-          <button className={cx("btn-add")}>
+          <button className={cx("btn-add")}
+          //  onClick={(e) => {
+          //       e.preventDefault();
+          //       alert(id);
+          //     }}
+          >
             <FontAwesomeIcon icon={faCartPlus} />
             <span>Thêm vào giỏ</span>
           </button>
@@ -76,10 +81,10 @@ function Cart({
             </div>
             <button
               className={cx("btn-favorite")}
-              onClick={(e) => {
-                e.preventDefault();
-                alert(id);
-              }}
+              // onClick={(e) => {
+              //   e.preventDefault();
+              //   alert(id);
+              // }}
             >
               <FontAwesomeIcon icon={faHeart} />
               <span>Yêu thích</span>

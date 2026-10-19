@@ -83,17 +83,26 @@ export default function CheckoutOrder() {
         })),
       };
 
-      await axiosClient.post(api.order, payload, {
+      const response = await axiosClient.post(api.order, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
+      if (Number(paymentTypeId) === 1) {
+        const paymentUrl = response.data?.paymentUrl;
+        if (!paymentUrl) {
+          throw new Error('Không tạo được liên kết thanh toán VNPAY.');
+        }
+        window.location.assign(paymentUrl);
+        return;
+      }
+
       showToast({ title: 'Đặt hàng thành công', type: 'success' });
       navigate('/');
     } catch (error) {
       showToast({
-        title: error?.response?.data?.message || 'Đặt hàng thất bại. Vui lòng thử lại.',
+        title: error?.response?.data?.message || error.message || 'Đặt hàng thất bại. Vui lòng thử lại.',
         type: 'error',
       });
     } finally {

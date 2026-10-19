@@ -1,11 +1,10 @@
 import styles from "./Home.module.scss";
 import classNames from "classnames/bind";
 import Cart from "~/components/Cart";
-import SecondCart from "~/components/SecondCart";
 import Loading from "~/components/Loading";
 import axios from "axios";
 import { banner_samsumS26plus } from "~/assets/banner";
-import { keyboard, iphone17promax, hotGif } from "~/assets/images";
+import { keyboard, hotGif } from "~/assets/images";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faAngleLeft,
@@ -109,19 +108,21 @@ function Home() {
             {/* <Title title="Siêu sale" className={cx("section-title")} /> */}
             <div className={cx("products-grid")}>
               {hotProducts.map((product, index) => (
-                <SecondCart
-                  key={index}
-                  id={product._id}
-                  title={product.title}
-                  minPrice={product.minPrice}
-                  avatar={product.avatar}
-                  sold={product.sold}
-                  discount={product.discount}
-                  installment={product.installment}
-                  screenSize={product.screenSize}
-                  rom={product.rom}
-                  to={`/product-detail/${product._id}`}
-                />
+                  <Cart
+                    key={product._id}
+                    id={product._id}
+                    title={product.title}
+                    minPrice={product.minPrice}
+                    avatar={product.avatar}
+                    sold={product.sold}
+                    discount={product.discount}
+                    installment={product.installment}
+                    screenSize={
+                      product.specifications?.phone?.screenSize || product.screenSize
+                    }
+                    rom={product.specifications?.phone?.storage || product.storage}
+                    to={`/product-detail/${product._id}`}
+                  />
               ))}
             </div>
             <div className={cx("circle-1")}></div>
@@ -165,8 +166,10 @@ function Home() {
                     sold={product.sold}
                     discount={product.discount}
                     installment={product.installment}
-                    screenSize={product.screenSize}
-                    rom={product.storage}
+                    screenSize={
+                      product.specifications?.phone?.screenSize || product.screenSize
+                    }
+                    rom={product.specifications?.phone?.storage || product.storage}
                     to={`/product-detail/${product._id}`}
                   />
                 ))}
@@ -181,8 +184,10 @@ function Home() {
                     sold={product.sold}
                     discount={product.discount}
                     installment={product.installment}
-                    screenSize={product.screenSize}
-                    rom={product.storage}
+                    screenSize={
+                      product.specifications?.laptop?.screenSize || product.screenSize
+                    }
+                    rom={product.specifications?.laptop?.storage || product.storage}
                     to={`/product-detail/${product._id}`}
                   />
                 ))}
@@ -209,12 +214,12 @@ function Home() {
               <Title
                 title="Phụ kiện chính hãng"
                 className={cx("accessories-title")}
-                className="mx-4"
+                // className="mx-4"
               />
               <Tippy content="Xem thêm" placement="right">
                 <Button
                   light
-                  to={`products/${accessories[0].category.parentCategory.id}`}
+                  to="/products/phu-kien"
                   className={cx("more-accessories")}
                 >
                   <FontAwesomeIcon icon={faGripLinesVertical} />
@@ -225,9 +230,9 @@ function Home() {
             <div className={cx("accessories-grid")}>
               {accessories.map((item) => (
                 <Link
-                  to={`/product-detail/${item.id}`}
+                  to={`/product-detail/${item._id || item.id}`}
                   className={cx("accessories-btn")}
-                  key={item.id}
+                  key={item._id || item.id}
                 >
                   <div className={cx("card-horizontal")}>
                     <img src={item.avatar} />
@@ -239,6 +244,64 @@ function Home() {
           </div>
         ) : (
           <></>
+        )}
+        {phones.length > 0 && (
+          <section className={cx("category-products")}>
+            <div className={cx("category-products-heading")}>
+              <Title title="Điện thoại nổi bật" />
+              <Link to="/products/dien-thoai" className={cx("category-products-more")}>
+                Xem tất cả <FontAwesomeIcon icon={faAngleRight} />
+              </Link>
+            </div>
+            <div className={cx("category-products-grid")}>
+              {phones.map((product) => (
+                <Cart
+                  key={product._id}
+                  id={product._id}
+                  title={product.title}
+                  minPrice={product.minPrice}
+                  avatar={product.avatar}
+                  sold={product.sold}
+                  discount={product.discount}
+                  installment={product.installment}
+                  screenSize={
+                    product.specifications?.phone?.screenSize || product.screenSize
+                  }
+                  rom={product.specifications?.phone?.storage || product.storage}
+                  to={`/product-detail/${product._id}`}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+        {laptops.length > 0 && (
+          <section className={cx("category-products")}>
+            <div className={cx("category-products-heading")}>
+              <Title title="Laptop nổi bật" />
+              <Link to="/products/laptop" className={cx("category-products-more")}>
+                Xem tất cả <FontAwesomeIcon icon={faAngleRight} />
+              </Link>
+            </div>
+            <div className={cx("category-products-grid")}>
+              {laptops.map((product) => (
+                <Cart
+                  key={product._id}
+                  id={product._id}
+                  title={product.title}
+                  minPrice={product.minPrice}
+                  avatar={product.avatar}
+                  sold={product.sold}
+                  discount={product.discount}
+                  installment={product.installment}
+                  screenSize={
+                    product.specifications?.laptop?.screenSize || product.screenSize
+                  }
+                  rom={product.specifications?.laptop?.storage || product.storage}
+                  to={`/product-detail/${product._id}`}
+                />
+              ))}
+            </div>
+          </section>
         )}
       </div>
     </div>

@@ -7,19 +7,17 @@ import axios from "axios";
 import Cart from "~/components/Cart";
 import { formatSlugToName } from "~/utils/functions";
 import Loading from "~/components/Loading";
-import Button from "~/components/Button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faAngleRight,
-  faChevronLeft,
-  faChevronRight,
   faFilter,
   faRotateLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 
-const PRODUCTS_PER_PAGE = 12;
+const INITIAL_PRODUCTS_COUNT = 20;
+const LOAD_MORE_COUNT = 10;
 const PRICE_RANGES = [
   { label: "Tất cả mức giá", slug: "all", min: 0, max: Infinity },
   { label: "Dưới 1 triệu", slug: "below-1m", min: 0, max: 1000000 },
@@ -34,24 +32,52 @@ function Products() {
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState([]);
   const [categoryName, setCategoryName] = useState("");
-  const [selectedBrand, setSelectedBrand] = useState("");
-  const [selectedPrice, setSelectedPrice] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [filterState, setFilterState] = useState({
+    searchKeyword: "",
+    brand: "",
+    price: 0,
+  });
+  const [visibleCountState, setVisibleCountState] = useState({
+    key: "",
+    count: INITIAL_PRODUCTS_COUNT,
+  });
   const { slug, id: categoryId, range: priceSlug } = useParams();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const searchKeyword = (searchParams.get("search") || "").trim();
+  const selectedBrand =
+    filterState.searchKeyword === searchKeyword ? filterState.brand : "";
+  const selectedPrice =
+    filterState.searchKeyword === searchKeyword ? filterState.price : 0;
   const selectedCategoryId = searchParams.get("brand") || "";
   const resolvedSlug = slug || "all";
   const priceSlugIndex = PRICE_RANGES.findIndex((range) => range.slug === priceSlug);
   const activePriceIndex = priceSlug
     ? Math.max(priceSlugIndex, 0)
     : selectedPrice;
+  const visibilityKey = JSON.stringify([
+    resolvedSlug,
+    categoryId,
+    searchKeyword,
+    selectedCategoryId,
+    selectedBrand,
+    activePriceIndex,
+  ]);
 
   useEffect(() => {
     const fetchAll = async () => {
       setLoading(true);
       try {
+        setCategoryName("");
+        if (searchKeyword) {
+          const { data: productsData } = await axios.get(api.productSearch, {
+            params: { keyword: searchKeyword, limit: 50 },
+          });
+          setCategories([]);
+          setAllProducts(productsData || []);
+          return;
+        }
+
         if (categoryId) {
           const [
             { data: categoryData },
@@ -78,16 +104,6 @@ function Products() {
               return categoryIds.has(String(productCategoryId));
             })
           );
-          return;
-        }
-
-        setCategoryName("");
-        if (searchKeyword) {
-          const { data: productsData } = await axios.get(api.productSearch, {
-            params: { keyword: searchKeyword, limit: 50 },
-          });
-          setCategories([]);
-          setAllProducts(productsData || []);
           return;
         }
 
@@ -131,25 +147,18 @@ function Products() {
     const matchesPrice =
       price >= priceRange.min &&
       (priceRange.max === Infinity || price < priceRange.max);
-    const matchesKeyword = !searchKeyword
-      ? true
-      : [product.title, product.brand, product.category?.name, product.category?.parentCategory?.name]
-          .filter(Boolean)
-          .some((value) => value.toLowerCase().includes(searchKeyword.toLowerCase()));
 
-    return matchesBrand && matchesCategory && matchesPrice && matchesKeyword;
+    return matchesBrand && matchesCategory && matchesPrice;
   });
 
-  const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
-  const paginatedProducts = filteredProducts.slice(
-    (currentPage - 1) * PRODUCTS_PER_PAGE,
-    currentPage * PRODUCTS_PER_PAGE
-  );
+  const visibleCount =
+    visibleCountState.key === visibilityKey
+      ? visibleCountState.count
+      : INITIAL_PRODUCTS_COUNT;
+  const visibleProducts = filteredProducts.slice(0, visibleCount);
 
   const resetFilters = () => {
-    setSelectedBrand("");
-    setSelectedPrice(0);
-    setCurrentPage(1);
+    setFilterState({ searchKeyword, brand: "", price: 0 });
     if (priceSlug) navigate("/products");
     if (selectedCategoryId) {
       const nextSearchParams = new URLSearchParams(searchParams);
@@ -157,10 +166,6 @@ function Products() {
       setSearchParams(nextSearchParams, { replace: true });
     }
   };
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedBrand, selectedPrice, searchKeyword, selectedCategoryId, activePriceIndex]);
 
   return loading ? Loading() : (
     <div className={cx("wrapper")}>
@@ -213,7 +218,6 @@ function Products() {
                   nextSearchParams.delete("brand");
                 }
                 setSearchParams(nextSearchParams, { replace: true });
-                setCurrentPage(1);
               }}
             >
               <option value="">Tất cả danh mục con</option>
@@ -230,7 +234,13 @@ function Products() {
           <select
             aria-label="Lọc theo thương hiệu"
             value={selectedBrand}
-            onChange={(event) => setSelectedBrand(event.target.value)}
+            onChange={(event) =>
+              setFilterState((current) => ({
+                searchKeyword,
+                brand: event.target.value,
+                price: current.searchKeyword === searchKeyword ? current.price : 0,
+              }))
+            }
           >
             <option value="">Tất cả thương hiệu</option>
             {brands.map((brandName) => (
@@ -242,15 +252,17 @@ function Products() {
             value={activePriceIndex}
             onChange={(event) => {
               const nextPriceIndex = Number(event.target.value);
-              setCurrentPage(1);
+              setFilterState((current) => ({
+                searchKeyword,
+                brand: current.searchKeyword === searchKeyword ? current.brand : "",
+                price: nextPriceIndex,
+              }));
               if (priceSlug) {
                 navigate(
                   nextPriceIndex === 0
                     ? "/products"
                     : `/prices/${PRICE_RANGES[nextPriceIndex].slug}`
                 );
-              } else {
-                setSelectedPrice(nextPriceIndex);
               }
             }}
           >
@@ -266,7 +278,7 @@ function Products() {
           <span className={cx("result-count")}>{filteredProducts.length} sản phẩm</span>
         </div>
         <div className={cx("products-grid")}>
-          {paginatedProducts.map((pro, index) => (
+          {visibleProducts.map((pro, index) => (
             <Cart
               key={pro.id || pro._id || index}
               id={pro.id}
@@ -276,46 +288,36 @@ function Products() {
               sold={pro.sold}
               discount={pro.discount}
               installment={pro.installment}
-              screenSize={pro.screenSize}
+              screenSize={
+                pro.specifications?.[pro.productType]?.screenSize || pro.screenSize
+              }
               rom={pro.rom}
               to={`/product-detail/${pro.id || pro._id}`}
             />
           ))}
         </div>
-        {paginatedProducts.length === 0 && (
+        {visibleProducts.length === 0 && (
           <div className={cx("empty-state")}>
             {searchKeyword
               ? `Không tìm thấy sản phẩm phù hợp với "${searchKeyword}".`
               : "Không tìm thấy sản phẩm phù hợp."}
           </div>
         )}
-        {totalPages > 1 && (
-          <div className={cx("pagination")}>
+        {filteredProducts.length > visibleProducts.length && (
+          <div className={cx("load-more")}>
             <button
               type="button"
-              aria-label="Trang trước"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((page) => page - 1)}
+              onClick={() =>
+                setVisibleCountState((currentState) => ({
+                  key: visibilityKey,
+                  count:
+                    (currentState.key === visibilityKey
+                      ? currentState.count
+                      : INITIAL_PRODUCTS_COUNT) + LOAD_MORE_COUNT,
+                }))
+              }
             >
-              <FontAwesomeIcon icon={faChevronLeft} />
-            </button>
-            {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
-              <button
-                type="button"
-                key={page}
-                className={cx({ active: currentPage === page })}
-                onClick={() => setCurrentPage(page)}
-              >
-                {page}
-              </button>
-            ))}
-            <button
-              type="button"
-              aria-label="Trang sau"
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((page) => page + 1)}
-            >
-              <FontAwesomeIcon icon={faChevronRight} />
+              Tải thêm 10 sản phẩm
             </button>
           </div>
         )}

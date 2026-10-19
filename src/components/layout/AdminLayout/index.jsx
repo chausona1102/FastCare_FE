@@ -2,16 +2,21 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import styles from "./AdminLayout.module.scss";
 import classNames from "classnames/bind";
+import { useDispatch } from "react-redux";
+import { logout } from "~/store/slices/authSlice";
+import axiosClient from "~/api/axiosClient";
+import { logo } from "~/assets/images";
 import {
   faHome,
   faUsers,
   faBox,
   faShoppingCart,
-  faCog,
   faSignOutAlt,
   faBars,
   faTimes,
-  faChartLine,
+  faLayerGroup,
+  faTags,
+  faClipboardList,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -20,33 +25,50 @@ const cx = classNames.bind(styles);
 function AdminLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const dispatch = useDispatch();
 
   const navItems = [
     { id: "dashboard", label: "Dashboard", icon: faHome, path: "/admin" },
     { id: "users", label: "Users", icon: faUsers, path: "/admin/User" },
-    { id: "products", label: "Products", icon: faBox, path: "/admin/products" },
     {
       id: "orders",
       label: "Orders",
       icon: faShoppingCart,
       path: "/admin/orders",
     },
+    { id: "products", label: "Products", icon: faBox, path: "/admin/products" },
     {
-      id: "analytics",
-      label: "Analytics",
-      icon: faChartLine,
-      path: "/admin/analytics",
+      id: "categories",
+      label: "Categories",
+      icon: faTags,
+      path: "/admin/categories",
     },
-    { id: "settings", label: "Settings", icon: faCog, path: "/admin/settings" },
+    {
+      id: "parent-categories",
+      label: "Parent Categories",
+      icon: faLayerGroup,
+      path: "/admin/parent-categories",
+    },
+    {
+      id: "logs",
+      label: "Activity Logs",
+      icon: faClipboardList,
+      path: "/admin/logs",
+    },
+    // { id: "settings", label: "Settings", icon: faCog, path: "/admin/settings" },
   ];
 
   const isActive = (path) => location.pathname === path;
 
-  const handleLogout = () => {
-    // TODO: Implement logout logic
-    localStorage.removeItem("fastcare_access_token");
-    localStorage.removeItem("fastcare_user");
-    window.location.href = "/login";
+  const handleLogout = async () => {
+    try {
+      await axiosClient.post("/api/auth/logout"); 
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      dispatch(logout());
+      window.location.href = "/login";
+    }
   };
 
   return (
@@ -54,8 +76,9 @@ function AdminLayout({ children }) {
       {/* Sidebar */}
       <aside className={cx("sidebar", { active: sidebarOpen })}>
         <div className={cx("logo")}>
-          <FontAwesomeIcon icon={faHome} />
-          <span>FastCare</span>
+          {/* <FontAwesomeIcon icon={faHome} /> */}
+          {/* <span>FastCare</span> */}
+          <img src={logo} alt="Logo" />
         </div>
 
         <ul className={cx("navMenu")}>

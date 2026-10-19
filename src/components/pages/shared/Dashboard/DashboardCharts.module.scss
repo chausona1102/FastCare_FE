@@ -1,0 +1,188 @@
+.chartsSection {
+  min-width: 0;
+}
+
+.chartPanel {
+  min-width: 0;
+  padding: 22px;
+  border: 1px solid #e8edf4;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 3px 12px rgba(25, 42, 70, 0.04);
+}
+
+.chartHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 20px;
+
+  h2 {
+    margin: 5px 0 3px;
+    color: #172033;
+    font-size: 2rem;
+  }
+
+  p {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 1.2rem;
+  }
+}
+
+.panelEyebrow {
+  margin: 0;
+  color: #64748b;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+}
+
+.periodPicker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #64748b;
+  font-size: 1.3rem;
+  white-space: nowrap;
+
+  select {
+    min-width: 120px;
+    padding: 10px 32px 10px 12px;
+    border: 1px solid #dbe2ea;
+    border-radius: 9px;
+    outline: none;
+    background: #fff;
+    color: #172033;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+    }
+  }
+}
+
+.chartLegend {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin: 0 0 8px 78px;
+  color: #64748b;
+  font-size: 1.2rem;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+}
+
+.legendDot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+
+  &.blue {
+    background: #3b82f6;
+  }
+
+  &.orange {
+    background: #f97316;
+  }
+}
+
+.chartViewport {
+  overflow-x: auto;
+  padding-bottom: 5px;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+  scrollbar-width: thin;
+}
+
+.lineChart {
+  display: block;
+  max-width: none;
+  overflow: visible;
+}
+
+.gridLine {
+  stroke: #e8edf4;
+  stroke-dasharray: 3 4;
+  stroke-width: 1;
+}
+
+.axisLabel,
+.xAxisLabel {
+  fill: #94a3b8;
+  font-family: inherit;
+  font-size: 11px;
+}
+
+.line {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.3;
+}
+
+.revenueLine {
+  stroke: #3b82f6;
+}
+
+.ordersLine {
+  stroke: #f97316;
+}
+
+.point {
+  stroke: #fff;
+  stroke-width: 2;
+  cursor: pointer;
+}
+
+.revenuePoint {
+  fill: #3b82f6;
+}
+
+.ordersPoint {
+  fill: #f97316;
+}
+
+.chartEmpty {
+  margin: 0;
+  padding: 34px 0;
+  color: #94a3b8;
+  font-size: 1.3rem;
+  text-align: center;
+}
+
+@media (max-width: 700px) {
+  .chartPanel {
+    padding: 18px;
+  }
+
+  .chartHeader {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .periodPicker {
+    width: 100%;
+    justify-content: space-between;
+
+    select {
+      flex: 1;
+    }
+  }
+
+  .chartLegend {
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    margin-left: 0;
+  }
+}

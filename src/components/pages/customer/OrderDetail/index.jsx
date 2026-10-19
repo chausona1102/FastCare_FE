@@ -9,7 +9,7 @@ import api from "~/api";
 import { converseStatus, converseVND, formatDateHour } from "~/utils/functions.jsx";
 
 const paymentMethods = {
-  1: "Chuyển khoản",
+  1: "VNPAY",
   2: "Thanh toán khi nhận hàng (COD)",
 };
 
@@ -26,6 +26,7 @@ function OrderDetail() {
   const [order, setOrder] = useState(orderFromLocation);
   const [loading, setLoading] = useState(!Boolean(orderFromLocation));
   const [error, setError] = useState("");
+  const paymentResult = new URLSearchParams(location.search).get("payment");
 
   useEffect(() => {
     if (order) return;
@@ -91,7 +92,16 @@ function OrderDetail() {
   }
 
   return (
-    <div className={cx("wrapper")}> 
+    <div className={cx("wrapper")}>
+      {paymentResult && (
+      <div className={`alert ${paymentResult === "success" ? "alert-success" : "alert-warning"}`}>
+          {paymentResult === "success"
+            ? "Thanh toán VNPAY thành công."
+            : paymentResult === "failed"
+              ? "Thanh toán VNPAY chưa thành công. Đơn hàng vẫn đang chờ thanh toán."
+              : "Không thể xác minh kết quả thanh toán VNPAY."}
+        </div>
+      )}
       <div className={cx("header")}> 
         <button className={cx("backBtn")} onClick={() => navigate(-1)}>
           Quay lại
@@ -115,12 +125,53 @@ function OrderDetail() {
         <div className={cx("infoCard")}> 
           <div className={cx("infoTitle")}>Thanh toán</div>
           <div className={cx("infoValue")}>{paymentMethods[order.paymentTypeId] || "Khác"}</div>
+          {order.paymentTypeId === 1 && (
+            <div className={cx("infoMeta")}>
+              {order.paymentStatus === "paid"
+                ? "Đã thanh toán"
+                : order.paymentStatus === "failed"
+                  ? "Thanh toán thất bại"
+                  : "Đang chờ thanh toán"}
+            </div>
+          )}
           <div className={cx("infoMeta")}>{order.codeAmount > 0 ? `Thu hộ ${converseVND(order.codeAmount)}` : "Không thu hộ"}</div>
         </div>
       </div>
 
       <div className={cx("body")}> 
         <div className={cx("mainSection")}> 
+          {order.returnRequest && (
+            <section className={cx("section", "returnSection")}>
+              <div className={cx("sectionTitle")}>Cập nhật yêu cầu trả hàng</div>
+              <p><strong>Trạng thái:</strong> {converseStatus(order.status)}</p>
+              <p><strong>Lý do:</strong> {order.returnRequest.reason || "-"}</p>
+              <p><strong>Mô tả:</strong> {order.returnRequest.description || "-"}</p>
+              {order.returnRequest.rejectionReason && (
+                <p><strong>Lý do từ chối:</strong> {order.returnRequest.rejectionReason}</p>
+              )}
+              {order.returnRequest.instructions && (
+                <>
+                  <p><strong>Hướng dẫn:</strong> {order.returnRequest.instructions}</p>
+                  <p><strong>Hạn mang sản phẩm đến:</strong> {formatDateHour(order.returnRequest.dropoffDeadline)}</p>
+                </>
+              )}
+              {order.returnRequest.receivedAt && (
+                <p><strong>Đã tiếp nhận lúc:</strong> {formatDateHour(order.returnRequest.receivedAt)}</p>
+              )}
+              {order.returnRequest.resolution && (
+                <p><strong>Kết quả:</strong> {order.returnRequest.resolution === "refund" ? "Hoàn tiền" : "Đổi hàng"}</p>
+              )}
+              {order.returnRequest.images?.length > 0 && (
+                <div className={cx("returnImages")}>
+                  {order.returnRequest.images.map((image, index) => (
+                    <a href={image} target="_blank" rel="noreferrer" key={image}>
+                      <img src={image} alt={`Ảnh tình trạng sản phẩm ${index + 1}`} />
+                    </a>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
           <div className={cx("section")}> 
             <div className={cx("sectionTitle")}>Thông tin giao hàng</div>
             <div className={cx("sectionRow")}> 

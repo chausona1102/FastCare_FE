@@ -472,3 +472,43 @@
         text-align: center;
     }
 }
+
+.category-products {
+    margin: 20px 10px;
+    padding: 16px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
+}
+
+.category-products-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.category-products-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-fastcare-500);
+    font-weight: 600;
+    white-space: nowrap;
+
+    &:hover {
+        color: var(--secondary-clr);
+        text-decoration: underline;
+    }
+}
+
+.category-products-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+
+    @media (max-width: 768px) {
+        justify-content: center;
+    }
+}

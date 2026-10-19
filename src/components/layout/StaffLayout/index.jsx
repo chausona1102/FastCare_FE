@@ -2,17 +2,21 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import styles from "./StaffLayout.module.scss";
 import classNames from "classnames/bind";
+import { useDispatch } from "react-redux";
+import { logout } from "~/store/slices/authSlice";
+import axiosClient from "~/api/axiosClient";
+import { logo } from "~/assets/images";
 import {
   faHome,
   faShoppingCart,
   faBox,
   faTruck,
-  faBell,
   faSignOutAlt,
   faBars,
   faTimes,
   faChartLine,
-  faListCheck,
+  faUsers,
+  faLayerGroup,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -21,7 +25,7 @@ const cx = classNames.bind(styles);
 function StaffLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
-
+  const dispatch = useDispatch();
   // Nhóm menu theo chức năng như trong prompt
   const navGroups = [
     {
@@ -46,12 +50,6 @@ function StaffLayout({ children }) {
           path: "/staff/orders",
         },
         {
-          id: "orders-create",
-          label: "Tạo đơn thủ công",
-          icon: faListCheck,
-          path: "/staff/orders/create",
-        },
-        {
           id: "orders-history",
           label: "Lịch sử đơn hàng",
           icon: faChartLine,
@@ -70,16 +68,16 @@ function StaffLayout({ children }) {
           path: "/staff/products",
         },
         {
-          id: "products-create",
-          label: "Thêm / Sửa sản phẩm",
-          icon: faListCheck,
-          path: "/staff/products/create",
-        },
-        {
           id: "products-categories",
           label: "Danh mục sản phẩm",
           icon: faBox,
           path: "/staff/products/categories",
+        },
+        {
+          id: "products-parent-categories",
+          label: "Nhóm danh mục",
+          icon: faLayerGroup,
+          path: "/staff/products/parent-categories",
         },
         {
           id: "products-inventory",
@@ -105,22 +103,17 @@ function StaffLayout({ children }) {
           icon: faShoppingCart,
           path: "/staff/imports",
         },
-        {
-          id: "suppliers",
-          label: "Quản lý nhà cung cấp",
-          icon: faBox,
-          path: "/staff/suppliers",
-        },
       ],
     },
     {
-      id: "notifications",
+      id: "users",
+      title: "Khách hàng",
       items: [
         {
-          id: "notifications",
-          label: "Thông Báo",
-          icon: faBell,
-          path: "/staff/notifications",
+          id: "users-list",
+          label: "Quản lý khách hàng",
+          icon: faUsers,
+          path: "/staff/users",
         },
       ],
     },
@@ -128,11 +121,15 @@ function StaffLayout({ children }) {
 
   const isActive = (path) => location.pathname === path;
 
-  const handleLogout = () => {
-    // TODO: Thay bằng API call thật - authService.logout()
-    localStorage.removeItem("fastcare_access_token");
-    localStorage.removeItem("fastcare_user");
-    window.location.href = "/login";
+  const handleLogout = async () => {
+    try {
+      await axiosClient.post("/api/auth/logout"); 
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      dispatch(logout());
+      window.location.href = "/login";
+    }
   };
 
   return (
@@ -140,8 +137,9 @@ function StaffLayout({ children }) {
       {/* Sidebar */}
       <aside className={cx("sidebar", { active: sidebarOpen })}>
         <div className={cx("logo")}>
-          <FontAwesomeIcon icon={faHome} />
-          <span>FastCare</span>
+          {/* <FontAwesomeIcon icon={faHome} />
+          <span>FastCare</span> */}
+          <img src={logo} alt="Logo" />
         </div>
 
         <div className={cx("navContainer")}>

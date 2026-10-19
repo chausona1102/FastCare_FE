@@ -41,6 +41,14 @@ function Order() {
   const [reviewError, setReviewError] = useState("");
   const [cancelTarget, setCancelTarget] = useState(null);
   const [cancelSubmitting, setCancelSubmitting] = useState(false);
+  const [returnTarget, setReturnTarget] = useState(null);
+  const [returnForm, setReturnForm] = useState({
+    reason: "",
+    description: "",
+    images: [],
+  });
+  const [returnSubmitting, setReturnSubmitting] = useState(false);
+  const [returnError, setReturnError] = useState("");
   const [processingOrderId, setProcessingOrderId] = useState("");
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -119,18 +127,27 @@ function Order() {
     }
   };
 
-  const requestReturn = async (order) => {
-    const orderId = order._id || order.id;
-    if (!order.ghnOrderCode) {
-      showToast({ title: "Đơn hàng chưa có mã vận đơn GHN.", type: "error" });
-      return;
-    }
-    if (!window.confirm("Gửi yêu cầu trả hàng cho đơn này?")) return;
+  const openReturnRequest = (order) => {
+    setReturnTarget(order);
+    setReturnForm({ reason: "", description: "", images: [] });
+    setReturnError("");
+  };
 
-    setProcessingOrderId(orderId);
+  const requestReturn = async (event) => {
+    event.preventDefault();
+    if (!returnTarget) return;
+
+    const orderId = returnTarget._id || returnTarget.id;
+    setReturnSubmitting(true);
+    setReturnError("");
     try {
-      const { data: updatedOrder } = await axiosClient.put(
-        `${api.order}/return/${encodeURIComponent(order.ghnOrderCode)}`
+      const formData = new FormData();
+      formData.append("reason", returnForm.reason);
+      formData.append("description", returnForm.description.trim());
+      returnForm.images.forEach((image) => formData.append("images", image));
+      const { data: updatedOrder } = await axiosClient.post(
+        `${api.order}/return/${encodeURIComponent(orderId)}`,
+        formData
       );
       setOrders((currentOrders) => currentOrders.map((item) =>
         (item._id || item.id) === orderId ? { ...item, ...updatedOrder } : item
@@ -138,14 +155,12 @@ function Order() {
       setCompletedOrder((currentOrders) => currentOrders.filter(
         (item) => (item._id || item.id) !== orderId
       ));
+      setReturnTarget(null);
       showToast({ title: "Đã gửi yêu cầu trả hàng.", type: "success" });
     } catch (error) {
-      showToast({
-        title: error.response?.data?.message || "Gửi yêu cầu trả hàng thất bại.",
-        type: "error",
-      });
+      setReturnError(error.response?.data?.message || "Gửi yêu cầu trả hàng thất bại. Vui lòng thử lại.");
     } finally {
-      setProcessingOrderId("");
+      setReturnSubmitting(false);
     }
   };
 
@@ -155,7 +170,13 @@ function Order() {
 
   const submitReview = async (event) => {
     event.preventDefault();
-    if (!reviewItem?.product?._id || !reviewItem?.variant?._id) {
+
+    const orderId = reviewOrder?._id || reviewOrder?.id;
+    const productId = reviewItem?.product?._id || reviewItem?.product?.id || reviewItem?.product || reviewItem?.productId;
+    const variantId = reviewItem?.variant?._id || reviewItem?.variant?.id || reviewItem?.variant || reviewItem?.variantId;
+    const userId = user?._id || user?.id;
+
+    if (!orderId || !productId || !variantId) {
       setReviewError("Không tìm thấy thông tin sản phẩm để đánh giá.");
       return;
     }
@@ -164,22 +185,27 @@ function Order() {
     setReviewError("");
     try {
       const formData = new FormData();
-      formData.append("order", reviewOrder._id);
-      formData.append("product", reviewItem.product._id);
-      formData.append("variant", reviewItem.variant._id);
+      formData.append("order", orderId);
+      formData.append("product", productId);
+      formData.append("variant", variantId);
+      if (userId) formData.append("user", userId);
       formData.append("star", String(reviewForm.star));
-      formData.append("feedbackTags", JSON.stringify(reviewForm.feedbackTags));
+      Object.entries(reviewForm.feedbackTags || {}).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          formData.append(`feedbackTags[${key}]`, String(Boolean(value)));
+        }
+      });
+      formData.append("feedbackTags", JSON.stringify(reviewForm.feedbackTags || {}));
       formData.append("comment", reviewForm.comment.trim());
       reviewForm.images.forEach((image) => formData.append("images", image));
 
       await axiosClient.post(api.feedback, formData);
       setOrders((currentOrders) => currentOrders.map((order) => (
-        order._id === reviewOrder._id ? { ...order, isRating: true } : order
+        (order._id || order.id) === orderId ? { ...order, isRating: true } : order
       )));
       setCompletedOrder((currentOrders) => currentOrders.map((order) => (
-        order._id === reviewOrder._id ? { ...order, isRating: true } : order
+        (order._id || order.id) === orderId ? { ...order, isRating: true } : order
       )));
-      // Cập nhật trạng thái đánh giá cho đơn hàng hiện tại
       setReviewOrder(null);
     } catch (error) {
       setReviewError(error.response?.data?.message || "Gửi đánh giá thất bại. Vui lòng thử lại.");
@@ -207,6 +233,7 @@ function Order() {
               className={cx("tab", { active: filter === f.key })}
               onClick={() => setFilter(f.key)}
             >
+              <FontAwesomeIcon icon={f.icon} className={cx("tabIcon")} />
               {f.label}
             </button>
           ))}
@@ -235,13 +262,11 @@ function Order() {
                     key={o._id || o.id || Math.random()}
                   >
                     <div className={cx("cardLeft")}> 
-                      <div className={cx("orderCode")}>Mã: {o._id || "-"}</div>
+                      <div className={cx("orderCode")}>{o.items[0].title || "-"}</div>
+                      <img src={o.items[0].product.avatar} alt={o.items[0].title} className={cx("productAvatar")} />
                       <div className={cx("orderDate")}>{formatDate(o.createdAt || Date.now())}</div>
                       <div className={cx("orderItems")}>
                         <span>{(o.items && o.items.length) || o.itemCount || 0} sản phẩm</span>
-                        {
-                          o.isRating ? <span className="border border-success rounded fw-bold primary text-success mx-2">Đã đánh giá</span> : <span className="border border-warning rounded fw-bold primary text-warning mx-2">Chưa đánh giá</span>
-                        }
                       </div>
                     </div>
                     <div className={cx("cardRight")}> 
@@ -271,12 +296,19 @@ function Order() {
                           if (action.key === "buyAgain") navigate(`/product-detail/${o.items[0]?.product.id || o.items[0]?.product._id}`);
                           if (action.key === "cancel") setCancelTarget(o);
                           if (action.key === "received") confirmReceived(o);
-                          if (action.key === "return") requestReturn(o);
+                          if (action.key === "return") openReturnRequest(o);
                         }}
                       >
                         {action.label}
                       </button>
                     ))}
+                    <button
+                      type="button"
+                      className="rounded px-3 py-1 fs-5 fw-bold my-1 mx-1 border border-primary text-primary"
+                      onClick={() => navigate(`/order/${o._id || o.id}`, { state: { order: o } })}
+                    >
+                      Xem chi tiết
+                    </button>
                   </div>
                 </div>
               ))}
@@ -313,6 +345,86 @@ function Order() {
                 </button>
               </div>
             </div>
+          </div>
+        ), document.body)}
+
+        {returnTarget && createPortal((
+          <div className={cx("modalBackdrop")} role="presentation" onMouseDown={() => !returnSubmitting && setReturnTarget(null)}>
+            <form className={cx("reviewModal")} onSubmit={requestReturn} onMouseDown={(event) => event.stopPropagation()}>
+              <div className={cx("modalHeader")}>
+                <div>
+                  <h2>Yêu cầu trả hàng</h2>
+                  <p>
+                    Hạn gửi yêu cầu: {formatDate(new Date(
+                      new Date(returnTarget.updatedAt).getTime() + 12 * 24 * 60 * 60 * 1000
+                    ))}. Nếu được duyệt, vui lòng mang sản phẩm đến cửa hàng trước thời hạn này.
+                  </p>
+                </div>
+                <button type="button" className={cx("closeModal")} onClick={() => !returnSubmitting && setReturnTarget(null)} aria-label="Đóng">
+                  <FontAwesomeIcon icon={faXmark} />
+                </button>
+              </div>
+
+              <label className={cx("fieldLabel")} htmlFor="returnReason">Lý do trả hàng</label>
+              <select
+                id="returnReason"
+                className={cx("reviewSelect")}
+                value={returnForm.reason}
+                onChange={(event) => setReturnForm((form) => ({ ...form, reason: event.target.value }))}
+                required
+              >
+                <option value="">Chọn lý do</option>
+                <option value="Sản phẩm lỗi/hư hỏng">Sản phẩm lỗi/hư hỏng</option>
+                <option value="Sai sản phẩm hoặc phụ kiện">Sai sản phẩm hoặc phụ kiện</option>
+                <option value="Không đúng mô tả">Không đúng mô tả</option>
+                <option value="Khác">Khác</option>
+              </select>
+
+              <label className={cx("fieldLabel")} htmlFor="returnDescription">Mô tả tình trạng sản phẩm</label>
+              <textarea
+                id="returnDescription"
+                className={cx("reviewTextarea")}
+                value={returnForm.description}
+                onChange={(event) => setReturnForm((form) => ({ ...form, description: event.target.value }))}
+                placeholder="Mô tả lỗi/tình trạng sản phẩm và phụ kiện đi kèm"
+                minLength={10}
+                maxLength={1000}
+                rows={4}
+                required
+              />
+
+              <label className={cx("imageInput")} htmlFor="returnImages">Ảnh tình trạng sản phẩm (không bắt buộc, tối đa 5 ảnh, JPG/PNG/WebP, mỗi ảnh tối đa 5 MB)</label>
+              <input
+                id="returnImages"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                onChange={(event) => {
+                  const files = Array.from(event.target.files || []);
+                  setReturnError("");
+                  if (files.length > 5) {
+                    setReturnError("Chỉ được chọn tối đa 5 ảnh.");
+                    event.target.value = "";
+                    return;
+                  }
+                  if (files.some((file) => file.size > 5 * 1024 * 1024)) {
+                    setReturnError("Mỗi ảnh không được vượt quá 5 MB.");
+                    event.target.value = "";
+                    return;
+                  }
+                  setReturnForm((form) => ({ ...form, images: files }));
+                }}
+              />
+              {returnError && <p className={cx("reviewError")} role="alert">{returnError}</p>}
+              <div className={cx("modalFooter")}>
+                <button type="button" className={cx("secondaryButton")} onClick={() => !returnSubmitting && setReturnTarget(null)}>
+                  Hủy
+                </button>
+                <button type="submit" className={cx("submitReview")} disabled={returnSubmitting}>
+                  {returnSubmitting ? "Đang gửi..." : "Gửi yêu cầu"}
+                </button>
+              </div>
+            </form>
           </div>
         ), document.body)}
 

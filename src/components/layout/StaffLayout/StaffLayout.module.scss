@@ -8,8 +8,8 @@
   width: 260px;
   background: linear-gradient(
     135deg,
-    var(--color-fastcare-700),
-    var(--color-fastcare-600)
+    var(--color-fastcare-600),
+    var(--color-fastcare-400)
   );
   color: white;
   position: fixed;
@@ -20,22 +20,18 @@
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
   z-index: 100;
+  font-weight: var(--fw-bold);
 
   .logo {
-    padding: 0 20px 30px;
-    font-size: 2rem;
-    font-weight: 700;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    svg {
-      width: 32px;
-      height: 32px;
+    background-color: rgba(255, 255, 255);
+    img {
+      width: 200px;
+      height: auto;
+      display: block;
+      margin: 0 auto 20px;
     }
   }
+
 
   .navContainer {
     display: flex;
@@ -112,11 +108,12 @@
           }
 
           &.logoutBtn {
-            color: rgba(255, 200, 200, 0.8);
+            font-weight: var(--fw-bold);
+            color: rgba(255, 255, 255, 0.8);
 
             &:hover {
-              color: #ff6b6b;
-              background-color: rgba(255, 100, 100, 0.1);
+              color: white;
+              background-color: rgba(255, 255, 255, 0.1);
             }
           }
         }

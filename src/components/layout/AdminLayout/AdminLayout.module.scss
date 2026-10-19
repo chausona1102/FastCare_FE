@@ -6,7 +6,7 @@
 
 .sidebar {
     width: 260px;
-    background: linear-gradient(135deg, var(--color-fastcare-700), var(--color-fastcare-600));
+    background: linear-gradient(135deg, var(--color-fastcare-600), var(--color-fastcare-400));
     color: white;
     position: fixed;
     left: 0;
@@ -18,18 +18,25 @@
     z-index: 100;
 
     .logo {
-        padding: 0 20px 30px;
-        font-size: 2rem;
-        font-weight: 700;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
+        // padding: 0 20px 30px;
+        // font-size: 2rem;
+        // font-weight: 700;
+        // border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        // margin-bottom: 20px;
+        // display: flex;
+        // align-items: center;
+        // gap: 10px;
 
-        svg {
-            width: 32px;
-            height: 32px;
+        // svg {
+        //     width: 32px;
+        //     height: 32px;
+        // }
+        background-color: rgba(255, 255, 255);
+        img {
+            width: 200px;
+            height: auto;
+            display: block;
+            margin: 0 auto 20px;
         }
     }
 

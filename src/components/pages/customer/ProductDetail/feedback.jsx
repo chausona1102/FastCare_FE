@@ -146,15 +146,15 @@ function Feedback({
       </div>
       <div className={cx("feedback-column")}>
         {paginatedFeedBack.length > 0 ? (
-          paginatedFeedBack.map((feed) => (
-            <div key={feed.id} className={cx("row")}>
+          paginatedFeedBack.map((feed, index) => (
+            <div key={feed._id || feed.id || index} className={cx("row")}>
               <div className={cx("col-1")}>
-                <img src={feed.user.avatar} alt={feed.user.fullname} />
+                <img src={feed.user?.avatar} alt={feed.user?.fullname || "Khách hàng"} />
               </div>
               <div className={cx("col-11")}>
-                <span className={cx("name")}>{feed.user.fullname}</span>
+                <span className={cx("name")}>{feed.user?.fullname || "Khách hàng"}</span>
                 <span className={cx("star")}>
-                  {Array.from({ length: feed.star }, (_, i) => (
+                  {Array.from({ length: feed.star || 0 }, (_, i) => (
                     <FontAwesomeIcon key={i} icon={faStar} />
                   ))}
                 </span>
@@ -171,12 +171,12 @@ function Feedback({
                     )}
                   </div>
                 )}
+                <span className={cx("feedback-text")}>{feed.comment || feed.feedback || ""}</span>
                 <span className={cx("date")}>
                   {formatDateHour(feed.createdAt)}
                 </span>
-                <span className={cx("feedback-text")}>{feed.feedback}</span>
                 <div className={cx("images")}>
-                  {feed.images.map((img, index) => (
+                  {(feed.images || []).map((img, index) => (
                     <img
                       key={index}
                       src={img}

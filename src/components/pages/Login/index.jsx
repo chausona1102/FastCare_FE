@@ -82,19 +82,20 @@ function Login() {
       }, 1000);
       setTimeout(() => {
         clearInterval(countdownTimer);
-        switch (data.user.role) {
-          case "admin":
-            navigate("/admin");
-            break;
-          case "staff":
-            navigate("/staff");
-            break;
-          case "customer":
-            navigate("/");
-            break;
-          default:
-            navigate("/");
-        }
+        // switch (data.user.role) {
+        //   case "admin":
+        //     navigate("/admin");
+        //     break;
+        //   case "staff":
+        //     navigate("/staff");
+        //     break;
+        //   case "customer":
+        //     navigate("/");
+        //     break;
+        //   default:
+        //     navigate("/");
+        // }
+        navigate("/");
       }, 3000);
     } catch (error) {
       console.error("Error:", error);

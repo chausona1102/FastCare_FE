@@ -34,6 +34,7 @@ const api = {
   // Product API:
   product: "http://localhost:5000/api/product",
   productSearch: "http://localhost:5000/api/product/search",
+  chatbot: "http://localhost:5000/api/chatbot",
 
   /* 
   Ex: http://localhost:5000/api/cart
@@ -91,8 +92,14 @@ const api = {
   // Order
   order: "http://localhost:5000/api/order",
 
-  // User management (admin)
+  // Favorites
+  favorite: "http://localhost:5000/api/favorite",
+
+  // User management
   user: "http://localhost:5000/api/user",
+  imports: "http://localhost:5000/api/import",
+  report: "http://localhost:5000/api/report",
+  logs: "http://localhost:5000/api/log",
 };
 
 export default api;

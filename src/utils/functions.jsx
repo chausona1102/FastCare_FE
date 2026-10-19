@@ -77,6 +77,18 @@ const converseStatus = (status) => {
       return "Đang phân loại hàng trả";
     case "returning": 
       return "Đang trả hàng";
+    case "return_request":
+      return "Đang chờ xử lý yêu cầu trả hàng";
+    case "return_approved":
+      return "Đã duyệt yêu cầu trả hàng";
+    case "return_rejected":
+      return "Yêu cầu trả hàng bị từ chối";
+    case "return_received":
+      return "Đã tiếp nhận sản phẩm trả";
+    case "return_completed":
+      return "Đã hoàn tất trả hàng";
+    case "return_expired":
+      return "Yêu cầu trả hàng đã quá hạn";
     case "return_fail": 
       return "Trả hàng thất bại";
     case "returned": 

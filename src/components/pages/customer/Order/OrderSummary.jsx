@@ -16,7 +16,6 @@ export default function OrderSummary({ user, completedOrder, totalPrice, hideNum
             <span className={cx("sub-title")}>{hideNumberPhone(user?.phone)}</span>
           </div>
         </div>
-
         <div className={cx("section-2", "section")}>
           <div className={cx("icon")}>
             <FontAwesomeIcon icon={faCartShopping} />

@@ -3,10 +3,12 @@ import { userRoutes, adminRoutes, staffRoutes } from "./routes";
 import NotFound from "~/components/pages/NotFound";
 import ProtectedAdminRoute from "~/components/ProtectedAdminRoute";
 import ProtectedStaffRoute from "~/components/ProtectedStaffRoute";
+import RoleRedirect from "~/components/RoleRedirect";
 
 function App() {
   return (
     <Routes>
+      <Route path="/" element={<RoleRedirect />} />
       {userRoutes.map((route, index) => (
         <Route
           key={index}

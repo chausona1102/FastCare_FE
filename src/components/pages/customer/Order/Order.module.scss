@@ -87,6 +87,25 @@
 	cursor: pointer;
 	font-size: 14px;
 	color: #444;
+  .tabIcon {
+    margin-right: 6px;
+  }
+}
+
+@media (max-width: 767px) {
+  .tabs {
+    display: inline-flex;
+    width: 90vw;
+    gap: 4px;
+    overflow-x: scroll;
+    flex-wrap: nowrap;
+    .tab {
+      flex: 0 0 auto;
+    }
+  }
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .tab.active {
@@ -175,6 +194,19 @@
 	white-space: nowrap;
 }
 
+.returnNotice {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px 10px;
+  border: 1px solid #f0d99e;
+  border-radius: 6px;
+  background: #fff9e9;
+  color: #76520c;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 .orderCard:hover {
 	box-shadow: 0 8px 20px rgba(215, 0, 24, 0.12);
 	transform: translateY(-2px);
@@ -186,6 +218,12 @@
 .cardLeft {
 	display: flex;
 	flex-direction: column;
+  .productAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    object-fit: cover;
+  }
 }
 
 .orderCode {
