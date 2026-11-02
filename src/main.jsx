@@ -15,13 +15,13 @@ createRoot(document.getElementById("root")).render(
     <GlobalStyles>
       <BrowserRouter>
         <ScrollToTop />
-        <ToastProvider>  
+        <ToastProvider>
           <AuthInitializer>
             <App />
           </AuthInitializer>
         </ToastProvider>
       </BrowserRouter>
     </GlobalStyles>
-  </Provider>
+  </Provider>,
   // </StrictMode>
 );

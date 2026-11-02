@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { useLocation, useNavigate } from 'react-router-dom';
-import axiosClient from '~/api/axiosClient';
-import api from '~/api';
-import { useToast } from '~/contexts/ToastContext.jsx';
+import React, { useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
+import axiosClient from "~/api/axiosClient";
+import api from "~/api";
+import { useToast } from "~/contexts/ToastContext.jsx";
 
 export default function CheckoutOrder() {
   const navigate = useNavigate();
@@ -12,8 +12,15 @@ export default function CheckoutOrder() {
   const { token } = useSelector((state) => state.auth);
   const cartItems = useSelector((state) => state.cart.items);
 
-  const selectedIds = useMemo(() => location.state?.selectedItemIds ?? [], [location.state]);
-  const checkoutItems = useMemo(() => location.state?.checkoutItems ?? null, [location.state]);
+  const selectedIds = useMemo(
+    () => location.state?.selectedItemIds ?? [],
+    [location.state],
+  );
+  const checkoutItems = useMemo(
+    () => location.state?.checkoutItems ?? null,
+    [location.state],
+  );
+  const voucher = location.state?.voucher || null;
 
   const selectedItems = useMemo(() => {
     if (checkoutItems?.length) {
@@ -23,42 +30,63 @@ export default function CheckoutOrder() {
       }));
     }
 
-    return cartItems.filter((item) => selectedIds.includes(item._id) && !item.variant?.deleteAt);
+    return cartItems.filter(
+      (item) => selectedIds.includes(item._id) && !item.variant?.deleteAt,
+    );
   }, [cartItems, checkoutItems, selectedIds]);
 
   const [paymentTypeId, setPaymentTypeId] = useState(2);
-  const [requiredNote, setRequiredNote] = useState('CHOXEMHANGKHONGTHU');
-  const [note, setNote] = useState('');
+  const [requiredNote, setRequiredNote] = useState("CHOXEMHANGKHONGTHU");
+  const [note, setNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (!token) {
-      showToast({ title: 'Vui lòng đăng nhập để đặt hàng', type: 'warning' });
-      navigate('/login');
+      showToast({ title: "Vui lòng đăng nhập để đặt hàng", type: "warning" });
+      navigate("/login");
       return;
     }
 
     if (!selectedIds.length && !selectedItems.length) {
-      showToast({ title: 'Vui lòng chọn sản phẩm trước khi thanh toán', type: 'warning' });
-      navigate('/cart');
+      showToast({
+        title: "Vui lòng chọn sản phẩm trước khi thanh toán",
+        type: "warning",
+      });
+      navigate("/cart");
     }
   }, [navigate, selectedIds.length, selectedItems.length, showToast, token]);
 
   const totalPrice = useMemo(
-    () => selectedItems.reduce((sum, item) => sum + (item.currentPrice || 0) * item.quantity, 0),
-    [selectedItems]
+    () =>
+      selectedItems.reduce(
+        (sum, item) => sum + (item.currentPrice || 0) * item.quantity,
+        0,
+      ),
+    [selectedItems],
   );
+  const voucherDiscount = voucher
+    ? Math.min(
+        totalPrice,
+        voucher.discountType === "percent"
+          ? Math.floor((totalPrice * voucher.discountValue) / 100)
+          : voucher.discountValue,
+        voucher.maxDiscount ?? Number.MAX_SAFE_INTEGER,
+      )
+    : 0;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (!token) {
-      navigate('/login');
+      navigate("/login");
       return;
     }
 
     if (!selectedItems.length) {
-      showToast({ title: 'Không có sản phẩm nào để đặt hàng', type: 'warning' });
+      showToast({
+        title: "Không có sản phẩm nào để đặt hàng",
+        type: "warning",
+      });
       return;
     }
 
@@ -69,11 +97,12 @@ export default function CheckoutOrder() {
         note,
         requiredNote,
         paymentTypeId: Number(paymentTypeId),
+        voucherId: voucher?._id || null,
         items: selectedItems.map((item) => ({
           product: item.product?._id || item.product,
           variant: item.variant?._id || item.variant,
-          color: item.color || '',
-          title: item.product?.title || item.title || 'Sản phẩm',
+          color: item.color || "",
+          title: item.product?.title || item.title || "Sản phẩm",
           quantity: item.quantity || 1,
           currentPrice: item.currentPrice || 0,
           weight: item.product?.weight || 500,
@@ -92,18 +121,21 @@ export default function CheckoutOrder() {
       if (Number(paymentTypeId) === 1) {
         const paymentUrl = response.data?.paymentUrl;
         if (!paymentUrl) {
-          throw new Error('Không tạo được liên kết thanh toán VNPAY.');
+          throw new Error("Không tạo được liên kết thanh toán VNPAY.");
         }
         window.location.assign(paymentUrl);
         return;
       }
 
-      showToast({ title: 'Đặt hàng thành công', type: 'success' });
-      navigate('/');
+      showToast({ title: "Đặt hàng thành công", type: "success" });
+      navigate("/");
     } catch (error) {
       showToast({
-        title: error?.response?.data?.message || error.message || 'Đặt hàng thất bại. Vui lòng thử lại.',
-        type: 'error',
+        title:
+          error?.response?.data?.message ||
+          error.message ||
+          "Đặt hàng thất bại. Vui lòng thử lại.",
+        type: "error",
       });
     } finally {
       setSubmitting(false);
@@ -113,7 +145,9 @@ export default function CheckoutOrder() {
   if (!selectedItems.length) {
     return (
       <div className="container py-5">
-        <div className="alert alert-info rounded-4">Đang chuẩn bị thông tin giỏ hàng...</div>
+        <div className="alert alert-info rounded-4">
+          Đang chuẩn bị thông tin giỏ hàng...
+        </div>
       </div>
     );
   }
@@ -128,7 +162,9 @@ export default function CheckoutOrder() {
 
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
-                  <label className="form-label fw-semibold fs-3">Phương thức thanh toán</label>
+                  <label className="form-label fw-semibold fs-3">
+                    Phương thức thanh toán
+                  </label>
                   <select
                     className="form-select fs-4"
                     value={paymentTypeId}
@@ -140,13 +176,17 @@ export default function CheckoutOrder() {
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label fw-semibold fs-3">Yêu cầu giao hàng</label>
+                  <label className="form-label fw-semibold fs-3">
+                    Yêu cầu giao hàng
+                  </label>
                   <select
                     className="form-select fs-4"
                     value={requiredNote}
                     onChange={(event) => setRequiredNote(event.target.value)}
                   >
-                    <option value="CHOXEMHANGKHONGTHU">Cho xem hàng, không thử</option>
+                    <option value="CHOXEMHANGKHONGTHU">
+                      Cho xem hàng, không thử
+                    </option>
                     <option value="CHOXEMHANGTHU">Cho xem hàng, thử</option>
                     <option value="KHONGCHOXEMHANG">Không cho xem hàng</option>
                   </select>
@@ -163,8 +203,12 @@ export default function CheckoutOrder() {
                   />
                 </div>
 
-                <button type="submit" className="btn btn-danger w-100 rounded-pill py-2 fs-4" disabled={submitting}>
-                  {submitting ? 'Đang xử lý...' : 'Hoàn tất đặt hàng'}
+                <button
+                  type="submit"
+                  className="btn btn-danger w-100 rounded-pill py-2 fs-4"
+                  disabled={submitting}
+                >
+                  {submitting ? "Đang xử lý..." : "Hoàn tất đặt hàng"}
                 </button>
               </form>
             </div>
@@ -178,18 +222,25 @@ export default function CheckoutOrder() {
 
               <div className="d-flex flex-column gap-3 mb-4">
                 {selectedItems.map((item) => (
-                  <div key={item._id} className="d-flex align-items-start gap-3 border-bottom pb-3">
+                  <div
+                    key={item._id}
+                    className="d-flex align-items-start gap-3 border-bottom pb-3"
+                  >
                     <div className="flex-grow-1">
                       <div className="fw-semibold">
-                        {item.product?.title || item.title || 'Sản phẩm'}
+                        {item.product?.title || item.title || "Sản phẩm"}
                       </div>
                       <div className="text-secondary small">
-                        {item.color ? `${item.color} • ` : ''}
-                        {item.quantity} × {item.currentPrice?.toLocaleString('vi-VN')} đ
+                        {item.color ? `${item.color} • ` : ""}
+                        {item.quantity} ×{" "}
+                        {item.currentPrice?.toLocaleString("vi-VN")} đ
                       </div>
                     </div>
                     <div className="fw-semibold text-danger">
-                      {(item.currentPrice * item.quantity).toLocaleString('vi-VN')} đ
+                      {(item.currentPrice * item.quantity).toLocaleString(
+                        "vi-VN",
+                      )}{" "}
+                      đ
                     </div>
                   </div>
                 ))}
@@ -197,11 +248,22 @@ export default function CheckoutOrder() {
 
               <div className="d-flex justify-content-between mb-2 text-secondary">
                 <span>Tạm tính</span>
-                <span>{totalPrice.toLocaleString('vi-VN')} đ</span>
+                <span>{totalPrice.toLocaleString("vi-VN")} đ</span>
               </div>
+              {voucher && (
+                <div className="d-flex justify-content-between mb-2 text-success">
+                  <span>Voucher {voucher.code}</span>
+                  <span>-{voucherDiscount.toLocaleString("vi-VN")} đ</span>
+                </div>
+              )}
               <div className="d-flex justify-content-between fw-bold fs-5 text-danger">
                 <span>Tổng thanh toán</span>
-                <span>{totalPrice.toLocaleString('vi-VN')} đ</span>
+                <span>
+                  {Math.max(0, totalPrice - voucherDiscount).toLocaleString(
+                    "vi-VN",
+                  )}{" "}
+                  đ
+                </span>
               </div>
             </div>
           </div>

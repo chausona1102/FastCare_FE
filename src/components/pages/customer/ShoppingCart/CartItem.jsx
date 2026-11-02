@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 export default function CartItem({
   item,
@@ -9,25 +9,27 @@ export default function CartItem({
   loading,
 }) {
   const [qty, setQty] = useState(item.quantity || 1);
-  
+
   // Lấy dữ liệu từ structure API
-  const productTitle = item.product?.title || 'Sản phẩm không xác định';
-  const productAvatar = item.product?.avatar || '';
+  const productTitle = item.product?.title || "Sản phẩm không xác định";
+  const productAvatar = item.product?.avatar || "";
   const productDiscount = item.product?.discount || 0;
-  
-  const variantStorage = item.variant?.storage || '';
+
+  const variantStorage = item.variant?.storage || "";
   const variantColors = item.variant?.colors || [];
-  const selectedColor = item.color || '';
+  const selectedColor = item.color || "";
   const stockQuantity = item.variant?.stockQuantity || 0;
   const isDeleted = item.variant?.deleteAt !== null;
-  
+
   const currentPrice = item.currentPrice || 0;
-  const originalPrice = productDiscount > 0 ? Math.ceil(currentPrice / (1 - productDiscount / 100)) : null;
+  const originalPrice =
+    productDiscount > 0
+      ? Math.ceil(currentPrice / (1 - productDiscount / 100))
+      : null;
   const unavailable = isDeleted || stockQuantity === 0;
-  
+
   const indexClr = variantColors.findIndex((clr) => clr === selectedColor);
   const variantImage = item.variant?.images?.[indexClr] || productAvatar;
-
 
   useEffect(() => {
     setQty(item.quantity || 1);
@@ -38,14 +40,17 @@ export default function CartItem({
   if (selectedColor) variantText.push(selectedColor);
 
   const handleChange = (nextValue) => {
-    const nextQty = Math.max(1, Math.min(stockQuantity || 1, Number(nextValue) || 1));
+    const nextQty = Math.max(
+      1,
+      Math.min(stockQuantity || 1, Number(nextValue) || 1),
+    );
     setQty(nextQty);
     onQuantityChange(item._id, nextQty);
   };
 
   return (
     <div
-      className={`card border-0 rounded-4 mb-3 shadow-sm cart-item-card ${unavailable ? 'unavailable' : ''}`}
+      className={`card border-0 rounded-4 mb-3 shadow-sm cart-item-card ${unavailable ? "unavailable" : ""}`}
       aria-disabled={unavailable}
     >
       <div className="card-body p-3">
@@ -59,7 +64,7 @@ export default function CartItem({
               disabled={unavailable}
               onChange={() => onToggleSelect(item._id)}
               aria-label={`Chọn sản phẩm ${productTitle}`}
-              style={{ accentColor: '#d70018' }}
+              style={{ accentColor: "#d70018" }}
             />
           </div>
 
@@ -74,10 +79,12 @@ export default function CartItem({
             <div className="d-flex justify-content-between align-items-start mb-2">
               <div>
                 <h5 className="mb-1 fs-5 text-dark">{productTitle}</h5>
-                <div className="text-secondary small">{variantText.join(' • ')}</div>
+                <div className="text-secondary small">
+                  {variantText.join(" • ")}
+                </div>
                 {unavailable && (
                   <span className="badge bg-danger-subtle text-danger mt-2">
-                    {isDeleted ? 'Ngừng kinh doanh' : 'Hết hàng'}
+                    {isDeleted ? "Ngừng kinh doanh" : "Hết hàng"}
                   </span>
                 )}
               </div>
@@ -96,11 +103,11 @@ export default function CartItem({
               <div>
                 {originalPrice ? (
                   <div className="text-muted small text-decoration-line-through mb-1">
-                    {originalPrice.toLocaleString('vi-VN')} đ
+                    {originalPrice.toLocaleString("vi-VN")} đ
                   </div>
                 ) : null}
                 <div className="fw-bold text-danger fs-5">
-                  {currentPrice.toLocaleString('vi-VN')} đ
+                  {currentPrice.toLocaleString("vi-VN")} đ
                 </div>
               </div>
 
@@ -128,7 +135,9 @@ export default function CartItem({
                   type="button"
                   className="btn btn-outline-secondary btn-sm"
                   onClick={() => handleChange(qty + 1)}
-                  disabled={loading || unavailable || qty >= (stockQuantity || 1)}
+                  disabled={
+                    loading || unavailable || qty >= (stockQuantity || 1)
+                  }
                 >
                   +
                 </button>
@@ -138,7 +147,7 @@ export default function CartItem({
             <div className="d-flex justify-content-between align-items-center mt-3">
               <div className="text-muted small">Kho: {stockQuantity}</div>
               <div className="fw-semibold text-danger">
-                {(currentPrice * item.quantity).toLocaleString('vi-VN')} đ
+                {(currentPrice * item.quantity).toLocaleString("vi-VN")} đ
               </div>
             </div>
           </div>

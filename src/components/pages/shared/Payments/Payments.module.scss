@@ -1,0 +1,267 @@
+.payments {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  color: #172033;
+}
+
+.pageHeader {
+  h1 {
+    margin: 5px 0 7px;
+    font-size: 2.8rem;
+  }
+}
+
+.eyebrow {
+  margin: 0;
+  color: #64748b;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.description {
+  margin: 0;
+  color: #64748b;
+  font-size: 1.3rem;
+}
+
+.panel {
+  overflow: hidden;
+  border: 1px solid #e8edf4;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 3px 12px rgba(25, 42, 70, 0.04);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 18px;
+  border-bottom: 1px solid #e8edf4;
+}
+
+.searchField {
+  display: flex;
+  min-width: 240px;
+  max-width: 680px;
+  flex: 1;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  border: 1px solid #dbe2ea;
+  border-radius: 8px;
+  color: #64748b;
+
+  input {
+    width: 100%;
+    min-height: 42px;
+    border: 0;
+    outline: 0;
+    color: #172033;
+    font: inherit;
+    font-size: 1.3rem;
+  }
+}
+
+.filters {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid #e8edf4;
+
+  label {
+    display: flex;
+    min-width: 165px;
+    flex-direction: column;
+    gap: 6px;
+    color: #536176;
+    font-size: 1.2rem;
+  }
+
+  select,
+  input {
+    min-height: 40px;
+    padding: 7px 10px;
+    border: 1px solid #dbe2ea;
+    border-radius: 8px;
+    background: #fff;
+    color: #172033;
+    font: inherit;
+    font-size: 1.3rem;
+  }
+}
+
+.clearButton {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #334155;
+  font: inherit;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.exportButton {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 15px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #334155;
+  font: inherit;
+  font-size: 1.3rem;
+  font-weight: 650;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+}
+
+.errorMessage {
+  margin: 16px 18px 0;
+  padding: 13px 16px;
+  border: 1px solid #fecaca;
+  border-radius: 9px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 1.3rem;
+}
+
+.tableHeading {
+  padding: 14px 18px;
+  color: #64748b;
+  font-size: 1.2rem;
+}
+
+.tableScroll {
+  overflow-x: auto;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1.2rem;
+    text-align: left;
+  }
+
+  th,
+  td {
+    padding: 13px 14px;
+    border-bottom: 1px solid #edf1f5;
+    vertical-align: top;
+    white-space: nowrap;
+  }
+
+  th {
+    background: #f8fafc;
+    color: #536176;
+    font-weight: 650;
+  }
+
+  td strong,
+  td small {
+    display: block;
+  }
+
+  td small {
+    margin-top: 5px;
+    color: #64748b;
+    font-size: 1.1rem;
+  }
+}
+
+.amount {
+  color: #172033;
+  font-weight: 700;
+}
+
+.status {
+  display: inline-flex;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #475569;
+  font-weight: 650;
+
+  &.status-paid {
+    background: #dcfce7;
+    color: #15803d;
+  }
+
+  &.status-pending {
+    background: #fef3c7;
+    color: #a16207;
+  }
+
+  &.status-failed {
+    background: #fee2e2;
+    color: #b91c1c;
+  }
+}
+
+.statusMessage {
+  padding: 34px 20px;
+  color: #64748b;
+  font-size: 1.3rem;
+  text-align: center;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  padding: 16px;
+  color: #64748b;
+  font-size: 1.2rem;
+
+  button {
+    padding: 8px 12px;
+    border: 1px solid #dbe2ea;
+    border-radius: 7px;
+    background: #fff;
+    color: #334155;
+    cursor: pointer;
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .pageHeader h1 {
+    font-size: 2.3rem;
+  }
+
+  .toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .searchField {
+    min-width: 0;
+  }
+
+  .filters {
+    align-items: stretch;
+    flex-direction: column;
+
+    label {
+      min-width: 0;
+    }
+  }
+}

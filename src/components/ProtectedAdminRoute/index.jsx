@@ -1,8 +1,8 @@
 import { Navigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useAuth } from "~/hook/useAuth";
 
 function ProtectedAdminRoute({ children }) {
-  const { user, role } = useSelector((state) => state.auth);
+  const { user, role } = useAuth();
 
   if (!user || role !== "admin") {
     return <Navigate to="/404" replace />;

@@ -23,15 +23,19 @@ import Order from "~/components/pages/customer/Order";
 import OrderDetail from "~/components/pages/customer/OrderDetail";
 import Profile from "~/components/pages/customer/Profile";
 import Favorites from "~/components/pages/customer/Favorites";
+import Settings from "~/components/pages/shared/Settings";
 
 // Shared admin and staff pages
 import Dashboard from "~/components/pages/shared/Dashboard";
+import ProfitReport from "~/components/pages/shared/ProfitReport";
 import UserManagement from "~/components/pages/shared/Users";
 import AdminOrders from "~/components/pages/shared/Orders";
+import OnlinePayments from "~/components/pages/shared/Payments";
 import ParentCategories from "~/components/pages/shared/ParentCategories";
 import CategoriesManagement from "~/components/pages/shared/Categories";
 import ProductsManagement from "~/components/pages/shared/Products";
 import ActivityLogs from "~/components/pages/admin/Logs";
+import RefreshTokenSessions from "~/components/pages/admin/RefreshTokenSessions";
 
 // Staff-only pages
 import ProductDetailStaff from "~/components/pages/staff/ProductDetail";
@@ -40,6 +44,7 @@ import Inventory from "~/components/pages/staff/Inventory";
 import Imports from "~/components/pages/staff/Imports";
 import ImportList from "~/components/pages/staff/ImportList";
 import OrderHistory from "~/components/pages/staff/OrderHistory";
+import InStoreSale from "~/components/pages/staff/InStoreSale";
 
 const userRoutes = [
   {
@@ -121,13 +126,23 @@ const userRoutes = [
     path: "/wishlist",
     component: Favorites,
     Layout: HeaderOnly,
-  }
+  },
+  {
+    path: "/settings",
+    component: Settings,
+    Layout: HeaderOnly,
+  },
 ];
 
 const adminRoutes = [
   {
     path: "/admin",
     component: Dashboard,
+    Layout: AdminLayout,
+  },
+  {
+    path: "/admin/profit",
+    component: ProfitReport,
     Layout: AdminLayout,
   },
   {
@@ -143,6 +158,11 @@ const adminRoutes = [
   {
     path: "/admin/orders",
     component: AdminOrders,
+    Layout: AdminLayout,
+  },
+  {
+    path: "/admin/payments",
+    component: OnlinePayments,
     Layout: AdminLayout,
   },
   {
@@ -165,12 +185,22 @@ const adminRoutes = [
     component: ActivityLogs,
     Layout: AdminLayout,
   },
+  {
+    path: "/admin/refresh-tokens",
+    component: RefreshTokenSessions,
+    Layout: AdminLayout,
+  },
 ];
 
 const staffRoutes = [
   {
     path: "/staff/dashboard",
     component: Dashboard,
+    Layout: StaffLayout,
+  },
+  {
+    path: "/staff/profit",
+    component: ProfitReport,
     Layout: StaffLayout,
   },
   {
@@ -214,8 +244,18 @@ const staffRoutes = [
     Layout: StaffLayout,
   },
   {
+    path: "/staff/orders/create",
+    component: InStoreSale,
+    Layout: StaffLayout,
+  },
+  {
     path: "/staff/orders",
     component: AdminOrders,
+    Layout: StaffLayout,
+  },
+  {
+    path: "/staff/payments",
+    component: OnlinePayments,
     Layout: StaffLayout,
   },
   {

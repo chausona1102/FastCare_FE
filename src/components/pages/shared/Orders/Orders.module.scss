@@ -296,6 +296,27 @@
   }
 }
 
+.reject-button {
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid #f0b4b8;
+  border-radius: 4px;
+  background: #fff1f2;
+  color: #b42332;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: #ffe1e4;
+  }
+
+  &:disabled {
+    cursor: wait;
+    opacity: 0.55;
+  }
+}
+
 .empty-state {
   padding: 40px 16px !important;
   color: #64748b;

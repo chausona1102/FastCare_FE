@@ -1,5 +1,5 @@
-import { useCallback, useMemo, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useCallback, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   fetchCart,
   setCartQuantity,
@@ -9,16 +9,16 @@ import {
   toggleSelectItem,
   toggleSelectAll,
   selectCartItems,
-  selectSelectedItems,
+  // selectSelectedItems,
   selectSelectedCount,
   selectSubtotal,
   selectPendingIds,
-} from '../store/slices/cartSlice.jsx';
+} from "../store/slices/cartSlice.jsx";
 
 export default function useCart() {
   const dispatch = useDispatch();
   const items = useSelector(selectCartItems);
-  const selectedItems = useSelector(selectSelectedItems);
+  // const selectedItems = useSelector(selectSelectedItems);
   const selectedQuantity = useSelector(selectSelectedCount);
   const selectedTotalPrice = useSelector(selectSubtotal);
   const loading = useSelector((state) => state.cart.loading);
@@ -45,21 +45,21 @@ export default function useCart() {
         dispatch(updateCartItemQuantity({ itemId, quantity }));
       }, 450);
     },
-    [dispatch]
+    [dispatch],
   );
 
   const handleRemoveItem = useCallback(
     (itemId) => {
       dispatch(removeCartItem(itemId));
     },
-    [dispatch]
+    [dispatch],
   );
 
   const handleToggleSelect = useCallback(
     (itemId) => {
       dispatch(toggleSelectItem(itemId));
     },
-    [dispatch]
+    [dispatch],
   );
 
   const handleSelectAll = useCallback(() => {

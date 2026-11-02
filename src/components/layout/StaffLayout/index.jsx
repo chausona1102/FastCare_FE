@@ -17,6 +17,7 @@ import {
   faChartLine,
   faUsers,
   faLayerGroup,
+  faMoneyBillWave,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -37,6 +38,12 @@ function StaffLayout({ children }) {
           icon: faHome,
           path: "/staff/dashboard",
         },
+        {
+          id: "profit-report",
+          label: "Báo cáo lợi nhuận",
+          icon: faChartLine,
+          path: "/staff/profit",
+        },
       ],
     },
     {
@@ -44,10 +51,22 @@ function StaffLayout({ children }) {
       title: "Quản Lý Đơn Hàng",
       items: [
         {
+          id: "orders-create",
+          label: "Tạo phiếu bán tại quầy",
+          icon: faShoppingCart,
+          path: "/staff/orders/create",
+        },
+        {
           id: "orders-list",
           label: "Danh sách đơn hàng",
           icon: faShoppingCart,
           path: "/staff/orders",
+        },
+        {
+          id: "payments-list",
+          label: "Thanh toán online",
+          icon: faMoneyBillWave,
+          path: "/staff/payments",
         },
         {
           id: "orders-history",

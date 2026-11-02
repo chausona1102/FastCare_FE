@@ -28,7 +28,7 @@ function CategoryPopper({ isOpen, categories }) {
     const fetchBrands = async () => {
       try {
         const { data: brandsData } = await axios.get(
-          `${api.category}/brands/${selectedKey}` 
+          `${api.category}/brands/${selectedKey}`,
         );
         if (isMounted) {
           setBrands(Array.isArray(brandsData) ? brandsData : []);
@@ -62,7 +62,8 @@ function CategoryPopper({ isOpen, categories }) {
             {categories?.map((category) => {
               const categoryKey = category._id || category.id;
               const isActive =
-                selectedCategory?._id === categoryKey || selectedCategory?.id === categoryKey;
+                selectedCategory?._id === categoryKey ||
+                selectedCategory?.id === categoryKey;
 
               return (
                 <li key={categoryKey} className={cx("category-item-wrapper")}>
@@ -76,7 +77,9 @@ function CategoryPopper({ isOpen, categories }) {
                       alt={category.name || "Danh mục"}
                       className={cx("category-avatar")}
                     />
-                    <span className={cx("category-label")}>{category.name}</span>
+                    <span className={cx("category-label")}>
+                      {category.name}
+                    </span>
                     <FontAwesomeIcon
                       icon={faAngleRight}
                       className={cx("category-icon")}
@@ -147,8 +150,7 @@ function CategoryPopper({ isOpen, categories }) {
                   </li>
                 </ul>
               </div>
-
-              <div>
+              {/* <div>
                 <h5 className={cx("detail-title")}>{selectedCategory.name} HOT</h5>
                 <ul className={cx("detail-list")}>
                   <li className={cx("price-item")}>
@@ -158,13 +160,15 @@ function CategoryPopper({ isOpen, categories }) {
                     <Link to="/prices/1m-3m">Bán chạy nhất</Link>
                   </li>
                 </ul>
-              </div>
+              </div> */}
             </div>
           </div>
         ) : (
           <div className={cx("category-detail", "empty-detail")}>
             <h5 className={cx("detail-title")}>Chọn danh mục</h5>
-            <p className={cx("empty-state")}>Vui lòng chọn một danh mục để xem nhãn hiệu và ưu đãi.</p>
+            <p className={cx("empty-state")}>
+              Vui lòng chọn một danh mục để xem nhãn hiệu và ưu đãi.
+            </p>
           </div>
         )}
       </div>

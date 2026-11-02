@@ -1,5 +1,3 @@
-import React from 'react';
-
 function SkeletonRow() {
   return (
     <div className="card rounded-4 mb-3 shadow-sm border-0">

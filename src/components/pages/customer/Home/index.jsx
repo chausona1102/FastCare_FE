@@ -6,24 +6,22 @@ import axios from "axios";
 import { banner_samsumS26plus } from "~/assets/banner";
 import { keyboard, hotGif } from "~/assets/images";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faAngleLeft,
-  faAngleRight,
-  faGripLinesVertical,
-} from "@fortawesome/free-solid-svg-icons";
+import { faAngleLeft, faAngleRight } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState, useRef } from "react";
+import { useAuth } from "~/hook/useAuth";
 import { Link } from "react-router-dom";
 import Title from "~/components/Title";
-import Button from "../../../Button";
-import Tippy from "@tippyjs/react";
 import api from "~/api";
+import axiosClient from "~/api/axiosClient";
 
 const cx = classNames.bind(styles);
 
 function Home() {
+  const { user } = useAuth();
   const [phones, setPhones] = useState([]);
   const [laptops, setLaptops] = useState([]);
   const [hotProducts, setHotProduct] = useState([]);
+  const [recommend, setRecommend] = useState([]);
   const [accessories, setAccessories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("phone");
   const [loading, setLoading] = useState(true);
@@ -52,12 +50,15 @@ function Home() {
     };
     const fetchHotProduct = async () => {
       try {
-        const {data: hotProductData} = await axios.get(`${api.product}/hot/${4}`);
+        const { data: hotProductData } = await axios.get(
+          `${api.product}/hot/${4}`,
+        );
         setHotProduct(hotProductData);
-      } catch(e) {
+      } catch (e) {
         console.log(e);
       }
-    }
+    };
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     fetchHotProduct();
     fetchProducts();
@@ -81,7 +82,23 @@ function Home() {
     };
   }, []);
 
-  return loading ? Loading() : (
+  useEffect(() => {
+    const fetchRecommend = async () => {
+      try {
+        const { data: recommendData } = await axiosClient.get(
+          `${api.recommend}/user`,
+        );
+        setRecommend(recommendData?.products ?? []);
+      } catch (e) {
+        console.error("Unable to load recommended products:", e);
+      }
+    };
+    if (user) fetchRecommend();
+  }, [user]);
+
+  return loading ? (
+    Loading()
+  ) : (
     <div className={cx("wrapper")}>
       <div className={cx("content")}>
         {/* Slogan */}
@@ -107,22 +124,25 @@ function Home() {
             <img src={hotGif} alt="Hot" className={cx("hot-gif")} />
             {/* <Title title="Siêu sale" className={cx("section-title")} /> */}
             <div className={cx("products-grid")}>
-              {hotProducts.map((product, index) => (
-                  <Cart
-                    key={product._id}
-                    id={product._id}
-                    title={product.title}
-                    minPrice={product.minPrice}
-                    avatar={product.avatar}
-                    sold={product.sold}
-                    discount={product.discount}
-                    installment={product.installment}
-                    screenSize={
-                      product.specifications?.phone?.screenSize || product.screenSize
-                    }
-                    rom={product.specifications?.phone?.storage || product.storage}
-                    to={`/product-detail/${product._id}`}
-                  />
+              {hotProducts.map((product) => (
+                <Cart
+                  key={product._id}
+                  id={product._id}
+                  title={product.title}
+                  minPrice={product.minPrice}
+                  avatar={product.avatar}
+                  sold={product.sold}
+                  discount={product.discount}
+                  installment={product.installment}
+                  screenSize={
+                    product.specifications?.phone?.screenSize ||
+                    product.screenSize
+                  }
+                  rom={
+                    product.specifications?.phone?.storage || product.storage
+                  }
+                  to={`/product-detail/${product._id}`}
+                />
               ))}
             </div>
             <div className={cx("circle-1")}></div>
@@ -134,6 +154,43 @@ function Home() {
         <div className={cx("banner")}>
           <img src={banner_samsumS26plus} />
         </div>
+        {/* Recommnend Products */}
+        {user && (
+          <section className={cx("category-products")}>
+            <div className={cx("category-products-heading")}>
+              <Title title="Có thể bạn quan tâm" />
+              <Link to="/products/" className={cx("category-products-more")}>
+                Xem tất cả <FontAwesomeIcon icon={faAngleRight} />
+              </Link>
+            </div>
+            <div className={cx("category-products-grid")}>
+              {recommend.map(
+                ({ product }) =>
+                  product && (
+                    <Cart
+                      key={product._id}
+                      id={product._id}
+                      title={product.title}
+                      minPrice={product.minPrice}
+                      avatar={product.avatar}
+                      sold={product.sold}
+                      discount={product.discount}
+                      installment={product.installment}
+                      screenSize={
+                        product.specifications?.phone?.screenSize ||
+                        product.screenSize
+                      }
+                      rom={
+                        product.specifications?.phone?.storage ||
+                        product.storage
+                      }
+                      to={`/product-detail/${product._id}`}
+                    />
+                  ),
+              )}
+            </div>
+          </section>
+        )}
 
         {/* Products */}
         <div className={cx("products", "vertical-grid")} ref={verticalGridRef}>
@@ -167,9 +224,12 @@ function Home() {
                     discount={product.discount}
                     installment={product.installment}
                     screenSize={
-                      product.specifications?.phone?.screenSize || product.screenSize
+                      product.specifications?.phone?.screenSize ||
+                      product.screenSize
                     }
-                    rom={product.specifications?.phone?.storage || product.storage}
+                    rom={
+                      product.specifications?.phone?.storage || product.storage
+                    }
                     to={`/product-detail/${product._id}`}
                   />
                 ))}
@@ -185,9 +245,12 @@ function Home() {
                     discount={product.discount}
                     installment={product.installment}
                     screenSize={
-                      product.specifications?.laptop?.screenSize || product.screenSize
+                      product.specifications?.laptop?.screenSize ||
+                      product.screenSize
                     }
-                    rom={product.specifications?.laptop?.storage || product.storage}
+                    rom={
+                      product.specifications?.laptop?.storage || product.storage
+                    }
                     to={`/product-detail/${product._id}`}
                   />
                 ))}
@@ -209,39 +272,33 @@ function Home() {
         </div>
         {/* Accessories */}
         {accessories.length > 0 ? (
-          <div className={cx("accessories")} ref={accessoriesRef}>
-            <div className="d-flex flex-direction-row align-items-center gap-5">
-              <Title
-                title="Phụ kiện chính hãng"
-                className={cx("accessories-title")}
-                // className="mx-4"
-              />
-              <Tippy content="Xem thêm" placement="right">
-                <Button
-                  light
-                  to="/products/phu-kien"
-                  className={cx("more-accessories")}
-                >
-                  <FontAwesomeIcon icon={faGripLinesVertical} />
-                  Xem tất cả <FontAwesomeIcon icon={faAngleRight} />
-                </Button>
-              </Tippy>
-            </div>
-            <div className={cx("accessories-grid")}>
-              {accessories.map((item) => (
+          <section className={cx("category-products")}>
+            <div className={cx("accessories")} ref={accessoriesRef}>
+              <div className={cx("category-products-heading")}>
+                <Title title="Phụ kiện" />
                 <Link
-                  to={`/product-detail/${item._id || item.id}`}
-                  className={cx("accessories-btn")}
-                  key={item._id || item.id}
+                  to="/products/phu-kien"
+                  className={cx("category-products-more")}
                 >
-                  <div className={cx("card-horizontal")}>
-                    <img src={item.avatar} />
-                    <span>{item.title}</span>
-                  </div>
+                  Xem tất cả <FontAwesomeIcon icon={faAngleRight} />
                 </Link>
-              ))}
+              </div>
+              <div className={cx("accessories-grid")}>
+                {accessories.map((item) => (
+                  <Link
+                    to={`/product-detail/${item._id || item.id}`}
+                    className={cx("accessories-btn")}
+                    key={item._id || item.id}
+                  >
+                    <div className={cx("card-horizontal")}>
+                      <img src={item.avatar} />
+                      <span>{item.title}</span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
+          </section>
         ) : (
           <></>
         )}
@@ -249,7 +306,10 @@ function Home() {
           <section className={cx("category-products")}>
             <div className={cx("category-products-heading")}>
               <Title title="Điện thoại nổi bật" />
-              <Link to="/products/dien-thoai" className={cx("category-products-more")}>
+              <Link
+                to="/products/dien-thoai"
+                className={cx("category-products-more")}
+              >
                 Xem tất cả <FontAwesomeIcon icon={faAngleRight} />
               </Link>
             </div>
@@ -265,9 +325,12 @@ function Home() {
                   discount={product.discount}
                   installment={product.installment}
                   screenSize={
-                    product.specifications?.phone?.screenSize || product.screenSize
+                    product.specifications?.phone?.screenSize ||
+                    product.screenSize
                   }
-                  rom={product.specifications?.phone?.storage || product.storage}
+                  rom={
+                    product.specifications?.phone?.storage || product.storage
+                  }
                   to={`/product-detail/${product._id}`}
                 />
               ))}
@@ -278,7 +341,10 @@ function Home() {
           <section className={cx("category-products")}>
             <div className={cx("category-products-heading")}>
               <Title title="Laptop nổi bật" />
-              <Link to="/products/laptop" className={cx("category-products-more")}>
+              <Link
+                to="/products/laptop"
+                className={cx("category-products-more")}
+              >
                 Xem tất cả <FontAwesomeIcon icon={faAngleRight} />
               </Link>
             </div>
@@ -294,9 +360,12 @@ function Home() {
                   discount={product.discount}
                   installment={product.installment}
                   screenSize={
-                    product.specifications?.laptop?.screenSize || product.screenSize
+                    product.specifications?.laptop?.screenSize ||
+                    product.screenSize
                   }
-                  rom={product.specifications?.laptop?.storage || product.storage}
+                  rom={
+                    product.specifications?.laptop?.storage || product.storage
+                  }
                   to={`/product-detail/${product._id}`}
                 />
               ))}

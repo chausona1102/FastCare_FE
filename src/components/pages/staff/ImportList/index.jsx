@@ -18,7 +18,10 @@ function ImportList() {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [search, setSearch] = useState("");
+  const [costDrafts, setCostDrafts] = useState({});
+  const [updatingCostId, setUpdatingCostId] = useState("");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -45,7 +48,9 @@ function ImportList() {
   }, []);
 
   const sortedRecords = useMemo(
-    () => [...records].sort((left, right) => new Date(right.createdAt || 0) - new Date(left.createdAt || 0)),
+    () => [...records].sort((left, right) =>
+      new Date(right.effectiveAt || right.createdAt || 0) -
+      new Date(left.effectiveAt || left.createdAt || 0)),
     [records],
   );
 
@@ -83,9 +88,48 @@ function ImportList() {
     return {
       totalQuantity,
       totalValue,
-      latestRecord: sortedRecords.length ? new Date(sortedRecords[0].createdAt).toLocaleDateString("vi-VN") : "-",
+      latestRecord: sortedRecords.length
+        ? new Date(sortedRecords[0].effectiveAt || sortedRecords[0].createdAt).toLocaleDateString("vi-VN")
+        : "-",
     };
   }, [records, sortedRecords]);
+
+  const updateMissingCost = async (event, recordId) => {
+    event.preventDefault();
+    const unitCost = costDrafts[recordId];
+    if (unitCost === undefined || unitCost === "" || Number(unitCost) < 0) {
+      setError("Vui lòng nhập đơn giá nhập hợp lệ.");
+      return;
+    }
+
+    setError("");
+    setNotice("");
+    setUpdatingCostId(recordId);
+    try {
+      const { data } = await axiosClient.patch(
+        `${api.imports}/${recordId}/unit-cost`,
+        { unitCost: Number(unitCost) },
+      );
+      setRecords((current) =>
+        current.map((record) =>
+          record._id === recordId ? { ...record, unitCost: data.unitCost } : record,
+        ),
+      );
+      setNotice("Đã bổ sung đơn giá cho phiếu nhập.");
+      setCostDrafts((current) => {
+        const next = { ...current };
+        delete next[recordId];
+        return next;
+      });
+    } catch (requestError) {
+      setError(
+        requestError.response?.data?.message ||
+          "Không thể cập nhật đơn giá phiếu nhập.",
+      );
+    } finally {
+      setUpdatingCostId("");
+    }
+  };
 
   if (loading) return <div className={cx("loading")}><Loading /></div>;
 
@@ -101,6 +145,7 @@ function ImportList() {
       </header>
 
       {error && <div className={cx("alert", "error")} role="alert">{error}</div>}
+      {notice && <div className={cx("alert", "success")} role="status">{notice}</div>}
 
       <div className={cx("summaryCards")}>
         <article className={cx("statCard")}>
@@ -140,7 +185,7 @@ function ImportList() {
         <table>
           <thead>
             <tr>
-              <th>Thời gian</th>
+              <th>Ngày hiệu lực</th>
               <th>Sản phẩm / SKU</th>
               <th>Số lượng</th>
               <th>Đơn giá</th>
@@ -159,7 +204,10 @@ function ImportList() {
 
               return (
                 <tr key={recordId}>
-                  <td>{new Date(record.createdAt).toLocaleString("vi-VN")}</td>
+                  <td>
+                    {new Date(record.effectiveAt || record.createdAt).toLocaleString("vi-VN")}
+                    {record.isBackfill && <small>Phiếu nhập bù lịch sử</small>}
+                  </td>
                   <td>
                     <div className={cx("productCell")}>
                       <span className={cx("productName")}>{itemName}</span>
@@ -167,7 +215,37 @@ function ImportList() {
                     </div>
                   </td>
                   <td className={cx("quantity")}>+{Number(record.quantity) || 0}</td>
-                  <td>{record.unitCost == null ? "-" : formatCurrency(record.unitCost)}</td>
+                  <td>
+                    {record.unitCost == null ? (
+                      <form
+                        className={cx("missingCostForm")}
+                        onSubmit={(event) => updateMissingCost(event, recordId)}
+                      >
+                        <input
+                          type="number"
+                          min="0"
+                          step="1"
+                          value={costDrafts[recordId] ?? ""}
+                          aria-label={`Đơn giá nhập cho phiếu ${sku}`}
+                          onChange={(event) =>
+                            setCostDrafts((current) => ({
+                              ...current,
+                              [recordId]: event.target.value,
+                            }))
+                          }
+                          required
+                        />
+                        <button
+                          type="submit"
+                          disabled={updatingCostId === recordId}
+                        >
+                          {updatingCostId === recordId ? "Đang lưu..." : "Bổ sung"}
+                        </button>
+                      </form>
+                    ) : (
+                      formatCurrency(record.unitCost)
+                    )}
+                  </td>
                   <td className={cx("amount")}>{formatCurrency(totalCost)}</td>
                   <td>{record.supplier || "-"}</td>
                   <td>{record.importedBy?.fullname || record.importedBy?.username || "-"}</td>

@@ -8,7 +8,20 @@ import Loading from "~/components/Loading";
 import styles from "./Imports.module.scss";
 
 const cx = classNames.bind(styles);
-const EMPTY_FORM = { variantId: "", quantity: "1", unitCost: "", supplier: "", note: "" };
+const getLocalDateTime = () => {
+  const date = new Date();
+  date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+  return date.toISOString().slice(0, 16);
+};
+const EMPTY_FORM = {
+  variantId: "",
+  quantity: "1",
+  unitCost: "",
+  supplier: "",
+  note: "",
+  isBackfill: false,
+  effectiveAt: getLocalDateTime(),
+};
 
 function Imports() {
   const [searchParams] = useSearchParams();
@@ -67,10 +80,20 @@ function Imports() {
       const { data } = await axiosClient.post(api.imports, {
         ...form,
         quantity: Number(form.quantity),
-        unitCost: form.unitCost === "" ? undefined : Number(form.unitCost),
+        unitCost: Number(form.unitCost),
+        effectiveAt: form.isBackfill
+          ? new Date(form.effectiveAt).toISOString()
+          : undefined,
       });
-      setNotice(`Đã nhập ${data.record.quantity} sản phẩm vào kho.`);
-      setForm((current) => ({ ...EMPTY_FORM, variantId: current.variantId }));
+      setNotice(
+        data.record.isBackfill
+          ? `Đã ghi nhận ${data.record.quantity} sản phẩm vào lịch sử nhập; tồn kho hiện tại không thay đổi.`
+          : `Đã nhập ${data.record.quantity} sản phẩm vào kho.`,
+      );
+      setForm((current) => ({
+        ...EMPTY_FORM,
+        variantId: current.variantId,
+      }));
       setRefreshKey((current) => current + 1);
     } catch (requestError) {
       setError(requestError.response?.data?.message || "Không thể tạo phiếu nhập.");
@@ -87,7 +110,7 @@ function Imports() {
         <div>
           <p className={cx("eyebrow")}>Kho hàng</p>
           <h1>Nhập hàng</h1>
-          <p className={cx("summary")}>Tạo phiếu nhập và tự động cập nhật tồn kho theo phiên bản.</p>
+          <p className={cx("summary")}>Ghi nhận giá vốn và ngày hiệu lực nhập kho theo từng phiên bản.</p>
         </div>
       </header>
 
@@ -114,8 +137,37 @@ function Imports() {
           </label>
           <label>
             Đơn giá nhập (₫)
-            <input name="unitCost" type="number" min="0" step="1" value={form.unitCost} onChange={handleChange} />
+            <input name="unitCost" type="number" min="0" step="1" value={form.unitCost} onChange={handleChange} required />
           </label>
+          <label className={cx("wide", "checkboxField")}>
+            <span>
+              <input
+                name="isBackfill"
+                type="checkbox"
+                checked={form.isBackfill}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    isBackfill: event.target.checked,
+                  }))
+                }
+              />
+              Đây là phiếu nhập bù lịch sử (không cộng lại tồn hiện tại)
+            </span>
+          </label>
+          {form.isBackfill && (
+            <label className={cx("wide")}>
+              Ngày giờ nhập thực tế *
+              <input
+                name="effectiveAt"
+                type="datetime-local"
+                max={getLocalDateTime()}
+                value={form.effectiveAt}
+                onChange={handleChange}
+                required
+              />
+            </label>
+          )}
           <label>
             Nhà cung cấp
             <input name="supplier" value={form.supplier} onChange={handleChange} maxLength="120" />
@@ -126,7 +178,11 @@ function Imports() {
           </label>
         </div>
         <button className={cx("submitButton")} type="submit" disabled={submitting || variants.length === 0}>
-          {submitting ? "Đang ghi nhận..." : "Lưu phiếu nhập và cập nhật kho"}
+          {submitting
+            ? "Đang ghi nhận..."
+            : form.isBackfill
+              ? "Lưu phiếu nhập bù lịch sử"
+              : "Lưu phiếu nhập và cập nhật kho"}
         </button>
         {variants.length === 0 && <p className={cx("hint")}>Chưa có phiên bản sản phẩm đang hoạt động để nhập kho.</p>}
       </form>
@@ -140,7 +196,7 @@ function Imports() {
           <table>
             <thead>
               <tr>
-                <th>Thời gian</th>
+                <th>Ngày hiệu lực</th>
                 <th>Sản phẩm / SKU</th>
                 <th>Số lượng</th>
                 <th>Đơn giá nhập</th>
@@ -152,7 +208,10 @@ function Imports() {
             <tbody>
               {records.map((record) => (
                 <tr key={record._id}>
-                  <td>{new Date(record.createdAt).toLocaleString("vi-VN")}</td>
+                  <td>
+                    {new Date(record.effectiveAt || record.createdAt).toLocaleString("vi-VN")}
+                    {record.isBackfill && <small>Phiếu nhập bù lịch sử</small>}
+                  </td>
                   <td>{record.product?.title || "Sản phẩm"}<small>{record.sku || record.variant?.sku || "-"}</small></td>
                   <td className={cx("quantity")}>+{record.quantity}</td>
                   <td>{record.unitCost == null ? "-" : `${Number(record.unitCost).toLocaleString("vi-VN")} ₫`}</td>

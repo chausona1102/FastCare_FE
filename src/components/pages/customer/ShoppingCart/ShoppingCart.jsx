@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import CartItemList from './CartItemList';
-import CartSummary from './CartSummary';
-import EmptyCart from './EmptyCart';
-import CartSkeleton from './CartSkeleton';
-import useCart from '~/hook/useCart.jsx';
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import CartItemList from "./CartItemList";
+import CartSummary from "./CartSummary";
+import EmptyCart from "./EmptyCart";
+import CartSkeleton from "./CartSkeleton";
+import useCart from "~/hook/useCart.jsx";
 
 export default function ShoppingCart() {
   const navigate = useNavigate();
@@ -29,11 +29,16 @@ export default function ShoppingCart() {
   }, [fetchCart]);
 
   const hasItems = items.length > 0;
-  const activeItemIds = items.filter((item) => !item.variant?.deleteAt).map((item) => item._id);
-  const allSelected = hasItems && activeItemIds.length > 0 && activeItemIds.every((id) => selectedItemIds.includes(id));
+  const activeItemIds = items
+    .filter((item) => !item.variant?.deleteAt)
+    .map((item) => item._id);
+  const allSelected =
+    hasItems &&
+    activeItemIds.length > 0 &&
+    activeItemIds.every((id) => selectedItemIds.includes(id));
 
   const handleCheckout = (selectedIds) => {
-    navigate('/checkout', { state: { selectedItemIds: selectedIds } });
+    navigate("/checkout", { state: { selectedItemIds: selectedIds } });
   };
 
   return (
@@ -42,7 +47,9 @@ export default function ShoppingCart() {
         <div className="mb-4">
           <h1 className="fw-bold">Giỏ hàng của bạn</h1>
           <p className="text-secondary">
-            {hasItems ? `Bạn có ${items.length} sản phẩm trong giỏ` : 'Kiểm tra sản phẩm và chọn món hàng yêu thích của bạn.'}
+            {hasItems
+              ? `Bạn có ${items.length} sản phẩm trong giỏ`
+              : "Kiểm tra sản phẩm và chọn món hàng yêu thích của bạn."}
           </p>
         </div>
 
@@ -90,4 +97,3 @@ export default function ShoppingCart() {
     </div>
   );
 }
-

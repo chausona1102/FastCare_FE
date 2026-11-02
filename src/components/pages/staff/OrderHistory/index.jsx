@@ -205,6 +205,9 @@ function OrderHistory() {
                   <tr key={orderId}>
                     <td>
                       <span className={cx("orderCode")}>{order.clientOrderCode || order.ghnOrderCode || orderId}</span>
+                      <small className={cx("secondaryText")}>
+                        {order.source === "in_store" ? "Bán tại quầy" : "Đơn online"}
+                      </small>
                       {order.ghnOrderCode && <small className={cx("secondaryText")}>GHN: {order.ghnOrderCode}</small>}
                     </td>
                     <td>

@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import classNames from "classnames/bind";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMagnifyingGlass, faPlus, faXmark } from "@fortawesome/free-solid-svg-icons";
+import {
+  faMagnifyingGlass,
+  faPlus,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 
 import api from "~/api";
 import axiosClient from "~/api/axiosClient";
@@ -36,53 +40,88 @@ const PRODUCT_FORM = {
 const VARIANT_FORM = {
   product: "",
   sku: "",
-  colors: "",
+  colors: [{ color: "", image: null, existingImage: "" }],
   storage: "",
   price: "",
   stockQuantity: "0",
-  images: [],
 };
 
 const getId = (value) =>
-  typeof value === "object" && value !== null ? value._id || value.id : value || "";
+  typeof value === "object" && value !== null
+    ? value._id || value.id
+    : value || "";
 
-const getProductTypeForCategory = (categoryId, categories, parentCategories) => {
+const getProductTypeForCategory = (
+  categoryId,
+  categories,
+  parentCategories,
+) => {
   const category = categories.find(
-    (item) => (item._id || item.id) === categoryId
+    (item) => (item._id || item.id) === categoryId,
   );
   const parentCategoryId = getId(category?.parentCategory);
   const parentCategory = parentCategories.find(
-    (item) => (item._id || item.id) === parentCategoryId
+    (item) => (item._id || item.id) === parentCategoryId,
   );
-  return {
-    "dien-thoai": "phone",
-    laptop: "laptop",
-    "phu-kien": "accessory",
-  }[parentCategory?.slug] || "";
+  return (
+    {
+      "dien-thoai": "phone",
+      laptop: "laptop",
+      "phu-kien": "accessory",
+    }[parentCategory?.slug] || ""
+  );
 };
 
 const getProductSpecifications = (product, productType) => {
   if (product.specifications?.[productType]) return product.specifications;
   const fieldsByType = {
     phone: [
-      "ram", "storage", "screenSize", "displayTech", "screenFeatures",
-      "rearCamera", "frontCamera", "chipset", "nfc", "sim", "os",
-      "screenResolution", "cpu",
+      "ram",
+      "storage",
+      "screenSize",
+      "displayTech",
+      "screenFeatures",
+      "rearCamera",
+      "frontCamera",
+      "chipset",
+      "nfc",
+      "sim",
+      "os",
+      "screenResolution",
+      "cpu",
     ],
     laptop: [
-      "ram", "storage", "screenSize", "displayTech", "screenFeatures",
-      "screenResolution", "cpu", "gpu", "os", "battery",
+      "ram",
+      "storage",
+      "screenSize",
+      "displayTech",
+      "screenFeatures",
+      "screenResolution",
+      "cpu",
+      "gpu",
+      "os",
+      "battery",
     ],
     accessory: [
-      "compatibility", "connection", "material", "capacity", "connector", "power",
+      "compatibility",
+      "connection",
+      "material",
+      "capacity",
+      "connector",
+      "power",
     ],
   };
   const legacySpecifications = Object.fromEntries(
     (fieldsByType[productType] || [])
-      .filter((field) => product[field] !== undefined && product[field] !== null)
-      .map((field) => [field, product[field]])
+      .filter(
+        (field) => product[field] !== undefined && product[field] !== null,
+      )
+      .map((field) => [field, product[field]]),
   );
-  return { ...(product.specifications || {}), [productType]: legacySpecifications };
+  return {
+    ...(product.specifications || {}),
+    [productType]: legacySpecifications,
+  };
 };
 
 function ProductsManagement() {
@@ -115,15 +154,20 @@ function ProductsManagement() {
     const controller = new AbortController();
     const loadData = async () => {
       try {
-        const [{ data: categoryData }, { data: parentCategoryData }] = await Promise.all([
-          axiosClient.get(api.category, { signal: controller.signal }),
-          axiosClient.get(api.parentCategory, { signal: controller.signal }),
-        ]);
+        const [{ data: categoryData }, { data: parentCategoryData }] =
+          await Promise.all([
+            axiosClient.get(api.category, { signal: controller.signal }),
+            axiosClient.get(api.parentCategory, { signal: controller.signal }),
+          ]);
         setCategories(Array.isArray(categoryData) ? categoryData : []);
-        setParentCategories(Array.isArray(parentCategoryData) ? parentCategoryData : []);
+        setParentCategories(
+          Array.isArray(parentCategoryData) ? parentCategoryData : [],
+        );
       } catch (requestError) {
         if (!controller.signal.aborted) {
-          const message = requestError.response?.data?.message || "Không thể tải dữ liệu sản phẩm và phiên bản.";
+          const message =
+            requestError.response?.data?.message ||
+            "Không thể tải dữ liệu sản phẩm và phiên bản.";
           setError(message);
           showToast({ title: message, type: "error" });
           setLoading(false);
@@ -138,7 +182,10 @@ function ProductsManagement() {
     const controller = new AbortController();
     const timeoutId = window.setTimeout(async () => {
       try {
-        const endpoint = activeTab === "products" ? `${api.product}/all` : `${api.variant}/all`;
+        const endpoint =
+          activeTab === "products"
+            ? `${api.product}/all`
+            : `${api.variant}/all`;
         const { data } = await axiosClient.get(endpoint, {
           params: {
             search: search.trim(),
@@ -154,8 +201,12 @@ function ProductsManagement() {
           setProducts(results);
           setHasMoreProducts(results.length === INITIAL_PRODUCT_LIMIT);
           setProductOptions((current) => {
-            const currentById = new Map(current.map((product) => [product._id || product.id, product]));
-            results.forEach((product) => currentById.set(product._id || product.id, product));
+            const currentById = new Map(
+              current.map((product) => [product._id || product.id, product]),
+            );
+            results.forEach((product) =>
+              currentById.set(product._id || product.id, product),
+            );
             return Array.from(currentById.values());
           });
         } else {
@@ -163,7 +214,9 @@ function ProductsManagement() {
         }
       } catch (requestError) {
         if (!controller.signal.aborted) {
-          const message = requestError.response?.data?.message || "Không thể tìm trong danh sách.";
+          const message =
+            requestError.response?.data?.message ||
+            "Không thể tìm trong danh sách.";
           setError(message);
           showToast({ title: message, type: "error" });
         }
@@ -184,10 +237,13 @@ function ProductsManagement() {
 
   const filteredItems = activeTab === "products" ? products : variants;
 
-  const totalPages = Math.max(1, Math.ceil(filteredItems.length / ITEMS_PER_PAGE));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredItems.length / ITEMS_PER_PAGE),
+  );
   const visibleItems = filteredItems.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
+    currentPage * ITEMS_PER_PAGE,
   );
 
   const handleLoadMoreProducts = async () => {
@@ -212,14 +268,20 @@ function ProductsManagement() {
       const fetchedProducts = Array.isArray(data) ? data : [];
       setProducts((current) => [...current, ...fetchedProducts]);
       setProductOptions((current) => {
-        const currentById = new Map(current.map((product) => [product._id || product.id, product]));
-        fetchedProducts.forEach((product) => currentById.set(product._id || product.id, product));
+        const currentById = new Map(
+          current.map((product) => [product._id || product.id, product]),
+        );
+        fetchedProducts.forEach((product) =>
+          currentById.set(product._id || product.id, product),
+        );
         return Array.from(currentById.values());
       });
       setHasMoreProducts(fetchedProducts.length === ADDITIONAL_PRODUCT_LIMIT);
     } catch (requestError) {
       if (!controller.signal.aborted) {
-        const message = requestError.response?.data?.message || "Không thể tải thêm sản phẩm.";
+        const message =
+          requestError.response?.data?.message ||
+          "Không thể tải thêm sản phẩm.";
         setError(message);
         showToast({ title: message, type: "error" });
       }
@@ -267,7 +329,9 @@ function ProductsManagement() {
     const productType =
       product.productType ||
       getProductTypeForCategory(categoryId, categories, parentCategories) ||
-      (product.rearCamera || product.frontCamera || product.sim ? "phone" : "laptop");
+      (product.rearCamera || product.frontCamera || product.sim
+        ? "phone"
+        : "laptop");
     setEditingItem(product);
     setProductForm({
       ...PRODUCT_FORM,
@@ -289,8 +353,13 @@ function ProductsManagement() {
       ...VARIANT_FORM,
       ...variant,
       product: getId(variant.product),
-      colors: (variant.colors || []).join(", "),
-      images: [],
+      colors: (variant.colors?.length ? variant.colors : [""]).map(
+        (color, index) => ({
+          color,
+          image: null,
+          existingImage: variant.images?.[index] || "",
+        }),
+      ),
     });
     setIsFormOpen(true);
     setError("");
@@ -307,7 +376,7 @@ function ProductsManagement() {
       if (key === "avatar" || key === "images") return;
       payload.append(
         key,
-        key === "specifications" ? JSON.stringify(value || {}) : value ?? ""
+        key === "specifications" ? JSON.stringify(value || {}) : (value ?? ""),
       );
     });
     if (productForm.avatar) payload.append("avatar", productForm.avatar);
@@ -316,13 +385,24 @@ function ProductsManagement() {
     try {
       if (editingItem) {
         const productId = editingItem._id || editingItem.id;
-        const { data } = await axiosClient.patch(`${api.product}/${productId}`, payload);
-        setProducts((current) => current.map((product) =>
-          (product._id || product.id) === productId ? { ...product, ...data } : product
-        ));
-        setProductOptions((current) => current.map((product) =>
-          (product._id || product.id) === productId ? { ...product, ...data } : product
-        ));
+        const { data } = await axiosClient.patch(
+          `${api.product}/${productId}`,
+          payload,
+        );
+        setProducts((current) =>
+          current.map((product) =>
+            (product._id || product.id) === productId
+              ? { ...product, ...data }
+              : product,
+          ),
+        );
+        setProductOptions((current) =>
+          current.map((product) =>
+            (product._id || product.id) === productId
+              ? { ...product, ...data }
+              : product,
+          ),
+        );
         const message = "Đã cập nhật sản phẩm.";
         setNotice(message);
         showToast({ title: message, type: "success" });
@@ -338,7 +418,8 @@ function ProductsManagement() {
       setRefreshKey((current) => current + 1);
       resetForm();
     } catch (requestError) {
-      const message = requestError.response?.data?.message || "Không thể lưu sản phẩm.";
+      const message =
+        requestError.response?.data?.message || "Không thể lưu sản phẩm.";
       setError(message);
       showToast({ title: message, type: "error" });
     } finally {
@@ -348,6 +429,18 @@ function ProductsManagement() {
 
   const handleVariantSubmit = async (event) => {
     event.preventDefault();
+    const colorRows = variantForm.colors
+      .map((row) => ({ ...row, color: row.color.trim() }))
+      .filter((row) => row.color);
+    const hasNewImages = colorRows.some((row) => row.image);
+    if (editingItem && hasNewImages && colorRows.some((row) => !row.image)) {
+      const message =
+        "Khi thay ảnh phiên bản, hãy tải ảnh mới cho tất cả màu để giữ đúng thứ tự.";
+      setError(message);
+      showToast({ title: message, type: "error" });
+      return;
+    }
+
     setSubmitting(true);
     setError("");
     setNotice("");
@@ -357,29 +450,48 @@ function ProductsManagement() {
     payload.append("storage", variantForm.storage.trim());
     payload.append("price", variantForm.price);
     payload.append("stockQuantity", variantForm.stockQuantity);
-    payload.append("colors", JSON.stringify(
-      variantForm.colors.split(",").map((color) => color.trim()).filter(Boolean)
-    ));
-    variantForm.images.forEach((image) => payload.append("images", image));
+    payload.append("colors", JSON.stringify(colorRows.map((row) => row.color)));
+    colorRows.forEach((row) => {
+      if (row.image) payload.append("images", row.image);
+    });
 
     try {
       if (editingItem) {
         const variantId = editingItem._id || editingItem.id;
-        const { data } = await axiosClient.patch(`${api.variant}/${variantId}`, payload);
-        setVariants((current) => current.map((variant) =>
-          (variant._id || variant.id) === variantId
-            ? { ...data, product: productOptions.find((product) => (product._id || product.id) === getId(data.product)) || data.product }
-            : variant
-        ));
+        const { data } = await axiosClient.patch(
+          `${api.variant}/${variantId}`,
+          payload,
+        );
+        setVariants((current) =>
+          current.map((variant) =>
+            (variant._id || variant.id) === variantId
+              ? {
+                  ...data,
+                  product:
+                    productOptions.find(
+                      (product) =>
+                        (product._id || product.id) === getId(data.product),
+                    ) || data.product,
+                }
+              : variant,
+          ),
+        );
         const message = "Đã cập nhật phiên bản.";
         setNotice(message);
         showToast({ title: message, type: "success" });
       } else {
         const { data } = await axiosClient.post(api.variant, payload);
-        setVariants((current) => [{
-          ...data,
-          product: productOptions.find((product) => (product._id || product.id) === getId(data.product)) || data.product,
-        }, ...current]);
+        setVariants((current) => [
+          {
+            ...data,
+            product:
+              productOptions.find(
+                (product) =>
+                  (product._id || product.id) === getId(data.product),
+              ) || data.product,
+          },
+          ...current,
+        ]);
         setCurrentPage(1);
         const message = "Đã tạo phiên bản.";
         setNotice(message);
@@ -388,7 +500,8 @@ function ProductsManagement() {
       setRefreshKey((current) => current + 1);
       resetForm();
     } catch (requestError) {
-      const message = requestError.response?.data?.message || "Không thể lưu phiên bản.";
+      const message =
+        requestError.response?.data?.message || "Không thể lưu phiên bản.";
       setError(message);
       showToast({ title: message, type: "error" });
     } finally {
@@ -400,7 +513,8 @@ function ProductsManagement() {
     const productId = product._id || product.id;
     const isDeleted = Boolean(product.deletedAt);
     const action = isDeleted ? "khôi phục" : "ẩn";
-    if (!window.confirm(`Bạn muốn ${action} sản phẩm "${product.title}"?`)) return;
+    if (!window.confirm(`Bạn muốn ${action} sản phẩm "${product.title}"?`))
+      return;
     setActionId(productId);
     setError("");
     setNotice("");
@@ -408,18 +522,23 @@ function ProductsManagement() {
       const { data } = isDeleted
         ? await axiosClient.delete(`${api.product}/restore/${productId}`)
         : await axiosClient.delete(`${api.product}/${productId}`);
-      setProducts((current) => current.map((item) =>
-        (item._id || item.id) === productId ? { ...item, ...data } : item
-      ));
-      setProductOptions((current) => current.map((item) =>
-        (item._id || item.id) === productId ? { ...item, ...data } : item
-      ));
+      setProducts((current) =>
+        current.map((item) =>
+          (item._id || item.id) === productId ? { ...item, ...data } : item,
+        ),
+      );
+      setProductOptions((current) =>
+        current.map((item) =>
+          (item._id || item.id) === productId ? { ...item, ...data } : item,
+        ),
+      );
       setRefreshKey((current) => current + 1);
       const message = isDeleted ? "Đã khôi phục sản phẩm." : "Đã ẩn sản phẩm.";
       setNotice(message);
       showToast({ title: message, type: "success" });
     } catch (requestError) {
-      const message = requestError.response?.data?.message || `Không thể ${action} sản phẩm.`;
+      const message =
+        requestError.response?.data?.message || `Không thể ${action} sản phẩm.`;
       setError(message);
       showToast({ title: message, type: "error" });
     } finally {
@@ -431,23 +550,36 @@ function ProductsManagement() {
     const variantId = variant._id || variant.id;
     const isDeleted = Boolean(variant.deleteAt);
     const action = isDeleted ? "khôi phục" : "xóa";
-    if (!window.confirm(`Bạn muốn ${action} phiên bản "${variant.sku || variant.storage}"?`)) return;
+    if (
+      !window.confirm(
+        `Bạn muốn ${action} phiên bản "${variant.sku || variant.storage}"?`,
+      )
+    )
+      return;
     setActionId(variantId);
     setError("");
     setNotice("");
     try {
       const { data } = await axiosClient.delete(
-        isDeleted ? `${api.variant}/restore/${variantId}` : `${api.variant}/${variantId}`
+        isDeleted
+          ? `${api.variant}/restore/${variantId}`
+          : `${api.variant}/${variantId}`,
       );
-      setVariants((current) => current.map((item) =>
-        (item._id || item.id) === variantId ? { ...item, ...data } : item
-      ));
+      setVariants((current) =>
+        current.map((item) =>
+          (item._id || item.id) === variantId ? { ...item, ...data } : item,
+        ),
+      );
       setRefreshKey((current) => current + 1);
-      const message = isDeleted ? "Đã khôi phục phiên bản." : "Đã xóa phiên bản.";
+      const message = isDeleted
+        ? "Đã khôi phục phiên bản."
+        : "Đã xóa phiên bản.";
       setNotice(message);
       showToast({ title: message, type: "success" });
     } catch (requestError) {
-      const message = requestError.response?.data?.message || `Không thể ${action} phiên bản.`;
+      const message =
+        requestError.response?.data?.message ||
+        `Không thể ${action} phiên bản.`;
       setError(message);
       showToast({ title: message, type: "error" });
     } finally {
@@ -461,7 +593,13 @@ function ProductsManagement() {
       ...current,
       [name]: value,
       ...(name === "category"
-        ? { productType: getProductTypeForCategory(value, categories, parentCategories) }
+        ? {
+            productType: getProductTypeForCategory(
+              value,
+              categories,
+              parentCategories,
+            ),
+          }
         : {}),
     }));
   };
@@ -485,6 +623,35 @@ function ProductsManagement() {
     setVariantForm((current) => ({
       ...current,
       [name]: files ? Array.from(files) : value,
+    }));
+  };
+
+  const updateVariantColor = (index, field, value) => {
+    setVariantForm((current) => ({
+      ...current,
+      colors: current.colors.map((row, rowIndex) =>
+        rowIndex === index ? { ...row, [field]: value } : row,
+      ),
+    }));
+  };
+
+  const addVariantColor = () => {
+    setVariantForm((current) => ({
+      ...current,
+      colors: [
+        ...current.colors,
+        { color: "", image: null, existingImage: "" },
+      ],
+    }));
+  };
+
+  const removeVariantColor = (index) => {
+    setVariantForm((current) => ({
+      ...current,
+      colors:
+        current.colors.length > 1
+          ? current.colors.filter((_, rowIndex) => rowIndex !== index)
+          : current.colors,
     }));
   };
 
@@ -516,7 +683,12 @@ function ProductsManagement() {
     setCurrentPage(1);
   };
 
-  if (loading) return <div className={cx("loading")}><Loading /></div>;
+  if (loading)
+    return (
+      <div className={cx("loading")}>
+        <Loading />
+      </div>
+    );
 
   return (
     <section className={cx("page")}>
@@ -524,24 +696,46 @@ function ProductsManagement() {
         <div>
           <p className={cx("eyebrow")}>Quản lý hàng hóa</p>
           <h1>Sản phẩm & phiên bản</h1>
-          <p className={cx("summary")}>Quản lý thông tin sản phẩm, biến thể, giá và tồn kho.</p>
+          <p className={cx("summary")}>
+            Quản lý thông tin sản phẩm, biến thể, giá và tồn kho.
+          </p>
         </div>
         <button
           className={cx("create-button")}
           type="button"
-          disabled={activeTab === "products" ? categories.length === 0 : productOptions.every((product) => product.deletedAt)}
+          disabled={
+            activeTab === "products"
+              ? categories.length === 0
+              : productOptions.every((product) => product.deletedAt)
+          }
           aria-expanded={isFormOpen}
           onClick={startCreate}
         >
           <FontAwesomeIcon icon={isFormOpen ? faXmark : faPlus} />
-          {isFormOpen ? "Đóng biểu mẫu" : activeTab === "products" ? "Thêm sản phẩm" : "Thêm phiên bản"}
+          {isFormOpen
+            ? "Đóng biểu mẫu"
+            : activeTab === "products"
+              ? "Thêm sản phẩm"
+              : "Thêm phiên bản"}
         </button>
       </header>
 
-      {error && <div className={cx("alert", "error")} role="alert">{error}</div>}
-      {notice && <div className={cx("alert", "success")} role="status">{notice}</div>}
+      {error && (
+        <div className={cx("alert", "error")} role="alert">
+          {error}
+        </div>
+      )}
+      {notice && (
+        <div className={cx("alert", "success")} role="status">
+          {notice}
+        </div>
+      )}
 
-      <div className={cx("tabs")} role="tablist" aria-label="Quản lý sản phẩm và phiên bản">
+      <div
+        className={cx("tabs")}
+        role="tablist"
+        aria-label="Quản lý sản phẩm và phiên bản"
+      >
         <button
           type="button"
           role="tab"
@@ -584,6 +778,9 @@ function ProductsManagement() {
           formData={variantForm}
           submitting={submitting}
           onChange={updateVariantField}
+          onColorChange={updateVariantColor}
+          onAddColor={addVariantColor}
+          onRemoveColor={removeVariantColor}
           onSubmit={handleVariantSubmit}
           onCancel={resetForm}
         />
@@ -595,11 +792,17 @@ function ProductsManagement() {
           <input
             type="search"
             value={search}
-            placeholder={activeTab === "products" ? "Tìm tên, thương hiệu, danh mục" : "Tìm SKU, dung lượng, màu, sản phẩm"}
-            aria-label={activeTab === "products" ? "Tìm sản phẩm" : "Tìm phiên bản"}
+            placeholder={
+              activeTab === "products"
+                ? "Tìm tên, thương hiệu, danh mục"
+                : "Tìm SKU, dung lượng, màu, sản phẩm"
+            }
+            aria-label={
+              activeTab === "products" ? "Tìm sản phẩm" : "Tìm phiên bản"
+            }
             onChange={(event) => {
-                  handleSearchChange(event);
-                }}
+              handleSearchChange(event);
+            }}
           />
         </label>
         <select
@@ -642,11 +845,21 @@ function ProductsManagement() {
 
       {totalPages > 1 && (
         <nav className={cx("pagination")} aria-label="Phân trang danh sách">
-          <button type="button" disabled={currentPage === 1} onClick={() => setCurrentPage((page) => page - 1)}>
+          <button
+            type="button"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((page) => page - 1)}
+          >
             Trước
           </button>
-          <span>Trang {currentPage} / {totalPages}</span>
-          <button type="button" disabled={currentPage === totalPages} onClick={() => setCurrentPage((page) => page + 1)}>
+          <span>
+            Trang {currentPage} / {totalPages}
+          </span>
+          <button
+            type="button"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((page) => page + 1)}
+          >
             Sau
           </button>
         </nav>

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { useAuth } from "~/hook/useAuth";
 import { Link, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -57,7 +58,7 @@ function ProfileField({ icon, label, value }) {
 function Profile() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user, token } = useSelector((state) => state.auth);
+  const { user, token } = useAuth();
   const [loading, setLoading] = useState(Boolean(token));
   const [error, setError] = useState("");
   const [locations, setLocations] = useState([]);
@@ -85,7 +86,7 @@ function Profile() {
     } catch (requestError) {
       setError(
         requestError.response?.data?.message ||
-          "Không thể tải thông tin tài khoản. Vui lòng thử lại."
+          "Không thể tải thông tin tài khoản. Vui lòng thử lại.",
       );
     } finally {
       setLoading(false);
@@ -101,7 +102,7 @@ function Profile() {
     } catch (requestError) {
       setLocationsError(
         requestError.response?.data?.message ||
-          "Không thể tải danh sách địa chỉ. Vui lòng thử lại."
+          "Không thể tải danh sách địa chỉ. Vui lòng thử lại.",
       );
     } finally {
       setLocationsLoading(false);
@@ -132,7 +133,9 @@ function Profile() {
     setFormLoading(true);
 
     try {
-      const provinceData = await axiosClient.get(`${locationApi}/address/provinces`);
+      const provinceData = await axiosClient.get(
+        `${locationApi}/address/provinces`,
+      );
       const provinceList = provinceData.data || [];
       setProvinces(provinceList);
 
@@ -140,29 +143,32 @@ function Profile() {
         const province = provinceList.find(
           (item) =>
             normalizePlaceName(item.ProvinceName) ===
-            normalizePlaceName(location.provinceName)
+            normalizePlaceName(location.provinceName),
         );
         if (province) {
           const districtData = await axiosClient.get(
             `${locationApi}/address/districts`,
-            { params: { provinceId: province.ProvinceID } }
+            { params: { provinceId: province.ProvinceID } },
           );
           const districtList = districtData.data || [];
           setDistricts(districtList);
           const district = districtList.find(
             (item) =>
               normalizePlaceName(item.DistrictName) ===
-              normalizePlaceName(location.districtName)
+              normalizePlaceName(location.districtName),
           );
 
           if (district) {
-            const wardData = await axiosClient.get(`${locationApi}/address/wards`, {
-              params: { districtId: district.DistrictID },
-            });
+            const wardData = await axiosClient.get(
+              `${locationApi}/address/wards`,
+              {
+                params: { districtId: district.DistrictID },
+              },
+            );
             const wardList = wardData.data || [];
             setWards(wardList);
             const ward = wardList.find(
-              (item) => String(item.WardCode) === String(location.wardCode)
+              (item) => String(item.WardCode) === String(location.wardCode),
             );
 
             setAddressForm((current) => ({
@@ -182,7 +188,7 @@ function Profile() {
     } catch (requestError) {
       setFormError(
         requestError.response?.data?.message ||
-          "Không thể tải dữ liệu tỉnh, quận, phường. Vui lòng thử lại."
+          "Không thể tải dữ liệu tỉnh, quận, phường. Vui lòng thử lại.",
       );
     } finally {
       setFormLoading(false);
@@ -198,18 +204,29 @@ function Profile() {
 
   const handleProvinceChange = async (event) => {
     const provinceId = event.target.value;
-    setAddressForm((current) => ({ ...current, provinceId, districtId: "", wardCode: "" }));
+    setAddressForm((current) => ({
+      ...current,
+      provinceId,
+      districtId: "",
+      wardCode: "",
+    }));
     setDistricts([]);
     setWards([]);
     if (!provinceId) return;
 
     try {
-      const { data } = await axiosClient.get(`${locationApi}/address/districts`, {
-        params: { provinceId },
-      });
+      const { data } = await axiosClient.get(
+        `${locationApi}/address/districts`,
+        {
+          params: { provinceId },
+        },
+      );
       setDistricts(data || []);
     } catch (requestError) {
-      setFormError(requestError.response?.data?.message || "Không thể tải danh sách quận, huyện.");
+      setFormError(
+        requestError.response?.data?.message ||
+          "Không thể tải danh sách quận, huyện.",
+      );
     }
   };
 
@@ -225,7 +242,10 @@ function Profile() {
       });
       setWards(data || []);
     } catch (requestError) {
-      setFormError(requestError.response?.data?.message || "Không thể tải danh sách phường, xã.");
+      setFormError(
+        requestError.response?.data?.message ||
+          "Không thể tải danh sách phường, xã.",
+      );
     }
   };
 
@@ -234,12 +254,14 @@ function Profile() {
     setFormError("");
 
     const province = provinces.find(
-      (item) => String(item.ProvinceID) === addressForm.provinceId
+      (item) => String(item.ProvinceID) === addressForm.provinceId,
     );
     const district = districts.find(
-      (item) => String(item.DistrictID) === addressForm.districtId
+      (item) => String(item.DistrictID) === addressForm.districtId,
     );
-    const ward = wards.find((item) => String(item.WardCode) === addressForm.wardCode);
+    const ward = wards.find(
+      (item) => String(item.WardCode) === addressForm.wardCode,
+    );
 
     if (!addressForm.address.trim() || !province || !district || !ward) {
       setFormError("Vui lòng điền địa chỉ và chọn đầy đủ tỉnh, quận, phường.");
@@ -264,12 +286,15 @@ function Profile() {
         await axiosClient.post(locationApi, payload);
       }
       await loadLocations();
-      setLocationNotice(activeLocation ? "Đã cập nhật địa chỉ." : "Đã thêm địa chỉ mới.");
+      setLocationNotice(
+        activeLocation ? "Đã cập nhật địa chỉ." : "Đã thêm địa chỉ mới.",
+      );
       setIsAddressFormOpen(false);
       setActiveLocation(null);
     } catch (requestError) {
       setFormError(
-        requestError.response?.data?.message || "Không thể lưu địa chỉ. Vui lòng thử lại."
+        requestError.response?.data?.message ||
+          "Không thể lưu địa chỉ. Vui lòng thử lại.",
       );
     } finally {
       setSavingAddress(false);
@@ -279,12 +304,15 @@ function Profile() {
   const setDefaultAddress = async (location) => {
     setLocationsError("");
     try {
-      await axiosClient.put(`${locationApi}/${location._id}`, { isDefault: true });
+      await axiosClient.put(`${locationApi}/${location._id}`, {
+        isDefault: true,
+      });
       await loadLocations();
       setLocationNotice("Đã cập nhật địa chỉ mặc định.");
     } catch (requestError) {
       setLocationsError(
-        requestError.response?.data?.message || "Không thể đặt địa chỉ mặc định."
+        requestError.response?.data?.message ||
+          "Không thể đặt địa chỉ mặc định.",
       );
     }
   };
@@ -298,7 +326,9 @@ function Profile() {
       await loadLocations();
       setLocationNotice("Đã xóa địa chỉ.");
     } catch (requestError) {
-      setLocationsError(requestError.response?.data?.message || "Không thể xóa địa chỉ.");
+      setLocationsError(
+        requestError.response?.data?.message || "Không thể xóa địa chỉ.",
+      );
     }
   };
 
@@ -366,13 +396,27 @@ function Profile() {
               <span className={cx("section-kicker")}>01 / HỒ SƠ</span>
               <h3>Thông tin tài khoản</h3>
             </div>
-            {loading && <span className={cx("loading-indicator")}>Đang đồng bộ</span>}
+            {loading && (
+              <span className={cx("loading-indicator")}>Đang đồng bộ</span>
+            )}
           </div>
           <div className={cx("field-grid")}>
-            <ProfileField icon={faUser} label="Họ và tên" value={user?.fullname} />
-            <ProfileField icon={faIdBadge} label="Tên đăng nhập" value={user?.username} />
+            <ProfileField
+              icon={faUser}
+              label="Họ và tên"
+              value={user?.fullname}
+            />
+            <ProfileField
+              icon={faIdBadge}
+              label="Tên đăng nhập"
+              value={user?.username}
+            />
             <ProfileField icon={faEnvelope} label="Email" value={user?.email} />
-            <ProfileField icon={faPhone} label="Số điện thoại" value={user?.phone} />
+            <ProfileField
+              icon={faPhone}
+              label="Số điện thoại"
+              value={user?.phone}
+            />
           </div>
         </div>
 
@@ -385,7 +429,10 @@ function Profile() {
         </div>
       </section>
 
-      <section className={cx("address-section")} aria-labelledby="addresses-title">
+      <section
+        className={cx("address-section")}
+        aria-labelledby="addresses-title"
+      >
         <div className={cx("address-heading")}>
           <div>
             <span className={cx("section-kicker")}>02 / GIAO HÀNG</span>
@@ -404,7 +451,11 @@ function Profile() {
         {locationNotice && (
           <div className={cx("location-notice")} role="status">
             <span>{locationNotice}</span>
-            <button type="button" onClick={() => setLocationNotice("")} aria-label="Đóng">
+            <button
+              type="button"
+              onClick={() => setLocationNotice("")}
+              aria-label="Đóng"
+            >
               <FontAwesomeIcon icon={faXmark} aria-hidden="true" />
             </button>
           </div>
@@ -412,7 +463,11 @@ function Profile() {
         {locationsError && (
           <div className={cx("error-banner")} role="alert">
             <span>{locationsError}</span>
-            <button type="button" onClick={loadLocations} disabled={locationsLoading}>
+            <button
+              type="button"
+              onClick={loadLocations}
+              disabled={locationsLoading}
+            >
               <FontAwesomeIcon icon={faRotateRight} aria-hidden="true" />
               Thử lại
             </button>
@@ -439,18 +494,29 @@ function Profile() {
                     )}
                   </div>
                   <p>
-                    {[location.wardName, location.districtName, location.provinceName]
+                    {[
+                      location.wardName,
+                      location.districtName,
+                      location.provinceName,
+                    ]
                       .filter(Boolean)
                       .join(", ")}
                   </p>
                 </div>
                 <div className={cx("address-actions")}>
                   {!location.isDefault && (
-                    <button type="button" onClick={() => setDefaultAddress(location)}>
+                    <button
+                      type="button"
+                      onClick={() => setDefaultAddress(location)}
+                    >
                       Đặt mặc định
                     </button>
                   )}
-                  <button type="button" onClick={() => openAddressForm(location)} aria-label="Sửa địa chỉ">
+                  <button
+                    type="button"
+                    onClick={() => openAddressForm(location)}
+                    aria-label="Sửa địa chỉ"
+                  >
                     <FontAwesomeIcon icon={faPen} aria-hidden="true" />
                     Sửa
                   </button>
@@ -481,19 +547,33 @@ function Profile() {
             if (event.target === event.currentTarget) closeAddressForm();
           }}
         >
-          <section className={cx("address-modal")} role="dialog" aria-modal="true" aria-labelledby="address-form-title">
+          <section
+            className={cx("address-modal")}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="address-form-title"
+          >
             <div className={cx("modal-heading")}>
               <div>
                 <span className={cx("section-kicker")}>ĐỊA CHỈ GIAO HÀNG</span>
-                <h2 id="address-form-title">{activeLocation ? "Cập nhật địa chỉ" : "Thêm địa chỉ"}</h2>
+                <h2 id="address-form-title">
+                  {activeLocation ? "Cập nhật địa chỉ" : "Thêm địa chỉ"}
+                </h2>
               </div>
-              <button type="button" onClick={closeAddressForm} aria-label="Đóng" disabled={savingAddress}>
+              <button
+                type="button"
+                onClick={closeAddressForm}
+                aria-label="Đóng"
+                disabled={savingAddress}
+              >
                 <FontAwesomeIcon icon={faXmark} />
               </button>
             </div>
 
             {formLoading ? (
-              <div className={cx("address-empty")}>Đang tải danh sách địa giới...</div>
+              <div className={cx("address-empty")}>
+                Đang tải danh sách địa giới...
+              </div>
             ) : (
               <form className={cx("address-form")} onSubmit={saveAddress}>
                 <label className={cx("form-field", "full-width")}>
@@ -503,17 +583,27 @@ function Profile() {
                     required
                     value={addressForm.address}
                     onChange={(event) =>
-                      setAddressForm((current) => ({ ...current, address: event.target.value }))
+                      setAddressForm((current) => ({
+                        ...current,
+                        address: event.target.value,
+                      }))
                     }
                     placeholder="Ví dụ: 12 Nguyễn Huệ"
                   />
                 </label>
                 <label className={cx("form-field")}>
                   <span>Tỉnh / thành phố</span>
-                  <select value={addressForm.provinceId} onChange={handleProvinceChange} required>
+                  <select
+                    value={addressForm.provinceId}
+                    onChange={handleProvinceChange}
+                    required
+                  >
                     <option value="">Chọn tỉnh / thành phố</option>
                     {provinces.map((province) => (
-                      <option key={province.ProvinceID} value={province.ProvinceID}>
+                      <option
+                        key={province.ProvinceID}
+                        value={province.ProvinceID}
+                      >
                         {province.ProvinceName}
                       </option>
                     ))}
@@ -529,7 +619,10 @@ function Profile() {
                   >
                     <option value="">Chọn quận / huyện</option>
                     {districts.map((district) => (
-                      <option key={district.DistrictID} value={district.DistrictID}>
+                      <option
+                        key={district.DistrictID}
+                        value={district.DistrictID}
+                      >
                         {district.DistrictName}
                       </option>
                     ))}
@@ -540,7 +633,10 @@ function Profile() {
                   <select
                     value={addressForm.wardCode}
                     onChange={(event) =>
-                      setAddressForm((current) => ({ ...current, wardCode: event.target.value }))
+                      setAddressForm((current) => ({
+                        ...current,
+                        wardCode: event.target.value,
+                      }))
                     }
                     required
                     disabled={!wards.length}
@@ -558,17 +654,33 @@ function Profile() {
                     type="checkbox"
                     checked={addressForm.isDefault}
                     onChange={(event) =>
-                      setAddressForm((current) => ({ ...current, isDefault: event.target.checked }))
+                      setAddressForm((current) => ({
+                        ...current,
+                        isDefault: event.target.checked,
+                      }))
                     }
                   />
                   <span>Đặt làm địa chỉ mặc định</span>
                 </label>
-                {formError && <p className={cx("form-error")} role="alert">{formError}</p>}
+                {formError && (
+                  <p className={cx("form-error")} role="alert">
+                    {formError}
+                  </p>
+                )}
                 <div className={cx("form-actions")}>
-                  <button type="button" className={cx("cancel-button")} onClick={closeAddressForm} disabled={savingAddress}>
+                  <button
+                    type="button"
+                    className={cx("cancel-button")}
+                    onClick={closeAddressForm}
+                    disabled={savingAddress}
+                  >
                     Hủy
                   </button>
-                  <button type="submit" className={cx("save-button")} disabled={savingAddress}>
+                  <button
+                    type="submit"
+                    className={cx("save-button")}
+                    disabled={savingAddress}
+                  >
                     {savingAddress ? "Đang lưu..." : "Lưu địa chỉ"}
                   </button>
                 </div>

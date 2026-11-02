@@ -9,6 +9,9 @@ function VariantForm({
   formData,
   submitting,
   onChange,
+  onColorChange,
+  onAddColor,
+  onRemoveColor,
   onSubmit,
   onCancel,
 }) {
@@ -43,20 +46,59 @@ function VariantForm({
           Dung lượng
           <input name="storage" value={formData.storage} onChange={onChange} placeholder="VD: 256GB" />
         </label>
-        <label>
-          Màu sắc (phân cách bằng dấu phẩy)
-          <input name="colors" value={formData.colors} onChange={onChange} placeholder="Đen, Trắng" />
-        </label>
-        <label>
-          Ảnh phiên bản
-          <input name="images" type="file" accept="image/*" multiple onChange={onChange} />
-        </label>
       </div>
-      {editingVariant?.images?.length > 0 && (
-        <p className={cx("current-image")}>
-          Có {editingVariant.images.length} ảnh hiện tại; tải ảnh mới sẽ thay thế ảnh hiện tại.
-        </p>
-      )}
+      <fieldset className={cx("color-rows")}>
+        <legend>Màu sắc và ảnh</legend>
+        {(formData.colors.length ? formData.colors : [{ color: "", image: null, existingImage: "" }])
+          .map((row, index) => (
+            <div className={cx("color-row")} key={index}>
+              <label>
+                Màu sắc *
+                <input
+                  type="text"
+                  value={row.color}
+                  onChange={(event) => onColorChange(index, "color", event.target.value)}
+                  placeholder="VD: Đen"
+                  required
+                />
+              </label>
+              <label>
+                Ảnh màu{!editingVariant || !row.existingImage ? " *" : ""}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(event) => onColorChange(index, "image", event.target.files?.[0] || null)}
+                  required={!editingVariant || !row.existingImage}
+                />
+                {row.existingImage && !row.image && (
+                  <span className={cx("existing-image")}>Đã có ảnh</span>
+                )}
+              </label>
+              <button
+                className={cx("remove-color-button")}
+                type="button"
+                aria-label={`Xóa dòng màu ${index + 1}`}
+                disabled={formData.colors.length <= 1}
+                onClick={() => onRemoveColor(index)}
+              >
+                Xóa
+              </button>
+            </div>
+          ))}
+        <button
+          className={cx("add-color-button")}
+          type="button"
+          disabled={formData.colors.length >= 10}
+          onClick={onAddColor}
+        >
+          + Thêm màu
+        </button>
+        {editingVariant?.images?.length > 0 && (
+          <p className={cx("current-image")}>
+            Nếu thay ảnh khi chỉnh sửa, hãy tải lại ảnh cho tất cả màu.
+          </p>
+        )}
+      </fieldset>
       <div className={cx("form-actions")}>
         <button className={cx("cancel-button")} type="button" onClick={onCancel}>Hủy</button>
         <button className={cx("submit-button")} type="submit" disabled={submitting}>

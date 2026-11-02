@@ -13,6 +13,7 @@ import axiosClient from "~/api/axiosClient";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faAngleDown,
   faAngleRight,
   faCartPlus,
   faHeart,
@@ -33,17 +34,16 @@ import { useToast } from "~/contexts/ToastContext.jsx";
 import Feedback from "./feedback";
 import Specifications from "./specifications";
 
-var moreProducts = [
-
-];
+var moreProducts = [];
 
 function ProductDetail() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const { loading, error } = useSelector((state) => state.cart);
+  const { loading } = useSelector((state) => state.cart);
   const { token } = useSelector((state) => state.auth);
   const { id } = useParams();
+  const user = useSelector((state) => state.auth.user);
 
   const timerRef = useRef(null);
 
@@ -62,12 +62,87 @@ function ProductDetail() {
   const [currentPage, setCurrentPage] = useState(0);
   const [favoriteState, setFavoriteState] = useState(null);
   const [favoriteSubmitting, setFavoriteSubmitting] = useState(false);
-  const favoriteStateMatchesProduct = favoriteState?.productId === id
-    && favoriteState?.token === token;
-  const isFavorite = Boolean(token && favoriteStateMatchesProduct && favoriteState.isFavorite);
+  const [vouchers, setVouchers] = useState([]);
+  const [savedVoucherIds, setSavedVoucherIds] = useState([]);
+  const [selectedVoucherId, setSelectedVoucherId] = useState(null);
+  const [draftVoucherId, setDraftVoucherId] = useState(null);
+  const [showVoucherDialog, setShowVoucherDialog] = useState(false);
+  const [voucherLoading, setVoucherLoading] = useState(true);
+  const [claimingVoucherId, setClaimingVoucherId] = useState(null);
+  const favoriteStateMatchesProduct =
+    favoriteState?.productId === id && favoriteState?.token === token;
+  const isFavorite = Boolean(
+    token && favoriteStateMatchesProduct && favoriteState.isFavorite,
+  );
   const favoriteLoading = Boolean(token) && !favoriteStateMatchesProduct;
+  const selectedVoucher = vouchers.find(
+    (voucher) => String(voucher._id) === selectedVoucherId,
+  );
+  const draftVoucher = vouchers.find(
+    (voucher) => String(voucher._id) === draftVoucherId,
+  );
+  const discountedUnitPrice =
+    (currentColor.price || 0) * (1 - (product?.discount || 0) / 100);
+  const voucherOrderValue = discountedUnitPrice * quantity;
+  const voucherDiscount = selectedVoucher
+    ? Math.min(
+        voucherOrderValue,
+        selectedVoucher.discountType === "percent"
+          ? Math.floor(
+              (voucherOrderValue * selectedVoucher.discountValue) / 100,
+            )
+          : selectedVoucher.discountValue,
+        selectedVoucher.maxDiscount ?? Number.MAX_SAFE_INTEGER,
+      )
+    : 0;
+  const selectedVoucherEligible =
+    selectedVoucher &&
+    voucherOrderValue >= (selectedVoucher.minOrderValue || 0);
+  const draftVoucherEligible =
+    draftVoucher &&
+    voucherOrderValue >= (draftVoucher.minOrderValue || 0) &&
+    Boolean(currentColor.price);
 
   // Functions
+  const handleClaimVoucher = async (voucherId) => {
+    if (!token) {
+      showToast({
+        title: "Vui lòng đăng nhập để lưu voucher.",
+        type: "warning",
+      });
+      navigate("/login");
+      return;
+    }
+
+    setClaimingVoucherId(voucherId);
+    try {
+      await axiosClient.post(`${api.userVoucher}/${voucherId}/claim`);
+      setSavedVoucherIds((currentIds) => [...currentIds, voucherId]);
+      showToast({ title: "Đã lưu voucher vào tài khoản.", type: "success" });
+      return true;
+    } catch (requestError) {
+      showToast({
+        title: requestError.response?.data?.message || "Không thể lưu voucher.",
+        type: "error",
+      });
+      return false;
+    } finally {
+      setClaimingVoucherId(null);
+    }
+  };
+
+  useEffect(() => {
+    if (!showVoucherDialog) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") setShowVoucherDialog(false);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showVoucherDialog]);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const startTimer = () => {
     if (!images.length) return;
 
@@ -110,18 +185,25 @@ function ProductDetail() {
           throw new Error("Dữ liệu yêu thích không hợp lệ.");
         }
         const productIsFavorite = data.some((favorite) => {
-          const favoriteProduct = favorite.product?._id || favorite.product?.id || favorite.product;
+          const favoriteProduct =
+            favorite.product?._id || favorite.product?.id || favorite.product;
           return String(favoriteProduct) === String(id);
         });
         if (isCurrentRequest) {
-          setFavoriteState({ productId: id, token, isFavorite: productIsFavorite });
+          setFavoriteState({
+            productId: id,
+            token,
+            isFavorite: productIsFavorite,
+          });
         }
       })
       .catch((requestError) => {
         if (isCurrentRequest) {
           setFavoriteState({ productId: id, token, isFavorite: false });
           showToast({
-            title: requestError.response?.data?.message || "Không thể tải trạng thái yêu thích.",
+            title:
+              requestError.response?.data?.message ||
+              "Không thể tải trạng thái yêu thích.",
             type: "error",
           });
         }
@@ -132,9 +214,74 @@ function ProductDetail() {
     };
   }, [id, showToast, token]);
 
+  useEffect(() => {
+    let isCurrentRequest = true;
+
+    const fetchVouchers = async () => {
+      setVoucherLoading(true);
+      try {
+        const { data } = await axiosClient.get(api.voucher);
+        if (!Array.isArray(data)) {
+          throw new Error("Dữ liệu voucher không hợp lệ.");
+        }
+        if (isCurrentRequest) setVouchers(data);
+      } catch (requestError) {
+        if (isCurrentRequest) {
+          showToast({
+            title:
+              requestError.response?.data?.message ||
+              requestError.message ||
+              "Không thể tải danh sách voucher.",
+            type: "error",
+          });
+        }
+      } finally {
+        if (isCurrentRequest) setVoucherLoading(false);
+      }
+    };
+
+    const fetchSavedVouchers = async () => {
+      if (!token) {
+        setSavedVoucherIds([]);
+        return;
+      }
+
+      try {
+        const { data } = await axiosClient.get(`${api.userVoucher}/user`);
+        if (!Array.isArray(data)) {
+          throw new Error("Dữ liệu voucher đã lưu không hợp lệ.");
+        }
+        if (isCurrentRequest) {
+          setSavedVoucherIds(
+            data.map((item) => String(item.voucher?._id || item.voucher)),
+          );
+        }
+      } catch (requestError) {
+        if (isCurrentRequest) {
+          showToast({
+            title:
+              requestError.response?.data?.message ||
+              "Không thể tải voucher đã lưu.",
+            type: "error",
+          });
+        }
+      }
+    };
+
+    fetchVouchers();
+    fetchSavedVouchers();
+
+    return () => {
+      isCurrentRequest = false;
+    };
+  }, [showToast, token]);
+
   const handleToggleFavorite = async () => {
     if (!token) {
-      showToast({ title: "Vui lòng đăng nhập để thêm sản phẩm vào yêu thích.", type: "warning" });
+      showToast({
+        title: "Vui lòng đăng nhập để thêm sản phẩm vào yêu thích.",
+        type: "warning",
+      });
       navigate("/login");
       return;
     }
@@ -142,18 +289,29 @@ function ProductDetail() {
     setFavoriteSubmitting(true);
     try {
       if (isFavorite) {
-        await axiosClient.delete(api.favorite, { data: { product: product._id } });
+        await axiosClient.delete(api.favorite, {
+          data: { product: product._id },
+        });
       } else {
         await axiosClient.post(api.favorite, { product: product._id });
+        axiosClient
+          .post(api.behavior, { action: "wishlist", product: product._id })
+          .catch((e) =>
+            console.error("Unable to record wishlist behavior: ", e),
+          );
       }
       setFavoriteState({ productId: id, token, isFavorite: !isFavorite });
       showToast({
-        title: isFavorite ? "Đã xóa khỏi danh sách yêu thích." : "Đã thêm vào danh sách yêu thích.",
+        title: isFavorite
+          ? "Đã xóa khỏi danh sách yêu thích."
+          : "Đã thêm vào danh sách yêu thích.",
         type: "success",
       });
     } catch (requestError) {
       showToast({
-        title: requestError.response?.data?.message || "Không thể cập nhật danh sách yêu thích.",
+        title:
+          requestError.response?.data?.message ||
+          "Không thể cập nhật danh sách yêu thích.",
         type: "error",
       });
     } finally {
@@ -180,7 +338,10 @@ function ProductDetail() {
   // Add to cart Function
   const handleAddToCart = async () => {
     if (!currentVersion || !currentColor.color) {
-      showToast({ title: "Vui lòng chọn phiên bản và màu sắc trước khi thêm vào giỏ hàng", type: "warning" });
+      showToast({
+        title: "Vui lòng chọn phiên bản và màu sắc trước khi thêm vào giỏ hàng",
+        type: "warning",
+      });
       return;
     }
     const result = await dispatch(
@@ -188,20 +349,33 @@ function ProductDetail() {
         product: product._id,
         variant: currentVersion._id,
         color: currentColor.color,
-        currentPrice: currentColor.price,
+        currentPrice: discountedUnitPrice,
         quantity: quantity,
-      })
+      }),
     );
+    if (user) {
+      axiosClient
+        .post(api.behavior, { action: "add_to_cart", product: product._id })
+        .catch((e) =>
+          console.error("Unable to record add_to_cart behavior: ", e),
+        );
+    }
     if (addToCart.fulfilled.match(result)) {
       showToast({ title: "Đã thêm vào giỏ hàng", type: "success" });
     } else if (addToCart.rejected.match(result)) {
-      showToast({ title: result.payload?.message || "Thêm vào giỏ hàng thất bại", type: "error" });
+      showToast({
+        title: result.payload?.message || "Thêm vào giỏ hàng thất bại",
+        type: "error",
+      });
     }
   };
 
   const handleBuyNow = () => {
     if (!currentVersion || !currentColor.color) {
-      showToast({ title: "Vui lòng chọn phiên bản và màu sắc trước khi mua ngay", type: "warning" });
+      showToast({
+        title: "Vui lòng chọn phiên bản và màu sắc trước khi mua ngay",
+        type: "warning",
+      });
       return;
     }
 
@@ -211,14 +385,29 @@ function ProductDetail() {
       color: currentColor.color,
       title: product.title,
       quantity,
-      currentPrice: currentColor.price,
+      currentPrice: discountedUnitPrice,
       weight: product.weight || 500,
       height: product.height || 20,
       length: product.length || 15,
       width: product.width || 20,
     };
 
-    navigate("/checkout", { state: { checkoutItems: [checkoutItem] } });
+    if (selectedVoucher && !selectedVoucherEligible) {
+      showToast({
+        title: `Đơn hàng cần tối thiểu ${converseVND(selectedVoucher.minOrderValue || 0)} để dùng voucher.`,
+        type: "warning",
+      });
+      return;
+    }
+
+    navigate("/checkout", {
+      state: {
+        checkoutItems: [checkoutItem],
+        voucher: selectedVoucher
+          ? { ...selectedVoucher, discountAmount: voucherDiscount }
+          : null,
+      },
+    });
   };
 
   // useEffect - Fetch Product
@@ -229,7 +418,11 @@ function ProductDetail() {
           axios.get(`${api.product}/${id}`),
           axios.get(`${api.variant}/product/${id}`),
         ]);
-
+        if (user) {
+          axiosClient
+            .post(api.behavior, { action: "view", product: id })
+            .catch((e) => console.error("Unable to record view behavior: ", e));
+        }
         setProduct(productData);
         setVariants(variantData);
         setCurrentVersion(variantData[0]);
@@ -239,28 +432,26 @@ function ProductDetail() {
       }
     };
     fetchProduct();
-  }, [id]);
+  }, [id, user]);
 
   // useEffect - Slider
   useEffect(() => {
     startTimer();
     return () => clearInterval(timerRef.current);
-  }, [images.length]);
+  }, [images.length, startTimer]);
 
   useEffect(() => {
     const fetchFeedbacks = async () => {
       try {
-        const { data: feedbackData } = await axios.get(`${api.feedback}/${id}`
-        );
+        const { data: feedbackData } = await axios.get(`${api.feedback}/${id}`);
         setFeedbacks(feedbackData);
         setCurrentFeedBack(feedbackData);
       } catch (e) {
         console.log(e);
       }
-    }
+    };
     fetchFeedbacks();
   }, [id]);
-
 
   if (!product || !currentVersion) return Loading();
   return (
@@ -346,6 +537,7 @@ function ProductDetail() {
             <FontAwesomeIcon icon={isFavorite ? faHeart : faHeartOutline} />
             {isFavorite ? "Đã thêm vào yêu thích" : "Thêm vào yêu thích"}
           </button>
+
           {/* Version */}
           <div className={cx("version")}>
             <Title title="Phiên bản" className={cx("sub-title")} />
@@ -392,7 +584,12 @@ function ProductDetail() {
                   />
                   <div className={cx("col")}>
                     <span>{color}</span>
-                    <span>{converseVND(currentVersion.price)}</span>
+                    <span>
+                      {converseVND(
+                        currentVersion.price *
+                          (1 - (product.discount || 0) / 100),
+                      )}
+                    </span>
                   </div>
                 </button>
               ))}
@@ -414,9 +611,43 @@ function ProductDetail() {
               </button>
             </div>
           </div>
+          <div className={cx("voucher-picker")}>
+            <span>Ưu đãi</span>
+            <button
+              type="button"
+              className={cx("voucher-picker-button")}
+              onClick={() => {
+                setDraftVoucherId(selectedVoucherId);
+                setShowVoucherDialog(true);
+              }}
+            >
+              <span>
+                {selectedVoucher
+                  ? `${selectedVoucher.code} · ${selectedVoucher.discountType === "percent" ? `Giảm ${selectedVoucher.discountValue}%` : `Giảm ${converseVND(selectedVoucher.discountValue)}`}`
+                  : "Chọn ưu đãi"}
+              </span>
+              <span aria-hidden="true">
+                <FontAwesomeIcon icon={faAngleDown} />
+              </span>
+            </button>
+          </div>
+          {selectedVoucher && (
+            <div className={cx("applied-voucher")}>
+              <span>
+                Voucher {selectedVoucher.code}
+                {selectedVoucherEligible
+                  ? ` giảm ${converseVND(voucherDiscount)}`
+                  : ` cần đơn tối thiểu ${converseVND(selectedVoucher.minOrderValue || 0)}`}
+              </span>
+              <span>
+                {selectedVoucherEligible
+                  ? `Còn ${converseVND(voucherOrderValue - voucherDiscount)}`
+                  : ""}
+              </span>
+            </div>
+          )}
         </div>
       </div>
-
       {/* Product Detail */}
       <div className={cx("product-detail")}>
         <Title className={cx("title")} title="Chi tiết sản phẩm" />
@@ -526,6 +757,147 @@ function ProductDetail() {
         </div>
       </div>
 
+      {showVoucherDialog && (
+        <div
+          className={cx("voucher-dialog-backdrop")}
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              setShowVoucherDialog(false);
+            }
+          }}
+        >
+          <section
+            className={cx("voucher-dialog")}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="voucher-dialog-title"
+          >
+            <header className={cx("voucher-dialog-header")}>
+              <div>
+                <h2 id="voucher-dialog-title">Chọn ưu đãi</h2>
+                <p>Chọn voucher đã lưu để áp dụng cho sản phẩm này.</p>
+              </div>
+              <button
+                type="button"
+                className={cx("voucher-dialog-close")}
+                aria-label="Đóng"
+                onClick={() => setShowVoucherDialog(false)}
+              >
+                ×
+              </button>
+            </header>
+
+            {voucherLoading ? (
+              <p className={cx("voucher-message")}>Đang tải voucher...</p>
+            ) : vouchers.length ? (
+              <div className={cx("voucher-options")}>
+                <label className={cx("voucher-option", "voucher-option-none")}>
+                  <input
+                    type="radio"
+                    name="product-voucher"
+                    checked={!draftVoucherId}
+                    onChange={() => setDraftVoucherId(null)}
+                  />
+                  <span>Không sử dụng voucher</span>
+                </label>
+                {vouchers.map((voucher) => {
+                  const voucherId = String(voucher._id);
+                  const isSaved = savedVoucherIds.includes(voucherId);
+                  const isEligible =
+                    voucherOrderValue >= (voucher.minOrderValue || 0) &&
+                    Boolean(currentColor.price);
+                  const discount =
+                    voucher.discountType === "percent"
+                      ? `Giảm ${voucher.discountValue}%`
+                      : `Giảm ${converseVND(voucher.discountValue)}`;
+
+                  return (
+                    <article
+                      className={cx("voucher-option-card", {
+                        selected: draftVoucherId === voucherId,
+                      })}
+                      key={voucherId}
+                    >
+                      <label className={cx("voucher-option")}>
+                        <input
+                          type="radio"
+                          name="product-voucher"
+                          value={voucherId}
+                          checked={draftVoucherId === voucherId}
+                          disabled={!isSaved || !isEligible}
+                          onChange={() => setDraftVoucherId(voucherId)}
+                        />
+                        <span className={cx("voucher-option-info")}>
+                          <strong>{voucher.name}</strong>
+                          <span>
+                            {voucher.code} · {discount}
+                          </span>
+                          <small>
+                            Đơn tối thiểu{" "}
+                            {converseVND(voucher.minOrderValue || 0)}
+                            {voucher.maxDiscount
+                              ? ` · Tối đa ${converseVND(voucher.maxDiscount)}`
+                              : ""}
+                            {voucher.rank ? ` · Hạng ${voucher.rank}` : ""}
+                          </small>
+                          {!isEligible && (
+                            <small className={cx("voucher-ineligible")}>
+                              Chọn màu sắc và đạt giá trị đơn tối thiểu để sử
+                              dụng
+                            </small>
+                          )}
+                        </span>
+                      </label>
+                      {!isSaved && (
+                        <button
+                          type="button"
+                          className={cx("voucher-claim")}
+                          disabled={claimingVoucherId === voucherId}
+                          onClick={async () => {
+                            const claimed = await handleClaimVoucher(voucherId);
+                            if (claimed) setDraftVoucherId(voucherId);
+                          }}
+                        >
+                          {claimingVoucherId === voucherId
+                            ? "Đang lưu..."
+                            : "Lưu"}
+                        </button>
+                      )}
+                    </article>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className={cx("voucher-message")}>
+                Hiện chưa có voucher khả dụng.
+              </p>
+            )}
+
+            <footer className={cx("voucher-dialog-footer")}>
+              <button
+                type="button"
+                className={cx("voucher-dialog-cancel")}
+                onClick={() => setShowVoucherDialog(false)}
+              >
+                Hủy
+              </button>
+              <button
+                type="button"
+                className={cx("voucher-dialog-apply")}
+                disabled={Boolean(draftVoucherId) && !draftVoucherEligible}
+                onClick={() => {
+                  setSelectedVoucherId(draftVoucherId);
+                  setShowVoucherDialog(false);
+                }}
+              >
+                Áp dụng
+              </button>
+            </footer>
+          </section>
+        </div>
+      )}
+
       {/* Modal */}
       <div className={cx("modal", { show: showModal })}>
         <div className={cx("container")}>
@@ -543,9 +915,10 @@ function ProductDetail() {
                 <span className={cx("sale-price")}>
                   {currentColor.price
                     ? converseVND(
-                        currentColor.price *
-                          quantity *
-                          (1 - product.discount / 100)
+                        Math.max(
+                          0,
+                          discountedUnitPrice * quantity - voucherDiscount,
+                        ),
                       )
                     : "Chưa chọn màu"}
                 </span>
@@ -554,14 +927,29 @@ function ProductDetail() {
                     <h4>{converseVND(currentColor.price * quantity)}</h4>
                   )}
                 </span>
+                {selectedVoucherEligible && (
+                  <small className={cx("voucher-savings")}>
+                    Đã giảm {converseVND(voucherDiscount)} bằng voucher{" "}
+                    {selectedVoucher.code}
+                  </small>
+                )}
               </>
             )}
           </div>
           <div className={cx("actions")}>
-            <Button secondary size="medium" className={cx("buy-btn")} onClick={handleBuyNow}>
+            <Button
+              secondary
+              size="medium"
+              className={cx("buy-btn")}
+              onClick={handleBuyNow}
+            >
               Mua ngay
             </Button>
-            <button className={cx("cart-btn")} onClick={handleAddToCart} disabled={loading}>
+            <button
+              className={cx("cart-btn")}
+              onClick={handleAddToCart}
+              disabled={loading}
+            >
               <FontAwesomeIcon icon={faCartPlus} />
             </button>
           </div>

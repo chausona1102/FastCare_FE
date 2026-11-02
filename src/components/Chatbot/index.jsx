@@ -17,7 +17,8 @@ import styles from "./Chatbot.module.scss";
 const cx = classNames.bind(styles);
 const STARTER_MESSAGE = {
   role: "assistant",
-  content: "Chào bạn! Mình có thể giúp bạn chọn điện thoại, laptop hoặc phụ kiện phù hợp.",
+  content:
+    "Chào bạn! Mình có thể giúp bạn chọn điện thoại, laptop hoặc phụ kiện phù hợp.",
 };
 const SUGGESTIONS = [
   "Tìm laptop dưới 20 triệu",
@@ -26,7 +27,9 @@ const SUGGESTIONS = [
 ];
 
 function ProductCard({ product }) {
-  const startingPrice = Math.min(...product.variants.map((variant) => variant.price));
+  const startingPrice = Math.min(
+    ...product.variants.map((variant) => variant.price),
+  );
 
   return (
     <Link className={cx("product-card")} to={`/product-detail/${product.id}`}>
@@ -39,7 +42,9 @@ function ProductCard({ product }) {
       )}
       <span className={cx("product-info")}>
         <span className={cx("product-title")}>{product.title}</span>
-        <span className={cx("product-price")}>{converseVND(startingPrice)}</span>
+        <span className={cx("product-price")}>
+          {converseVND(startingPrice)}
+        </span>
         <span className={cx("product-link")}>
           Xem sản phẩm <FontAwesomeIcon icon={faArrowRight} />
         </span>
@@ -58,7 +63,10 @@ function Chatbot() {
 
   useEffect(() => {
     if (isOpen) {
-      messageEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+      messageEndRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
       inputRef.current?.focus();
     }
   }, [isOpen, isSending, messages]);
@@ -70,13 +78,19 @@ function Chatbot() {
     const history = messages
       .filter((item) => item.role === "user" || item.role === "assistant")
       .slice(-8)
-      .map(({ role, content: messageContent }) => ({ role, content: messageContent }));
+      .map(({ role, content: messageContent }) => ({
+        role,
+        content: messageContent,
+      }));
     setMessages((current) => [...current, { role: "user", content: message }]);
     setInput("");
     setIsSending(true);
 
     try {
-      const { data } = await axiosClient.post(api.chatbot, { message, history });
+      const { data } = await axiosClient.post(api.chatbot, {
+        message,
+        history,
+      });
       if (typeof data?.reply !== "string" || !Array.isArray(data.products)) {
         throw new Error("Phản hồi chatbot không đúng định dạng.");
       }
@@ -141,14 +155,17 @@ function Chatbot() {
           <div className={cx("messages")} aria-live="polite">
             {messages.map((item, index) => (
               <div
-                className={cx("message-row", item.role === "user" && "user-row")}
+                className={cx(
+                  "message-row",
+                  item.role === "user" && "user-row",
+                )}
                 key={`${index}-${item.role}`}
               >
                 <div
                   className={cx(
                     "message",
                     item.role === "user" && "user-message",
-                    item.isError && "error-message"
+                    item.isError && "error-message",
                   )}
                 >
                   {item.content}
@@ -219,8 +236,8 @@ function Chatbot() {
             </button>
           </form>
           <p className={cx("disclaimer")}>
-            Tin nhắn và thông tin sản phẩm liên quan được gửi tới OpenAI để tạo câu trả lời.
-            Không gửi thông tin tài khoản hoặc đơn hàng.
+            Tin nhắn và thông tin sản phẩm liên quan được gửi tới OpenAI để tạo
+            câu trả lời. Không gửi thông tin tài khoản hoặc đơn hàng.
           </p>
         </section>
       )}

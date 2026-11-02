@@ -60,6 +60,7 @@ function AdminOrders() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [confirmingOrderId, setConfirmingOrderId] = useState("");
+  const [rejectingOrderId, setRejectingOrderId] = useState("");
   const [returnRejectionReason, setReturnRejectionReason] = useState("");
   const [returnResolution, setReturnResolution] = useState("refund");
   const [returnSubmitting, setReturnSubmitting] = useState(false);
@@ -178,6 +179,41 @@ function AdminOrders() {
       });
     } finally {
       setConfirmingOrderId("");
+    }
+  };
+
+  const handleRejectOrder = async (order) => {
+    const orderId = order._id || order.id;
+    if (!window.confirm(`Từ chối đơn ${order.clientOrderCode || orderId}? Tồn kho sẽ được hoàn lại.`)) {
+      return;
+    }
+
+    setRejectingOrderId(orderId);
+    try {
+      const { data: updatedOrder } = await axiosClient.put(`${api.order}/reject/${orderId}`);
+      if (activeView === "pending") {
+        setOrders((currentOrders) => currentOrders.filter(
+          (currentOrder) => (currentOrder._id || currentOrder.id) !== orderId
+        ));
+        if ((selectedOrder?._id || selectedOrder?.id) === orderId) setSelectedOrder(null);
+      } else {
+        setOrders((currentOrders) => currentOrders.map((currentOrder) =>
+          (currentOrder._id || currentOrder.id) === orderId
+            ? { ...currentOrder, ...updatedOrder, items: currentOrder.items }
+            : currentOrder
+        ));
+        if ((selectedOrder?._id || selectedOrder?.id) === orderId) {
+          setSelectedOrder((currentOrder) => ({ ...currentOrder, ...updatedOrder }));
+        }
+      }
+      showToast({ title: "Đã từ chối đơn hàng và hoàn lại tồn kho.", type: "success" });
+    } catch (requestError) {
+      showToast({
+        title: requestError.response?.data?.message || "Từ chối đơn hàng thất bại.",
+        type: "error",
+      });
+    } finally {
+      setRejectingOrderId("");
     }
   };
 
@@ -366,6 +402,9 @@ function AdminOrders() {
                     <strong className={cx("order-code")}>
                       {order.clientOrderCode || order.ghnOrderCode || orderId}
                     </strong>
+                    <small className={cx("secondary-code")}>
+                      {order.source === "in_store" ? "Bán tại quầy" : "Đơn online"}
+                    </small>
                     {order.ghnOrderCode && (
                       <small className={cx("secondary-code")}>GHN: {order.ghnOrderCode}</small>
                     )}
@@ -394,16 +433,28 @@ function AdminOrders() {
                         <FontAwesomeIcon icon={faEye} />
                       </button>
                       {order.status === "pending" && (
-                        <button
-                          className={cx("confirm-button")}
-                          type="button"
-                          title="Xác nhận và tạo đơn GHN"
-                          aria-label={`Xác nhận đơn ${order.clientOrderCode || orderId}`}
-                          disabled={confirmingOrderId === orderId}
-                          onClick={() => handleConfirmOrder(order)}
-                        >
-                          <FontAwesomeIcon icon={faCheck} />
-                        </button>
+                        <>
+                          <button
+                            className={cx("confirm-button")}
+                            type="button"
+                            title="Xác nhận và tạo đơn GHN"
+                            aria-label={`Xác nhận đơn ${order.clientOrderCode || orderId}`}
+                            disabled={confirmingOrderId === orderId || rejectingOrderId === orderId}
+                            onClick={() => handleConfirmOrder(order)}
+                          >
+                            <FontAwesomeIcon icon={faCheck} />
+                          </button>
+                          <button
+                            className={cx("reject-button")}
+                            type="button"
+                            title="Từ chối đơn và hoàn tồn kho"
+                            aria-label={`Từ chối đơn ${order.clientOrderCode || orderId}`}
+                            disabled={confirmingOrderId === orderId || rejectingOrderId === orderId}
+                            onClick={() => handleRejectOrder(order)}
+                          >
+                            <FontAwesomeIcon icon={faXmark} />
+                          </button>
+                        </>
                       )}
                     </div>
                   </td>
@@ -463,16 +514,35 @@ function AdminOrders() {
             </header>
             <div className={cx("detail-grid")}>
               <div className={cx("detail-section")}>
-                <h3>Người nhận</h3>
+                <h3>{selectedOrder.source === "in_store" ? "Khách hàng" : "Người nhận"}</h3>
                 <p>{selectedOrder.toName || selectedOrder.user?.fullname || "-"}</p>
                 <p>{selectedOrder.toPhone || selectedOrder.user?.phone || "-"}</p>
-                <p>{selectedOrder.toAddress || "Chưa có địa chỉ"}</p>
+                <p>
+                  {selectedOrder.source === "in_store"
+                    ? "Nhận tại cửa hàng"
+                    : selectedOrder.toAddress || "Chưa có địa chỉ"}
+                </p>
                 <p className={cx("note")}>Ghi chú: {selectedOrder.note || "Không có"}</p>
               </div>
               <div className={cx("detail-section")}>
                 <h3>Thanh toán & trạng thái</h3>
-                <p>{selectedOrder.paymentTypeId === 2 ? "Thanh toán khi nhận hàng (COD)" : "VNPAY"}</p>
-                {selectedOrder.paymentTypeId === 1 && (
+                <p>
+                  {selectedOrder.source === "in_store"
+                    ? "Bán tại quầy"
+                    : "Đơn online"}
+                </p>
+                <p>
+                  {{
+                    cash: "Tiền mặt",
+                    bank_transfer: "Chuyển khoản",
+                    cod: "Thanh toán khi nhận hàng (COD)",
+                    vnpay: "VNPAY",
+                  }[selectedOrder.paymentMethod]
+                    || (selectedOrder.paymentTypeId === 2
+                      ? "Thanh toán khi nhận hàng (COD)"
+                      : "VNPAY")}
+                </p>
+                {(selectedOrder.paymentTypeId === 1 || selectedOrder.source === "in_store") && (
                   <p>
                     Trạng thái thanh toán: {
                       { paid: "Đã thanh toán", failed: "Thất bại", pending: "Đang chờ thanh toán" }[

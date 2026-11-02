@@ -9,12 +9,13 @@ import Tippy from "@tippyjs/react";
 import { Link } from "react-router-dom";
 import "tippy.js/dist/tippy.css";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "~/store/slices/authSlice"
+import { logout } from "~/store/slices/authSlice";
 import {
   faBars,
   faUserCircle,
   faShoppingCart,
   faHeart,
+  faGear,
   faSignOut,
   faBagShopping,
 } from "@fortawesome/free-solid-svg-icons";
@@ -35,7 +36,6 @@ function Header() {
   const token = useSelector((state) => state.auth.token);
   const user = useSelector((state) => state.auth.user);
 
-
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -48,7 +48,6 @@ function Header() {
     fetchCategories();
   }, []);
 
-
   useEffect(() => {
     if (token) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -58,7 +57,7 @@ function Header() {
 
   const handleLogout = async () => {
     try {
-      await axiosClient.post("/api/auth/logout"); 
+      await axiosClient.post("/api/auth/logout");
     } catch (err) {
       console.error("Logout error:", err);
     } finally {
@@ -81,9 +80,7 @@ function Header() {
             </Tippy>
           </div>
         </Link>
-        <div
-          className={cx("category-wrapper")}
-        >
+        <div className={cx("category-wrapper")}>
           <Button
             primary
             rightIcon={faBars}
@@ -120,15 +117,54 @@ function Header() {
         </Tippy>
         {isLoggedIn ? (
           <div>
-            <button className={cx("profile-btn")} onClick={() => {setIsProfileOpen(!isProfileOpen)}}>
+            <button
+              className={cx("profile-btn")}
+              onClick={() => {
+                setIsProfileOpen(!isProfileOpen);
+              }}
+            >
               <img src={user?.avatar} alt="Avatar" />
             </button>
             <ul className={cx("profile-dropdown", { open: isProfileOpen })}>
-                <button onClick={() => (window.location.href = "/wishlist")}><FontAwesomeIcon icon={faHeart} className={cx("profile-icon")} /><span>Yêu thích</span></button>
-                <button onClick={() => (window.location.href = "/cart")}><FontAwesomeIcon icon={faShoppingCart} className={cx("profile-icon")} /><span>Giỏ hàng</span></button>
-                <button onClick={() => (window.location.href = "/order")}><FontAwesomeIcon icon={faBagShopping} className={cx("profile-icon")} /><span>Đơn hàng của tôi</span></button>
-                <button onClick={() => (window.location.href = "/profile")}><FontAwesomeIcon icon={faUserCircle} className={cx("profile-icon")} /><span>Thông tin cá nhân</span></button>
-                <button onClick={handleLogout} className={cx("logout-btn")}><FontAwesomeIcon icon={faSignOut} className={cx("profile-icon")} /><span>Đăng xuất</span></button>
+              <button onClick={() => (window.location.href = "/wishlist")}>
+                <FontAwesomeIcon
+                  icon={faHeart}
+                  className={cx("profile-icon")}
+                />
+                <span>Yêu thích</span>
+              </button>
+              <button onClick={() => (window.location.href = "/cart")}>
+                <FontAwesomeIcon
+                  icon={faShoppingCart}
+                  className={cx("profile-icon")}
+                />
+                <span>Giỏ hàng</span>
+              </button>
+              <button onClick={() => (window.location.href = "/order")}>
+                <FontAwesomeIcon
+                  icon={faBagShopping}
+                  className={cx("profile-icon")}
+                />
+                <span>Đơn hàng của tôi</span>
+              </button>
+              <button onClick={() => (window.location.href = "/profile")}>
+                <FontAwesomeIcon
+                  icon={faUserCircle}
+                  className={cx("profile-icon")}
+                />
+                <span>Thông tin cá nhân</span>
+              </button>
+              <button onClick={() => (window.location.href = "/settings")}>
+                <FontAwesomeIcon icon={faGear} className={cx("profile-icon")} />
+                <span>Cài đặt</span>
+              </button>
+              <button onClick={handleLogout} className={cx("logout-btn")}>
+                <FontAwesomeIcon
+                  icon={faSignOut}
+                  className={cx("profile-icon")}
+                />
+                <span>Đăng xuất</span>
+              </button>
             </ul>
             {isProfileOpen && (
               <div
@@ -138,7 +174,7 @@ function Header() {
             )}
           </div>
         ) : (
-        <Tippy content="Đăng nhập" placement="bottom">
+          <Tippy content="Đăng nhập" placement="bottom">
             <div>
               <Button
                 primary
@@ -146,7 +182,7 @@ function Header() {
                 size="medium"
                 to="/login"
                 className={cx("login-btn")}
-                >
+              >
                 <span className={cx("login-text")}>Đăng nhập</span>
               </Button>
             </div>

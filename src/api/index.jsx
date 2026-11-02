@@ -1,5 +1,4 @@
 const api = {
-
   /* Sign up: Method POST
   Ex: http://localhost:5000/api/auth/signup
   Method: POST
@@ -14,7 +13,7 @@ const api = {
   }
   */
   signup: "http://localhost:5000/api/auth/signup",
-  
+
   /* 
   Ex: http://localhost:5000/api/auth/login
   Method: POST
@@ -25,6 +24,7 @@ const api = {
   }
   */
   login: "http://localhost:5000/api/auth/login",
+  refreshSessions: "http://localhost:5000/api/auth/sessions",
 
   // Verify Email: Method POST
   verifyEmail: "http://localhost:5000/api/auth/verify-email",
@@ -35,6 +35,7 @@ const api = {
   product: "http://localhost:5000/api/product",
   productSearch: "http://localhost:5000/api/product/search",
   chatbot: "http://localhost:5000/api/chatbot",
+  recommend: "http://localhost:5000/api/recommend",
 
   /* 
   Ex: http://localhost:5000/api/cart
@@ -42,7 +43,7 @@ const api = {
   */
   cart: "http://localhost:5000/api/cart",
   cartItem: "http://localhost:5000/api/cartitem",
-  
+
   /*
   Ex: http://localhost:5000/api/product/category/dien-thoai/20
   Method: GET
@@ -52,7 +53,6 @@ const api = {
   Response: Array of products
   */
   productBySlug: "http://localhost:5000/api/product/category",
-  
 
   /*
   Ex: http://localhost:5000/api/category/brands/parentCategoryId
@@ -78,7 +78,6 @@ const api = {
   */
   feedback: "http://localhost:5000/api/feedback",
 
-
   /*
   Ex: http://localhost:5000/api/parent/category
   Method: GET
@@ -91,6 +90,12 @@ const api = {
 
   // Order
   order: "http://localhost:5000/api/order",
+  onlinePayments: "http://localhost:5000/api/payment/records",
+  onlinePaymentsExport: "http://localhost:5000/api/payment/records/export",
+  inStoreOrder: "http://localhost:5000/api/order/in-store",
+  rank: "http://localhost:5000/api/rank/user",
+  voucher: "http://localhost:5000/api/voucher",
+  userVoucher: "http://localhost:5000/api/user-voucher",
 
   // Favorites
   favorite: "http://localhost:5000/api/favorite",
@@ -99,7 +104,12 @@ const api = {
   user: "http://localhost:5000/api/user",
   imports: "http://localhost:5000/api/import",
   report: "http://localhost:5000/api/report",
+  profitReport: "http://localhost:5000/api/report/profit",
+  profitReportExport: "http://localhost:5000/api/report/profit/export",
+  traffic: "http://localhost:5000/api/traffic",
   logs: "http://localhost:5000/api/log",
+  behavior: "http://localhost:5000/api/behavior",
+  visited: "http://localhost:5000/api/visited",
 };
 
 export default api;

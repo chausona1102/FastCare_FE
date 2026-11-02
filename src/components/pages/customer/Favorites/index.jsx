@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useAuth } from "~/hook/useAuth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeart, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import classNames from "classnames/bind";
@@ -15,7 +15,7 @@ const cx = classNames.bind(styles);
 function Favorites() {
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const token = useSelector((state) => state.auth.token);
+  const { token } = useAuth();
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -23,12 +23,16 @@ function Favorites() {
 
   useEffect(() => {
     if (!token) {
-      showToast({ title: "Vui lòng đăng nhập để xem sản phẩm yêu thích.", type: "warning" });
+      showToast({
+        title: "Vui lòng đăng nhập để xem sản phẩm yêu thích.",
+        type: "warning",
+      });
       navigate("/login");
       return undefined;
     }
 
     let isCurrentRequest = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     setError("");
 
@@ -39,12 +43,20 @@ function Favorites() {
           throw new Error("Dữ liệu yêu thích không hợp lệ.");
         }
         if (isCurrentRequest) {
-          setFavorites(data.filter((favorite) => favorite.product && typeof favorite.product === "object"));
+          setFavorites(
+            data.filter(
+              (favorite) =>
+                favorite.product && typeof favorite.product === "object",
+            ),
+          );
         }
       })
       .catch((requestError) => {
         if (isCurrentRequest) {
-          setError(requestError.response?.data?.message || "Không thể tải danh sách yêu thích.");
+          setError(
+            requestError.response?.data?.message ||
+              "Không thể tải danh sách yêu thích.",
+          );
         }
       })
       .finally(() => {
@@ -61,7 +73,10 @@ function Favorites() {
   const handleRemoveFavorite = async (favorite) => {
     const productId = favorite.product._id || favorite.product.id;
     if (!productId) {
-      showToast({ title: "Không tìm thấy sản phẩm cần xóa khỏi yêu thích.", type: "error" });
+      showToast({
+        title: "Không tìm thấy sản phẩm cần xóa khỏi yêu thích.",
+        type: "error",
+      });
       return;
     }
 
@@ -69,16 +84,23 @@ function Favorites() {
     try {
       await axiosClient.delete(api.favorite, { data: { product: productId } });
       setFavorites((currentFavorites) =>
-        currentFavorites.filter((item) => item._id !== favorite._id)
+        currentFavorites.filter((item) => item._id !== favorite._id),
       );
-      showToast({ title: "Đã xóa sản phẩm khỏi danh sách yêu thích.", type: "success" });
+      showToast({
+        title: "Đã xóa sản phẩm khỏi danh sách yêu thích.",
+        type: "success",
+      });
     } catch (requestError) {
       showToast({
-        title: requestError.response?.data?.message || "Không thể xóa sản phẩm khỏi danh sách yêu thích.",
+        title:
+          requestError.response?.data?.message ||
+          "Không thể xóa sản phẩm khỏi danh sách yêu thích.",
         type: "error",
       });
     } finally {
-      setPendingIds((currentIds) => currentIds.filter((id) => id !== favorite._id));
+      setPendingIds((currentIds) =>
+        currentIds.filter((id) => id !== favorite._id),
+      );
     }
   };
 
@@ -100,7 +122,9 @@ function Favorites() {
         )}
 
         {loading ? (
-          <div className={cx("state")} role="status">Đang tải danh sách yêu thích...</div>
+          <div className={cx("state")} role="status">
+            Đang tải danh sách yêu thích...
+          </div>
         ) : favorites.length === 0 ? (
           <div className={cx("state", "empty")}>
             <FontAwesomeIcon icon={faHeart} />
@@ -127,8 +151,12 @@ function Favorites() {
                   >
                     <img src={product.avatar} alt={product.title} />
                     <span className={cx("product-info")}>
-                      <span className={cx("product-title")}>{product.title}</span>
-                      <span className={cx("price")}>{converseVND(product.minPrice)}</span>
+                      <span className={cx("product-title")}>
+                        {product.title}
+                      </span>
+                      <span className={cx("price")}>
+                        {converseVND(product.minPrice)}
+                      </span>
                     </span>
                   </button>
                   <div className={cx("actions")}>

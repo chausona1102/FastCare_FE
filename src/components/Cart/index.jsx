@@ -5,6 +5,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCartPlus, faHeart } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import { converseVND, converseKilo } from "~/utils/functions.jsx";
+import { useSelector } from "react-redux";
+import axiosClient from "~/api/axiosClient";
+import api from "~/api";
 const cx = classNames.bind(styles);
 
 function Cart({
@@ -19,8 +22,18 @@ function Cart({
   rom,
   to,
 }) {
+  const user = useSelector((state) => state.auth.user);
+
+  const handleClick = () => {
+    if (user) {
+      axiosClient
+        .post(api.behavior, { action: "click", product: id })
+        .catch((e) => console.error("Unable to record click behavior: ", e));
+    }
+  };
+
   return (
-    <Link to={to}>
+    <Link to={to} onClick={handleClick}>
       <div className={cx("wrapper")}>
         {/* Badges góc trên */}
         {discount > 0 && (
@@ -33,11 +46,12 @@ function Cart({
         {/* Ảnh */}
         <div className={cx("image-wrap")}>
           <img src={avatar} alt={title} className={cx("image")} />
-          <button className={cx("btn-add")}
-          //  onClick={(e) => {
-          //       e.preventDefault();
-          //       alert(id);
-          //     }}
+          <button
+            className={cx("btn-add")}
+            //  onClick={(e) => {
+            //       e.preventDefault();
+            //       alert(id);
+            //     }}
           >
             <FontAwesomeIcon icon={faCartPlus} />
             <span>Thêm vào giỏ</span>

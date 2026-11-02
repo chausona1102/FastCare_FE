@@ -6,7 +6,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch, faXmark } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import api from "~/api";
+import axiosClient from "~/api/axiosClient";
 import { converseVND } from "~/utils/functions.jsx";
+import { useAuth } from "~/hook/useAuth";
 
 const cx = classNames.bind(styles);
 const suggestedKeywords = [
@@ -27,6 +29,7 @@ function Search() {
   const [products, setProducts] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
+  const { user } = useAuth();
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -36,12 +39,14 @@ function Search() {
   }, [isOpen]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setKeyword(currentSearch);
   }, [currentSearch]);
 
   useEffect(() => {
     const normalizedKeyword = keyword.trim();
     if (!normalizedKeyword) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setProducts([]);
       setSearchError("");
       setIsSearching(false);
@@ -66,7 +71,7 @@ function Search() {
         if (isCurrentRequest) {
           setProducts([]);
           setSearchError(
-            error.response?.data?.message || "Không thể tìm kiếm sản phẩm."
+            error.response?.data?.message || "Không thể tìm kiếm sản phẩm.",
           );
         }
       } finally {
@@ -92,6 +97,13 @@ function Search() {
 
     setIsOpen(false);
     setShowModal(false);
+    if (user) {
+      axiosClient
+        .post(api.behavior, { action: "search", searchQuery: searchKeyword })
+        .catch((error) =>
+          console.error("Unable to record search behavior:", error),
+        );
+    }
     navigate(`/products?search=${encodeURIComponent(searchKeyword)}`);
   };
 
@@ -125,11 +137,19 @@ function Search() {
         }}
       />
       {currentSearch && keyword === currentSearch ? (
-        <button type="button" className={cx("search-btn", "close-btn")} onClick={handleClose}>
+        <button
+          type="button"
+          className={cx("search-btn", "close-btn")}
+          onClick={handleClose}
+        >
           <FontAwesomeIcon icon={faXmark} />
         </button>
       ) : (
-        <button type="button" className={cx("search-btn")} onClick={handleSearch}>
+        <button
+          type="button"
+          className={cx("search-btn")}
+          onClick={handleSearch}
+        >
           <FontAwesomeIcon icon={faSearch} />
         </button>
       )}
@@ -154,9 +174,15 @@ function Search() {
                         onClick={() => handleSelectProduct(product)}
                         aria-label={`Xem ${product.title}`}
                       >
-                        <img src={product.avatar} alt="" />
+                        <img
+                          src={product.avatar}
+                          alt=""
+                          className={cx("avatar")}
+                        />
                         <span className={cx("product-option-info")}>
-                          <span className={cx("product-option-title")}>{product.title}</span>
+                          <span className={cx("product-option-title")}>
+                            {product.title}
+                          </span>
                           <span className={cx("product-option-price")}>
                             {converseVND(product.minPrice)}
                           </span>
@@ -175,7 +201,9 @@ function Search() {
                 </button>
               </>
             ) : (
-              <p className={cx("search-status")}>Không tìm thấy sản phẩm phù hợp.</p>
+              <p className={cx("search-status")}>
+                Không tìm thấy sản phẩm phù hợp.
+              </p>
             )}
           </>
         ) : (
@@ -188,7 +216,9 @@ function Search() {
                   onMouseDown={(event) => event.preventDefault()}
                   onClick={() => {
                     setKeyword(suggestedKeyword);
-                    navigate(`/products?search=${encodeURIComponent(suggestedKeyword)}`);
+                    navigate(
+                      `/products?search=${encodeURIComponent(suggestedKeyword)}`,
+                    );
                     setShowModal(false);
                   }}
                 >

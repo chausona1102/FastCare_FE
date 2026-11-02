@@ -2,7 +2,7 @@
     margin: 10px 0;
     .row {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         .section {
             padding: 10px;
             display: inline-flex;
@@ -30,7 +30,7 @@
                 object-fit: cover;
             }
         }
-        .section-2, .section-3 {
+        .section-2, .section-3, .section-4 {
             border-left: 3px solid var(--color-fastcare-600);
             height: min-content;
             align-items: center;
@@ -496,7 +496,8 @@
 }
 
   .summary .section-2,
-  .summary .section-3 {
+  .summary .section-3,
+  .summary .section-4 {
     border-left: none;
     // border-top: 1px solid var(--color-fastcare-600);
     padding-top: 14px;
