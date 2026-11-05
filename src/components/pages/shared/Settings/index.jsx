@@ -10,13 +10,9 @@ function Settings() {
     <main className={cx("page")}>
       <div className={cx("topline")}>
         <div>
-          <p className={cx("eyebrow")}>TÀI KHOẢN CỦA BẠN</p>
+          <p className={cx("eyebrow")}>Cài đặt</p>
           <h1>Thông tin cá nhân</h1>
         </div>
-        <Link to="/order" className={cx("orders-link")}>
-          Đơn hàng của tôi
-          <FontAwesomeIcon icon={faArrowRight} aria-hidden="true" />
-        </Link>
       </div>
     </main>
   );

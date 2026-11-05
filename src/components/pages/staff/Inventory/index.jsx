@@ -4,7 +4,7 @@ import classNames from "classnames/bind";
 
 import api from "~/api";
 import axiosClient from "~/api/axiosClient";
-import Loading from "~/components/Loading";
+import { LoadingProduct } from "~/components/Loading";
 import styles from "./Inventory.module.scss";
 
 const cx = classNames.bind(styles);
@@ -28,7 +28,9 @@ function Inventory() {
         setVariants(Array.isArray(data) ? data : []);
       } catch (requestError) {
         if (!controller.signal.aborted) {
-          setError(requestError.response?.data?.message || "Không thể tải tồn kho.");
+          setError(
+            requestError.response?.data?.message || "Không thể tải tồn kho.",
+          );
         }
       } finally {
         if (!controller.signal.aborted) setLoading(false);
@@ -48,18 +50,31 @@ function Inventory() {
         variant.sku,
         variant.storage,
         ...(variant.colors || []),
-      ].filter(Boolean).join(" ").toLocaleLowerCase("vi");
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLocaleLowerCase("vi");
       const matchesSearch = !keyword || text.includes(keyword);
       const matchesFilter =
         stockFilter === "all" ||
         (stockFilter === "out" && stock === 0) ||
         (stockFilter === "low" && stock > 0 && stock <= 10) ||
         (stockFilter === "available" && stock > 10);
-      return !variant.deleteAt && !variant.product?.deletedAt && matchesSearch && matchesFilter;
+      return (
+        !variant.deleteAt &&
+        !variant.product?.deletedAt &&
+        matchesSearch &&
+        matchesFilter
+      );
     });
   }, [search, stockFilter, variants]);
 
-  if (loading) return <div className={cx("loading")}><Loading /></div>;
+  if (loading)
+    return (
+      <div className={cx("loading")}>
+        <LoadingProduct />
+      </div>
+    );
 
   return (
     <section className={cx("page")}>
@@ -67,12 +82,20 @@ function Inventory() {
         <div>
           <p className={cx("eyebrow")}>Kho hàng</p>
           <h1>Quản lý tồn kho</h1>
-          <p className={cx("summary")}>Theo dõi số lượng khả dụng theo từng phiên bản sản phẩm.</p>
+          <p className={cx("summary")}>
+            Theo dõi số lượng khả dụng theo từng phiên bản sản phẩm.
+          </p>
         </div>
-        <Link className={cx("primaryButton")} to="/staff/imports/create">Tạo phiếu nhập</Link>
+        <Link className={cx("primaryButton")} to="/staff/imports/create">
+          Tạo phiếu nhập
+        </Link>
       </header>
 
-      {error && <div className={cx("alert", "error")} role="alert">{error}</div>}
+      {error && (
+        <div className={cx("alert", "error")} role="alert">
+          {error}
+        </div>
+      )}
 
       <div className={cx("toolbar")}>
         <input
@@ -82,7 +105,11 @@ function Inventory() {
           aria-label="Tìm phiên bản sản phẩm"
           onChange={(event) => setSearch(event.target.value)}
         />
-        <select value={stockFilter} aria-label="Lọc tồn kho" onChange={(event) => setStockFilter(event.target.value)}>
+        <select
+          value={stockFilter}
+          aria-label="Lọc tồn kho"
+          onChange={(event) => setStockFilter(event.target.value)}
+        >
           <option value="all">Tất cả tồn kho</option>
           <option value="out">Hết hàng</option>
           <option value="low">Sắp hết (≤ 10)</option>
@@ -111,19 +138,46 @@ function Inventory() {
                 <tr key={id}>
                   <td>{variant.product?.title || "Sản phẩm đã xóa"}</td>
                   <td>{variant.sku || "-"}</td>
-                  <td>{[variant.storage, ...(variant.colors || [])].filter(Boolean).join(" · ") || "-"}</td>
+                  <td>
+                    {[variant.storage, ...(variant.colors || [])]
+                      .filter(Boolean)
+                      .join(" · ") || "-"}
+                  </td>
                   <td className={cx("quantity")}>{stock}</td>
                   <td>
-                    <span className={cx("badge", stock === 0 ? "empty" : stock <= 10 ? "low" : "available")}>
-                      {stock === 0 ? "Hết hàng" : stock <= 10 ? "Sắp hết" : "Đủ hàng"}
+                    <span
+                      className={cx(
+                        "badge",
+                        stock === 0
+                          ? "empty"
+                          : stock <= 10
+                            ? "low"
+                            : "available",
+                      )}
+                    >
+                      {stock === 0
+                        ? "Hết hàng"
+                        : stock <= 10
+                          ? "Sắp hết"
+                          : "Đủ hàng"}
                     </span>
                   </td>
-                  <td><Link to={`/staff/imports/create?variant=${encodeURIComponent(id)}`}>Nhập thêm</Link></td>
+                  <td>
+                    <Link
+                      to={`/staff/imports/create?variant=${encodeURIComponent(id)}`}
+                    >
+                      Nhập thêm
+                    </Link>
+                  </td>
                 </tr>
               );
             })}
             {visibleVariants.length === 0 && (
-              <tr><td className={cx("emptyState")} colSpan="6">Không tìm thấy phiên bản sản phẩm.</td></tr>
+              <tr>
+                <td className={cx("emptyState")} colSpan="6">
+                  Không tìm thấy phiên bản sản phẩm.
+                </td>
+              </tr>
             )}
           </tbody>
         </table>

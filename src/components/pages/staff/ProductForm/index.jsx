@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 
 import api from "~/api";
-import Loading from "~/components/Loading";
+import { LoadingProduct } from "~/components/Loading";
 
 function ProductForm() {
   const { id } = useParams();
@@ -51,8 +51,7 @@ function ProductForm() {
     try {
       setLoading(true);
       const response = await axios.get(`${api.product}/${id}`);
-      const nfc =
-        response.data.nfc ?? response.data.specifications?.phone?.nfc;
+      const nfc = response.data.nfc ?? response.data.specifications?.phone?.nfc;
       setFormData((prev) => ({
         ...prev,
         ...response.data,
@@ -61,7 +60,7 @@ function ProductForm() {
             ? "Có"
             : nfc === false || nfc === "false"
               ? "Không"
-              : nfc ?? "Không",
+              : (nfc ?? "Không"),
       }));
     } catch (err) {
       setError("Lỗi khi tải thông tin sản phẩm");
@@ -118,7 +117,7 @@ function ProductForm() {
   if (loading)
     return (
       <div className={cx("wrapper")}>
-        <Loading />
+        <LoadingProduct />
       </div>
     );
 

@@ -8,6 +8,7 @@ import Title from "~/components/Title";
 
 import { Link } from "react-router-dom";
 import Tippy from "@tippyjs/react";
+import { LoadingCircle } from "~/components/Loading";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faAngleLeft,
@@ -244,6 +245,7 @@ function Login() {
                 >
                   {isSigningUp ? "Đang đăng ký..." : "Đăng ký"}
                 </button>
+                {isSigningUp && <LoadingCircle />}
                 <div className={cx("more-login")}>
                   <div className={cx("dash")}></div>
                   <span>Hoặc</span>

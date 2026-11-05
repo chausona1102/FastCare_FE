@@ -25,11 +25,17 @@ const api = {
   */
   login: "http://localhost:5000/api/auth/login",
   refreshSessions: "http://localhost:5000/api/auth/sessions",
+  revokeLoginSession: (id) =>
+    `http://localhost:5000/api/auth/sessions/${id}/revoke-from-email`,
 
   // Verify Email: Method POST
   verifyEmail: "http://localhost:5000/api/auth/verify-email",
   // Resend-Verify Email: Method POST
   resendVerify: "http://localhost:5000/api/auth/resend-verify",
+  forgotPassword: "http://localhost:5000/api/auth/forgot-password",
+  verifyPasswordResetPin:
+    "http://localhost:5000/api/auth/verify-password-reset-pin",
+  resetPassword: "http://localhost:5000/api/auth/reset-password",
 
   // Product API:
   product: "http://localhost:5000/api/product",

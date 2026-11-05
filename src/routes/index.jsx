@@ -12,11 +12,13 @@ import NotFound from "~/components/pages/NotFound";
 import Home from "~/components/pages/customer/Home";
 import ProductDetail from "~/components/pages/customer/ProductDetail";
 import Login from "~/components/pages/Login";
+import ForgotPassword from "~/components/pages/ForgotPassword";
 import Signup from "~/components/pages/Signup";
 import Products from "~/components/pages/customer/Products";
 import Categories from "~/components/pages/customer/Categories";
 import VerifyEmail from "~/components/pages/VerifyEmail";
 import ResendVerify from "~/components/pages/ResendVerify";
+import LoginSecurity from "~/components/pages/LoginSecurity";
 import ShoppingCart from "~/components/pages/customer/ShoppingCart";
 import CheckoutOrder from "~/components/pages/customer/CheckoutOrder";
 import Order from "~/components/pages/customer/Order";
@@ -63,6 +65,11 @@ const userRoutes = [
     Layout: SecondaryLayout,
   },
   {
+    path: "/forgot-password",
+    component: ForgotPassword,
+    Layout: SecondaryLayout,
+  },
+  {
     path: "/signup",
     component: Signup,
     Layout: SecondaryLayout,
@@ -95,6 +102,11 @@ const userRoutes = [
   {
     path: "/resend-verify",
     component: ResendVerify,
+    Layout: SecondaryLayout,
+  },
+  {
+    path: "/security/login-reject/:id",
+    component: LoginSecurity,
     Layout: SecondaryLayout,
   },
   {

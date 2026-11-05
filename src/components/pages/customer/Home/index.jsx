@@ -1,7 +1,7 @@
 import styles from "./Home.module.scss";
 import classNames from "classnames/bind";
 import Cart from "~/components/Cart";
-import Loading from "~/components/Loading";
+import { LoadingProduct } from "~/components/Loading";
 import axios from "axios";
 import { banner_samsumS26plus } from "~/assets/banner";
 import { keyboard, hotGif } from "~/assets/images";
@@ -97,7 +97,7 @@ function Home() {
   }, [user]);
 
   return loading ? (
-    Loading()
+    LoadingProduct()
   ) : (
     <div className={cx("wrapper")}>
       <div className={cx("content")}>

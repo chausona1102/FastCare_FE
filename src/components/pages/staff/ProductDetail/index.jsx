@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faPen } from "@fortawesome/free-solid-svg-icons";
 
 import api from "~/api";
-import Loading from "~/components/Loading";
+import { LoadingProduct } from "~/components/Loading";
 
 function ProductDetail() {
   const { id } = useParams();
@@ -45,7 +45,7 @@ function ProductDetail() {
   if (loading)
     return (
       <div className={cx("wrapper")}>
-        <Loading />
+        <LoadingProduct />
       </div>
     );
   if (error)
@@ -128,7 +128,7 @@ function ProductDetail() {
               <span
                 className={cx(
                   "badge",
-                  product.deletedAt === null ? "selling" : "hidden"
+                  product.deletedAt === null ? "selling" : "hidden",
                 )}
               >
                 {product.deletedAt === null ? "Đang bán" : "Đã ẩn"}

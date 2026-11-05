@@ -4,7 +4,7 @@ import classNames from "classnames/bind";
 
 import api from "~/api";
 import axiosClient from "~/api/axiosClient";
-import Loading from "~/components/Loading";
+import { LoadingProduct } from "~/components/Loading";
 import styles from "./Imports.module.scss";
 
 const cx = classNames.bind(styles);
@@ -40,23 +40,32 @@ function Imports() {
     const loadData = async () => {
       setError("");
       try {
-        const [{ data: variantData }, { data: importData }] = await Promise.all([
-          axiosClient.get(`${api.variant}/all`, {
-            params: { status: "active" },
-            signal: controller.signal,
-          }),
-          axiosClient.get(api.imports, {
-            params: { limit: 100 },
-            signal: controller.signal,
-          }),
-        ]);
-        setVariants(Array.isArray(variantData) ? variantData.filter(
-          (variant) => !variant.deleteAt && !variant.product?.deletedAt
-        ) : []);
+        const [{ data: variantData }, { data: importData }] = await Promise.all(
+          [
+            axiosClient.get(`${api.variant}/all`, {
+              params: { status: "active" },
+              signal: controller.signal,
+            }),
+            axiosClient.get(api.imports, {
+              params: { limit: 100 },
+              signal: controller.signal,
+            }),
+          ],
+        );
+        setVariants(
+          Array.isArray(variantData)
+            ? variantData.filter(
+                (variant) => !variant.deleteAt && !variant.product?.deletedAt,
+              )
+            : [],
+        );
         setRecords(Array.isArray(importData) ? importData : []);
       } catch (requestError) {
         if (!controller.signal.aborted) {
-          setError(requestError.response?.data?.message || "Không thể tải thông tin nhập hàng.");
+          setError(
+            requestError.response?.data?.message ||
+              "Không thể tải thông tin nhập hàng.",
+          );
         }
       } finally {
         if (!controller.signal.aborted) setLoading(false);
@@ -96,13 +105,20 @@ function Imports() {
       }));
       setRefreshKey((current) => current + 1);
     } catch (requestError) {
-      setError(requestError.response?.data?.message || "Không thể tạo phiếu nhập.");
+      setError(
+        requestError.response?.data?.message || "Không thể tạo phiếu nhập.",
+      );
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (loading) return <div className={cx("loading")}><Loading /></div>;
+  if (loading)
+    return (
+      <div className={cx("loading")}>
+        <LoadingProduct />
+      </div>
+    );
 
   return (
     <section className={cx("page")}>
@@ -110,34 +126,70 @@ function Imports() {
         <div>
           <p className={cx("eyebrow")}>Kho hàng</p>
           <h1>Nhập hàng</h1>
-          <p className={cx("summary")}>Ghi nhận giá vốn và ngày hiệu lực nhập kho theo từng phiên bản.</p>
+          <p className={cx("summary")}>
+            Ghi nhận giá vốn và ngày hiệu lực nhập kho theo từng phiên bản.
+          </p>
         </div>
       </header>
 
-      {error && <div className={cx("alert", "error")} role="alert">{error}</div>}
-      {notice && <div className={cx("alert", "success")} role="status">{notice}</div>}
+      {error && (
+        <div className={cx("alert", "error")} role="alert">
+          {error}
+        </div>
+      )}
+      {notice && (
+        <div className={cx("alert", "success")} role="status">
+          {notice}
+        </div>
+      )}
 
       <form className={cx("form")} onSubmit={handleSubmit}>
         <h2>Tạo phiếu nhập</h2>
         <div className={cx("formGrid")}>
           <label className={cx("wide")}>
             Phiên bản sản phẩm *
-            <select name="variantId" value={form.variantId || selectedVariantId} onChange={handleChange} required>
+            <select
+              name="variantId"
+              value={form.variantId || selectedVariantId}
+              onChange={handleChange}
+              required
+            >
               <option value="">Chọn sản phẩm / SKU</option>
               {variants.map((variant) => (
-                <option key={variant._id || variant.id} value={variant._id || variant.id}>
-                  {variant.product?.title || "Sản phẩm"} · {variant.sku || "Không có SKU"} · Tồn: {variant.stockQuantity || 0}
+                <option
+                  key={variant._id || variant.id}
+                  value={variant._id || variant.id}
+                >
+                  {variant.product?.title || "Sản phẩm"} ·{" "}
+                  {variant.sku || "Không có SKU"} · Tồn:{" "}
+                  {variant.stockQuantity || 0}
                 </option>
               ))}
             </select>
           </label>
           <label>
             Số lượng nhập *
-            <input name="quantity" type="number" min="1" step="1" value={form.quantity} onChange={handleChange} required />
+            <input
+              name="quantity"
+              type="number"
+              min="1"
+              step="1"
+              value={form.quantity}
+              onChange={handleChange}
+              required
+            />
           </label>
           <label>
             Đơn giá nhập (₫)
-            <input name="unitCost" type="number" min="0" step="1" value={form.unitCost} onChange={handleChange} required />
+            <input
+              name="unitCost"
+              type="number"
+              min="0"
+              step="1"
+              value={form.unitCost}
+              onChange={handleChange}
+              required
+            />
           </label>
           <label className={cx("wide", "checkboxField")}>
             <span>
@@ -170,21 +222,40 @@ function Imports() {
           )}
           <label>
             Nhà cung cấp
-            <input name="supplier" value={form.supplier} onChange={handleChange} maxLength="120" />
+            <input
+              name="supplier"
+              value={form.supplier}
+              onChange={handleChange}
+              maxLength="120"
+            />
           </label>
           <label className={cx("wide")}>
             Ghi chú
-            <textarea name="note" value={form.note} onChange={handleChange} maxLength="500" rows="3" />
+            <textarea
+              name="note"
+              value={form.note}
+              onChange={handleChange}
+              maxLength="500"
+              rows="3"
+            />
           </label>
         </div>
-        <button className={cx("submitButton")} type="submit" disabled={submitting || variants.length === 0}>
+        <button
+          className={cx("submitButton")}
+          type="submit"
+          disabled={submitting || variants.length === 0}
+        >
           {submitting
             ? "Đang ghi nhận..."
             : form.isBackfill
               ? "Lưu phiếu nhập bù lịch sử"
               : "Lưu phiếu nhập và cập nhật kho"}
         </button>
-        {variants.length === 0 && <p className={cx("hint")}>Chưa có phiên bản sản phẩm đang hoạt động để nhập kho.</p>}
+        {variants.length === 0 && (
+          <p className={cx("hint")}>
+            Chưa có phiên bản sản phẩm đang hoạt động để nhập kho.
+          </p>
+        )}
       </form>
 
       <section className={cx("history")}>
@@ -209,18 +280,37 @@ function Imports() {
               {records.map((record) => (
                 <tr key={record._id}>
                   <td>
-                    {new Date(record.effectiveAt || record.createdAt).toLocaleString("vi-VN")}
+                    {new Date(
+                      record.effectiveAt || record.createdAt,
+                    ).toLocaleString("vi-VN")}
                     {record.isBackfill && <small>Phiếu nhập bù lịch sử</small>}
                   </td>
-                  <td>{record.product?.title || "Sản phẩm"}<small>{record.sku || record.variant?.sku || "-"}</small></td>
+                  <td>
+                    {record.product?.title || "Sản phẩm"}
+                    <small>{record.sku || record.variant?.sku || "-"}</small>
+                  </td>
                   <td className={cx("quantity")}>+{record.quantity}</td>
-                  <td>{record.unitCost == null ? "-" : `${Number(record.unitCost).toLocaleString("vi-VN")} ₫`}</td>
+                  <td>
+                    {record.unitCost == null
+                      ? "-"
+                      : `${Number(record.unitCost).toLocaleString("vi-VN")} ₫`}
+                  </td>
                   <td>{record.supplier || "-"}</td>
-                  <td>{record.importedBy?.fullname || record.importedBy?.username || "-"}</td>
+                  <td>
+                    {record.importedBy?.fullname ||
+                      record.importedBy?.username ||
+                      "-"}
+                  </td>
                   <td>{record.note || "-"}</td>
                 </tr>
               ))}
-              {records.length === 0 && <tr><td className={cx("empty")} colSpan="7">Chưa có phiếu nhập hàng.</td></tr>}
+              {records.length === 0 && (
+                <tr>
+                  <td className={cx("empty")} colSpan="7">
+                    Chưa có phiếu nhập hàng.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

@@ -11,18 +11,25 @@ import {
 
 import api from "~/api";
 import axiosClient from "~/api/axiosClient";
-import Loading from "~/components/Loading";
+import { LoadingProduct } from "~/components/Loading";
 import styles from "./Categories.module.scss";
 
 const cx = classNames.bind(styles);
 const ITEMS_PER_PAGE = 10;
 const INITIAL_CATEGORY_LIMIT = 50;
 const ADDITIONAL_CATEGORY_LIMIT = 20;
-const INITIAL_FORM = { name: "", parentCategory: "", avatar: null, removeAvatar: false };
+const INITIAL_FORM = {
+  name: "",
+  parentCategory: "",
+  avatar: null,
+  removeAvatar: false,
+};
 
 const getParentId = (category) => {
   const parent = category.parentCategory;
-  return typeof parent === "object" && parent !== null ? parent._id || parent.id : parent || "";
+  return typeof parent === "object" && parent !== null
+    ? parent._id || parent.id
+    : parent || "";
 };
 
 function CategoriesManagement() {
@@ -51,11 +58,16 @@ function CategoriesManagement() {
     const fetchData = async () => {
       setError("");
       try {
-        const { data } = await axiosClient.get(api.parentCategory, { signal: controller.signal });
+        const { data } = await axiosClient.get(api.parentCategory, {
+          signal: controller.signal,
+        });
         setParentCategories(Array.isArray(data) ? data : []);
       } catch (requestError) {
         if (!controller.signal.aborted) {
-          setError(requestError.response?.data?.message || "Không thể tải danh sách phân loại cha.");
+          setError(
+            requestError.response?.data?.message ||
+              "Không thể tải danh sách phân loại cha.",
+          );
         }
       }
     };
@@ -66,31 +78,39 @@ function CategoriesManagement() {
 
   useEffect(() => {
     const controller = new AbortController();
-    const timeoutId = window.setTimeout(async () => {
-      try {
-        const { data } = await axiosClient.get(api.category, {
-          params: {
-            search: search.trim(),
-            parentCategory: selectedParent,
-            skip: 0,
-            limit: INITIAL_CATEGORY_LIMIT,
-          },
-          signal: controller.signal,
-        });
-        const fetchedCategories = Array.isArray(data) ? data : [];
-        setCategories(fetchedCategories);
-        setHasMoreCategories(fetchedCategories.length === INITIAL_CATEGORY_LIMIT);
-      } catch (requestError) {
-        if (!controller.signal.aborted) {
-          setError(requestError.response?.data?.message || "Không thể tải danh sách phân loại.");
+    const timeoutId = window.setTimeout(
+      async () => {
+        try {
+          const { data } = await axiosClient.get(api.category, {
+            params: {
+              search: search.trim(),
+              parentCategory: selectedParent,
+              skip: 0,
+              limit: INITIAL_CATEGORY_LIMIT,
+            },
+            signal: controller.signal,
+          });
+          const fetchedCategories = Array.isArray(data) ? data : [];
+          setCategories(fetchedCategories);
+          setHasMoreCategories(
+            fetchedCategories.length === INITIAL_CATEGORY_LIMIT,
+          );
+        } catch (requestError) {
+          if (!controller.signal.aborted) {
+            setError(
+              requestError.response?.data?.message ||
+                "Không thể tải danh sách phân loại.",
+            );
+          }
+        } finally {
+          if (!controller.signal.aborted) {
+            setLoading(false);
+            setSearching(false);
+          }
         }
-      } finally {
-        if (!controller.signal.aborted) {
-          setLoading(false);
-          setSearching(false);
-        }
-      }
-    }, search.trim() ? 500 : 0);
+      },
+      search.trim() ? 500 : 0,
+    );
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -102,7 +122,7 @@ function CategoriesManagement() {
   const totalPages = Math.max(1, Math.ceil(categories.length / ITEMS_PER_PAGE));
   const visibleCategories = categories.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
+    currentPage * ITEMS_PER_PAGE,
   );
 
   const handleLoadMore = async () => {
@@ -126,10 +146,15 @@ function CategoriesManagement() {
       if (controller.signal.aborted) return;
       const fetchedCategories = Array.isArray(data) ? data : [];
       setCategories((current) => [...current, ...fetchedCategories]);
-      setHasMoreCategories(fetchedCategories.length === ADDITIONAL_CATEGORY_LIMIT);
+      setHasMoreCategories(
+        fetchedCategories.length === ADDITIONAL_CATEGORY_LIMIT,
+      );
     } catch (requestError) {
       if (!controller.signal.aborted) {
-        setError(requestError.response?.data?.message || "Không thể tải thêm phân loại.");
+        setError(
+          requestError.response?.data?.message ||
+            "Không thể tải thêm phân loại.",
+        );
       }
     } finally {
       if (loadMoreControllerRef.current === controller) {
@@ -180,10 +205,15 @@ function CategoriesManagement() {
     try {
       if (editingCategory) {
         const categoryId = editingCategory._id || editingCategory.id;
-        const { data } = await axiosClient.patch(`${api.category}/${categoryId}`, payload);
-        setCategories((current) => current.map((category) =>
-          (category._id || category.id) === categoryId ? data : category
-        ));
+        const { data } = await axiosClient.patch(
+          `${api.category}/${categoryId}`,
+          payload,
+        );
+        setCategories((current) =>
+          current.map((category) =>
+            (category._id || category.id) === categoryId ? data : category,
+          ),
+        );
         setNotice("Đã cập nhật phân loại.");
       } else {
         const { data } = await axiosClient.post(api.category, payload);
@@ -194,7 +224,9 @@ function CategoriesManagement() {
       setRefreshKey((current) => current + 1);
       resetForm();
     } catch (requestError) {
-      setError(requestError.response?.data?.message || "Không thể lưu phân loại.");
+      setError(
+        requestError.response?.data?.message || "Không thể lưu phân loại.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -209,21 +241,29 @@ function CategoriesManagement() {
     setNotice("");
     try {
       await axiosClient.delete(`${api.category}/${categoryId}`);
-      setCategories((current) => current.filter(
-        (item) => (item._id || item.id) !== categoryId
-      ));
+      setCategories((current) =>
+        current.filter((item) => (item._id || item.id) !== categoryId),
+      );
       setCurrentPage(1);
       setNotice("Đã xóa phân loại.");
       setRefreshKey((current) => current + 1);
-      if ((editingCategory?._id || editingCategory?.id) === categoryId) resetForm();
+      if ((editingCategory?._id || editingCategory?.id) === categoryId)
+        resetForm();
     } catch (requestError) {
-      setError(requestError.response?.data?.message || "Không thể xóa phân loại.");
+      setError(
+        requestError.response?.data?.message || "Không thể xóa phân loại.",
+      );
     } finally {
       setDeletingId("");
     }
   };
 
-  if (loading) return <div className={cx("loading")}><Loading /></div>;
+  if (loading)
+    return (
+      <div className={cx("loading")}>
+        <LoadingProduct />
+      </div>
+    );
 
   return (
     <section className={cx("page")}>
@@ -231,14 +271,20 @@ function CategoriesManagement() {
         <div>
           <p className={cx("eyebrow")}>Quản lý danh mục</p>
           <h1>Phân loại</h1>
-          <p className={cx("summary")}>Quản lý các danh mục con và nhóm phân loại cha tương ứng.</p>
+          <p className={cx("summary")}>
+            Quản lý các danh mục con và nhóm phân loại cha tương ứng.
+          </p>
         </div>
         <button
           className={cx("create-button")}
           type="button"
           aria-expanded={isFormOpen}
           disabled={parentCategories.length === 0}
-          title={parentCategories.length === 0 ? "Hãy tạo phân loại cha trước" : undefined}
+          title={
+            parentCategories.length === 0
+              ? "Hãy tạo phân loại cha trước"
+              : undefined
+          }
           onClick={startCreate}
         >
           <FontAwesomeIcon icon={isFormOpen ? faXmark : faPlus} />
@@ -246,8 +292,16 @@ function CategoriesManagement() {
         </button>
       </header>
 
-      {error && <div className={cx("alert", "error")} role="alert">{error}</div>}
-      {notice && <div className={cx("alert", "success")} role="status">{notice}</div>}
+      {error && (
+        <div className={cx("alert", "error")} role="alert">
+          {error}
+        </div>
+      )}
+      {notice && (
+        <div className={cx("alert", "success")} role="status">
+          {notice}
+        </div>
+      )}
       {parentCategories.length === 0 && (
         <div className={cx("alert", "info")} role="status">
           Cần tạo ít nhất một phân loại cha trước khi thêm phân loại.
@@ -266,7 +320,12 @@ function CategoriesManagement() {
               <input
                 name="name"
                 value={formData.name}
-                onChange={(event) => setFormData((current) => ({ ...current, name: event.target.value }))}
+                onChange={(event) =>
+                  setFormData((current) => ({
+                    ...current,
+                    name: event.target.value,
+                  }))
+                }
                 maxLength={100}
                 required
               />
@@ -276,12 +335,20 @@ function CategoriesManagement() {
               <select
                 name="parentCategory"
                 value={formData.parentCategory}
-                onChange={(event) => setFormData((current) => ({ ...current, parentCategory: event.target.value }))}
+                onChange={(event) =>
+                  setFormData((current) => ({
+                    ...current,
+                    parentCategory: event.target.value,
+                  }))
+                }
                 required
               >
                 <option value="">Chọn phân loại cha</option>
                 {parentCategories.map((parent) => (
-                  <option key={parent._id || parent.id} value={parent._id || parent.id}>
+                  <option
+                    key={parent._id || parent.id}
+                    value={parent._id || parent.id}
+                  >
                     {parent.name}
                   </option>
                 ))}
@@ -293,27 +360,33 @@ function CategoriesManagement() {
                 name="avatar"
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
-                onChange={(event) => setFormData((current) => ({
-                  ...current,
-                  avatar: event.target.files?.[0] || null,
-                  removeAvatar: false,
-                }))}
+                onChange={(event) =>
+                  setFormData((current) => ({
+                    ...current,
+                    avatar: event.target.files?.[0] || null,
+                    removeAvatar: false,
+                  }))
+                }
               />
             </label>
           </div>
           {editingCategory?.avatar && (
             <div className={cx("image-options")}>
               <img src={editingCategory.avatar} alt="" />
-              <span>{formData.avatar ? formData.avatar.name : "Ảnh hiện tại"}</span>
+              <span>
+                {formData.avatar ? formData.avatar.name : "Ảnh hiện tại"}
+              </span>
               {!formData.avatar && (
                 <label>
                   <input
                     type="checkbox"
                     checked={formData.removeAvatar}
-                    onChange={(event) => setFormData((current) => ({
-                      ...current,
-                      removeAvatar: event.target.checked,
-                    }))}
+                    onChange={(event) =>
+                      setFormData((current) => ({
+                        ...current,
+                        removeAvatar: event.target.checked,
+                      }))
+                    }
                   />
                   Gỡ ảnh hiện tại
                 </label>
@@ -321,11 +394,23 @@ function CategoriesManagement() {
             </div>
           )}
           <div className={cx("form-actions")}>
-            <button className={cx("cancel-button")} type="button" onClick={resetForm}>
+            <button
+              className={cx("cancel-button")}
+              type="button"
+              onClick={resetForm}
+            >
               Hủy
             </button>
-            <button className={cx("submit-button")} type="submit" disabled={submitting}>
-              {submitting ? "Đang lưu..." : editingCategory ? "Lưu thay đổi" : "Tạo phân loại"}
+            <button
+              className={cx("submit-button")}
+              type="submit"
+              disabled={submitting}
+            >
+              {submitting
+                ? "Đang lưu..."
+                : editingCategory
+                  ? "Lưu thay đổi"
+                  : "Tạo phân loại"}
             </button>
           </div>
         </form>
@@ -360,13 +445,18 @@ function CategoriesManagement() {
         >
           <option value="">Tất cả phân loại cha</option>
           {parentCategories.map((parent) => (
-            <option key={parent._id || parent.id} value={parent._id || parent.id}>
+            <option
+              key={parent._id || parent.id}
+              value={parent._id || parent.id}
+            >
               {parent.name}
             </option>
           ))}
         </select>
         <span className={cx("result-count")}>
-          {searching ? "Đang tìm trong database..." : `${categories.length} phân loại đã tải`}
+          {searching
+            ? "Đang tìm trong database..."
+            : `${categories.length} phân loại đã tải`}
         </span>
       </div>
 
@@ -383,7 +473,9 @@ function CategoriesManagement() {
           <tbody>
             {visibleCategories.map((category) => {
               const parentId = getParentId(category);
-              const parent = parentCategories.find((item) => (item._id || item.id) === parentId);
+              const parent = parentCategories.find(
+                (item) => (item._id || item.id) === parentId,
+              );
               return (
                 <tr key={category._id || category.id}>
                   <td>
@@ -391,7 +483,10 @@ function CategoriesManagement() {
                       {category.avatar ? (
                         <img src={category.avatar} alt="" />
                       ) : (
-                        <span className={cx("image-fallback")} aria-hidden="true">
+                        <span
+                          className={cx("image-fallback")}
+                          aria-hidden="true"
+                        >
                           {(category.name || "?").charAt(0).toUpperCase()}
                         </span>
                       )}
@@ -452,7 +547,9 @@ function CategoriesManagement() {
           >
             Trước
           </button>
-          <span>Trang {currentPage} / {totalPages}</span>
+          <span>
+            Trang {currentPage} / {totalPages}
+          </span>
           <button
             type="button"
             disabled={currentPage === totalPages}

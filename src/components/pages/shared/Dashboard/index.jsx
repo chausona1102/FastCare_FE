@@ -13,7 +13,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import api from "~/api";
 import axiosClient from "~/api/axiosClient";
-import Loading from "~/components/Loading";
+import { LoadingProduct } from "~/components/Loading";
 import DashboardCharts from "./DashboardCharts";
 import styles from "./Dashboard.module.scss";
 
@@ -152,7 +152,7 @@ function Dashboard() {
   if (loading) {
     return (
       <div className={cx("loadingState")}>
-        <Loading />
+        <LoadingProduct />
       </div>
     );
   }

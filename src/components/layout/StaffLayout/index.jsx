@@ -2,10 +2,12 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import styles from "./StaffLayout.module.scss";
 import classNames from "classnames/bind";
+import { useAuth } from "~/hook/useAuth";
 import { useDispatch } from "react-redux";
 import { logout } from "~/store/slices/authSlice";
 import axiosClient from "~/api/axiosClient";
 import { logo } from "~/assets/images";
+import Tippy from "@tippyjs/react";
 import {
   faHome,
   faShoppingCart,
@@ -24,6 +26,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 const cx = classNames.bind(styles);
 
 function StaffLayout({ children }) {
+  const { user } = useAuth();
+  console.log("StaffLayout user:", user);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const dispatch = useDispatch();
@@ -142,7 +146,7 @@ function StaffLayout({ children }) {
 
   const handleLogout = async () => {
     try {
-      await axiosClient.post("/api/auth/logout"); 
+      await axiosClient.post("/api/auth/logout");
     } catch (err) {
       console.error("Logout error:", err);
     } finally {
@@ -217,7 +221,30 @@ function StaffLayout({ children }) {
           </button>
           <h1 className={cx("headerTitle")}>Staff Dashboard</h1>
           <div className={cx("headerRight")}>
-            <div className={cx("userAvatar")}>ST</div>
+            <Tippy
+              content={
+                user ? (
+                  <div className={cx("userTooltip")}>
+                    <p>{user.fullname}</p>
+                    <p>{user.email}</p>
+                  </div>
+                ) : (
+                  "Người dùng"
+                )
+              }
+              placement="bottom"
+            >
+              <div className={cx("userAvatar")}>
+                {user && user.avatar ? (
+                  <img src={user.avatar} alt="User Avatar" />
+                ) : (
+                  <FontAwesomeIcon
+                    icon={faUsers}
+                    className={cx("defaultAvatar")}
+                  />
+                )}
+              </div>
+            </Tippy>
           </div>
         </header>
 

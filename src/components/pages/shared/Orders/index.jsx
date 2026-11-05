@@ -1,11 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import classNames from "classnames/bind";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheck, faEye, faMagnifyingGlass, faXmark } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCheck,
+  faEye,
+  faMagnifyingGlass,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 
 import api from "~/api";
 import axiosClient from "~/api/axiosClient";
-import Loading from "~/components/Loading";
+import { LoadingProduct } from "~/components/Loading";
 import { useToast } from "~/contexts/ToastContext";
 import styles from "./Orders.module.scss";
 
@@ -68,13 +73,17 @@ function AdminOrders() {
 
   const applyOrderUpdate = (updatedOrder) => {
     const orderId = updatedOrder._id || updatedOrder.id;
-    setOrders((currentOrders) => currentOrders.map((order) =>
-      (order._id || order.id) === orderId ? { ...order, ...updatedOrder } : order
-    ));
+    setOrders((currentOrders) =>
+      currentOrders.map((order) =>
+        (order._id || order.id) === orderId
+          ? { ...order, ...updatedOrder }
+          : order,
+      ),
+    );
     setSelectedOrder((currentOrder) =>
       currentOrder && (currentOrder._id || currentOrder.id) === orderId
         ? { ...currentOrder, ...updatedOrder }
-        : currentOrder
+        : currentOrder,
     );
   };
 
@@ -88,16 +97,23 @@ function AdminOrders() {
           params: {
             view: activeView,
             search: search.trim(),
-            ...(activeView === "all" ? { skip: 0, limit: INITIAL_ORDER_LIMIT } : {}),
+            ...(activeView === "all"
+              ? { skip: 0, limit: INITIAL_ORDER_LIMIT }
+              : {}),
           },
           signal: controller.signal,
         });
         const fetchedOrders = Array.isArray(data) ? data : [];
         setOrders(fetchedOrders);
-        setHasMoreOrders(activeView === "all" && fetchedOrders.length === INITIAL_ORDER_LIMIT);
+        setHasMoreOrders(
+          activeView === "all" && fetchedOrders.length === INITIAL_ORDER_LIMIT,
+        );
       } catch (requestError) {
         if (!controller.signal.aborted) {
-          setError(requestError.response?.data?.message || "Không thể tải danh sách đơn hàng.");
+          setError(
+            requestError.response?.data?.message ||
+              "Không thể tải danh sách đơn hàng.",
+          );
         }
       } finally {
         if (!controller.signal.aborted) {
@@ -128,13 +144,22 @@ function AdminOrders() {
         },
       });
       const fetchedOrders = Array.isArray(data) ? data : [];
-      if (activeViewRef.current === "all" && searchRef.current.trim() === requestedSearch) {
+      if (
+        activeViewRef.current === "all" &&
+        searchRef.current.trim() === requestedSearch
+      ) {
         setOrders((currentOrders) => [...currentOrders, ...fetchedOrders]);
         setHasMoreOrders(fetchedOrders.length === ADDITIONAL_ORDER_LIMIT);
       }
     } catch (requestError) {
-      if (activeViewRef.current === "all" && searchRef.current.trim() === requestedSearch) {
-        setError(requestError.response?.data?.message || "Không thể tải thêm đơn hàng.");
+      if (
+        activeViewRef.current === "all" &&
+        searchRef.current.trim() === requestedSearch
+      ) {
+        setError(
+          requestError.response?.data?.message ||
+            "Không thể tải thêm đơn hàng.",
+        );
       }
     } finally {
       setLoadingMore(false);
@@ -144,37 +169,56 @@ function AdminOrders() {
   const totalPages = Math.max(1, Math.ceil(orders.length / ORDERS_PER_PAGE));
   const visibleOrders = orders.slice(
     (currentPage - 1) * ORDERS_PER_PAGE,
-    currentPage * ORDERS_PER_PAGE
+    currentPage * ORDERS_PER_PAGE,
   );
 
   const handleConfirmOrder = async (order) => {
     const orderId = order._id || order.id;
-    if (!window.confirm(`Xác nhận đơn ${order.clientOrderCode || orderId} và tạo vận đơn GHN?`)) {
+    if (
+      !window.confirm(
+        `Xác nhận đơn ${order.clientOrderCode || orderId} và tạo vận đơn GHN?`,
+      )
+    ) {
       return;
     }
 
     setConfirmingOrderId(orderId);
     try {
-      const { data: updatedOrder } = await axiosClient.put(`${api.order}/confirm/${orderId}`);
+      const { data: updatedOrder } = await axiosClient.put(
+        `${api.order}/confirm/${orderId}`,
+      );
       if (activeView === "pending") {
-        setOrders((currentOrders) => currentOrders.filter(
-          (currentOrder) => (currentOrder._id || currentOrder.id) !== orderId
-        ));
-        if ((selectedOrder?._id || selectedOrder?.id) === orderId) setSelectedOrder(null);
+        setOrders((currentOrders) =>
+          currentOrders.filter(
+            (currentOrder) => (currentOrder._id || currentOrder.id) !== orderId,
+          ),
+        );
+        if ((selectedOrder?._id || selectedOrder?.id) === orderId)
+          setSelectedOrder(null);
       } else {
-        setOrders((currentOrders) => currentOrders.map((currentOrder) =>
-          (currentOrder._id || currentOrder.id) === orderId
-            ? { ...currentOrder, ...updatedOrder, items: currentOrder.items }
-            : currentOrder
-        ));
+        setOrders((currentOrders) =>
+          currentOrders.map((currentOrder) =>
+            (currentOrder._id || currentOrder.id) === orderId
+              ? { ...currentOrder, ...updatedOrder, items: currentOrder.items }
+              : currentOrder,
+          ),
+        );
         if ((selectedOrder?._id || selectedOrder?.id) === orderId) {
-          setSelectedOrder((currentOrder) => ({ ...currentOrder, ...updatedOrder }));
+          setSelectedOrder((currentOrder) => ({
+            ...currentOrder,
+            ...updatedOrder,
+          }));
         }
       }
-      showToast({ title: "Đã xác nhận đơn hàng và tạo vận đơn GHN.", type: "success" });
+      showToast({
+        title: "Đã xác nhận đơn hàng và tạo vận đơn GHN.",
+        type: "success",
+      });
     } catch (requestError) {
       showToast({
-        title: requestError.response?.data?.message || "Xác nhận đơn hàng thất bại. Đơn vẫn ở trạng thái chờ xác nhận.",
+        title:
+          requestError.response?.data?.message ||
+          "Xác nhận đơn hàng thất bại. Đơn vẫn ở trạng thái chờ xác nhận.",
         type: "error",
       });
     } finally {
@@ -184,32 +228,50 @@ function AdminOrders() {
 
   const handleRejectOrder = async (order) => {
     const orderId = order._id || order.id;
-    if (!window.confirm(`Từ chối đơn ${order.clientOrderCode || orderId}? Tồn kho sẽ được hoàn lại.`)) {
+    if (
+      !window.confirm(
+        `Từ chối đơn ${order.clientOrderCode || orderId}? Tồn kho sẽ được hoàn lại.`,
+      )
+    ) {
       return;
     }
 
     setRejectingOrderId(orderId);
     try {
-      const { data: updatedOrder } = await axiosClient.put(`${api.order}/reject/${orderId}`);
+      const { data: updatedOrder } = await axiosClient.put(
+        `${api.order}/reject/${orderId}`,
+      );
       if (activeView === "pending") {
-        setOrders((currentOrders) => currentOrders.filter(
-          (currentOrder) => (currentOrder._id || currentOrder.id) !== orderId
-        ));
-        if ((selectedOrder?._id || selectedOrder?.id) === orderId) setSelectedOrder(null);
+        setOrders((currentOrders) =>
+          currentOrders.filter(
+            (currentOrder) => (currentOrder._id || currentOrder.id) !== orderId,
+          ),
+        );
+        if ((selectedOrder?._id || selectedOrder?.id) === orderId)
+          setSelectedOrder(null);
       } else {
-        setOrders((currentOrders) => currentOrders.map((currentOrder) =>
-          (currentOrder._id || currentOrder.id) === orderId
-            ? { ...currentOrder, ...updatedOrder, items: currentOrder.items }
-            : currentOrder
-        ));
+        setOrders((currentOrders) =>
+          currentOrders.map((currentOrder) =>
+            (currentOrder._id || currentOrder.id) === orderId
+              ? { ...currentOrder, ...updatedOrder, items: currentOrder.items }
+              : currentOrder,
+          ),
+        );
         if ((selectedOrder?._id || selectedOrder?.id) === orderId) {
-          setSelectedOrder((currentOrder) => ({ ...currentOrder, ...updatedOrder }));
+          setSelectedOrder((currentOrder) => ({
+            ...currentOrder,
+            ...updatedOrder,
+          }));
         }
       }
-      showToast({ title: "Đã từ chối đơn hàng và hoàn lại tồn kho.", type: "success" });
+      showToast({
+        title: "Đã từ chối đơn hàng và hoàn lại tồn kho.",
+        type: "success",
+      });
     } catch (requestError) {
       showToast({
-        title: requestError.response?.data?.message || "Từ chối đơn hàng thất bại.",
+        title:
+          requestError.response?.data?.message || "Từ chối đơn hàng thất bại.",
         type: "error",
       });
     } finally {
@@ -220,33 +282,46 @@ function AdminOrders() {
   const handleReviewReturn = async (order, decision) => {
     const orderId = order._id || order.id;
     if (decision === "reject" && returnRejectionReason.trim().length < 5) {
-      showToast({ title: "Nhập lý do từ chối (ít nhất 5 ký tự).", type: "error" });
+      showToast({
+        title: "Nhập lý do từ chối (ít nhất 5 ký tự).",
+        type: "error",
+      });
       return;
     }
     const actionLabel = decision === "approve" ? "duyệt" : "từ chối";
-    if (!window.confirm(`Xác nhận ${actionLabel} yêu cầu trả hàng ${order.clientOrderCode || orderId}?`)) {
+    if (
+      !window.confirm(
+        `Xác nhận ${actionLabel} yêu cầu trả hàng ${order.clientOrderCode || orderId}?`,
+      )
+    ) {
       return;
     }
 
     setReturnSubmitting(true);
     try {
-      const { data: response } = await axiosClient.put(`${api.order}/return/${orderId}/review`, {
-        decision,
-        rejectionReason: returnRejectionReason.trim(),
-      });
+      const { data: response } = await axiosClient.put(
+        `${api.order}/return/${orderId}/review`,
+        {
+          decision,
+          rejectionReason: returnRejectionReason.trim(),
+        },
+      );
       const updatedOrder = response.order || response;
       applyOrderUpdate(updatedOrder);
       setReturnRejectionReason("");
       showToast({
-        title: response.notificationWarning
-          || (decision === "approve"
-          ? "Đã duyệt yêu cầu và gửi hướng dẫn mang hàng đến cửa hàng."
-          : "Đã từ chối yêu cầu và gửi lý do cho khách hàng."),
+        title:
+          response.notificationWarning ||
+          (decision === "approve"
+            ? "Đã duyệt yêu cầu và gửi hướng dẫn mang hàng đến cửa hàng."
+            : "Đã từ chối yêu cầu và gửi lý do cho khách hàng."),
         type: response.notificationWarning ? "error" : "success",
       });
     } catch (requestError) {
       showToast({
-        title: requestError.response?.data?.message || `Không thể ${actionLabel} yêu cầu trả hàng.`,
+        title:
+          requestError.response?.data?.message ||
+          `Không thể ${actionLabel} yêu cầu trả hàng.`,
         type: "error",
       });
     } finally {
@@ -258,14 +333,22 @@ function AdminOrders() {
     const orderId = order._id || order.id;
     setReturnSubmitting(true);
     try {
-      const { data: updatedOrder } = await axiosClient.put(`${api.order}/return/${orderId}/complete`, {
-        resolution: returnResolution,
-      });
+      const { data: updatedOrder } = await axiosClient.put(
+        `${api.order}/return/${orderId}/complete`,
+        {
+          resolution: returnResolution,
+        },
+      );
       applyOrderUpdate(updatedOrder);
-      showToast({ title: "Đã ghi nhận hoàn tất xử lý trả hàng.", type: "success" });
+      showToast({
+        title: "Đã ghi nhận hoàn tất xử lý trả hàng.",
+        type: "success",
+      });
     } catch (requestError) {
       showToast({
-        title: requestError.response?.data?.message || "Không thể hoàn tất xử lý trả hàng.",
+        title:
+          requestError.response?.data?.message ||
+          "Không thể hoàn tất xử lý trả hàng.",
         type: "error",
       });
     } finally {
@@ -275,18 +358,29 @@ function AdminOrders() {
 
   const handleReceiveReturn = async (order) => {
     const orderId = order._id || order.id;
-    if (!window.confirm(`Xác nhận đã kiểm tra và tiếp nhận sản phẩm trả của đơn ${order.clientOrderCode || orderId}?`)) {
+    if (
+      !window.confirm(
+        `Xác nhận đã kiểm tra và tiếp nhận sản phẩm trả của đơn ${order.clientOrderCode || orderId}?`,
+      )
+    ) {
       return;
     }
 
     setReturnSubmitting(true);
     try {
-      const { data: updatedOrder } = await axiosClient.put(`${api.order}/return/${orderId}/receive`);
+      const { data: updatedOrder } = await axiosClient.put(
+        `${api.order}/return/${orderId}/receive`,
+      );
       applyOrderUpdate(updatedOrder);
-      showToast({ title: "Đã ghi nhận đã kiểm tra và tiếp nhận sản phẩm.", type: "success" });
+      showToast({
+        title: "Đã ghi nhận đã kiểm tra và tiếp nhận sản phẩm.",
+        type: "success",
+      });
     } catch (requestError) {
       showToast({
-        title: requestError.response?.data?.message || "Không thể ghi nhận tiếp nhận sản phẩm.",
+        title:
+          requestError.response?.data?.message ||
+          "Không thể ghi nhận tiếp nhận sản phẩm.",
         type: "error",
       });
     } finally {
@@ -298,12 +392,19 @@ function AdminOrders() {
     const orderId = order._id || order.id;
     setReturnSubmitting(true);
     try {
-      const { data: updatedOrder } = await axiosClient.put(`${api.order}/return/${orderId}/expire`);
+      const { data: updatedOrder } = await axiosClient.put(
+        `${api.order}/return/${orderId}/expire`,
+      );
       applyOrderUpdate(updatedOrder);
-      showToast({ title: "Đã đóng yêu cầu trả hàng quá hạn.", type: "success" });
+      showToast({
+        title: "Đã đóng yêu cầu trả hàng quá hạn.",
+        type: "success",
+      });
     } catch (requestError) {
       showToast({
-        title: requestError.response?.data?.message || "Không thể đóng yêu cầu trả hàng.",
+        title:
+          requestError.response?.data?.message ||
+          "Không thể đóng yêu cầu trả hàng.",
         type: "error",
       });
     } finally {
@@ -311,20 +412,35 @@ function AdminOrders() {
     }
   };
 
-  if (loading) return <div className={cx("loading")}><Loading /></div>;
+  if (loading)
+    return (
+      <div className={cx("loading")}>
+        <LoadingProduct />
+      </div>
+    );
 
   return (
     <section className={cx("page")}>
       <header className={cx("page-header")}>
         <div>
           <p className={cx("eyebrow")}>Vận hành Đơn hàng</p>
-          <p className={cx("subtitle")}>Theo dõi đơn hàng và thông tin giao nhận</p>
+          <p className={cx("subtitle")}>
+            Theo dõi đơn hàng và thông tin giao nhận
+          </p>
         </div>
       </header>
 
-      {error && <div className={cx("alert")} role="alert">{error}</div>}
+      {error && (
+        <div className={cx("alert")} role="alert">
+          {error}
+        </div>
+      )}
 
-      <div className={cx("order-tabs")} role="tablist" aria-label="Danh sách đơn hàng">
+      <div
+        className={cx("order-tabs")}
+        role="tablist"
+        aria-label="Danh sách đơn hàng"
+      >
         {ORDER_VIEWS.map((view) => (
           <button
             key={view.key}
@@ -394,7 +510,7 @@ function AdminOrders() {
               const orderId = order._id || order.id;
               const itemCount = (order.items || []).reduce(
                 (count, item) => count + Number(item.quantity || 0),
-                0
+                0,
               );
               return (
                 <tr key={orderId}>
@@ -403,22 +519,39 @@ function AdminOrders() {
                       {order.clientOrderCode || order.ghnOrderCode || orderId}
                     </strong>
                     <small className={cx("secondary-code")}>
-                      {order.source === "in_store" ? "Bán tại quầy" : "Đơn online"}
+                      {order.source === "in_store"
+                        ? "Bán tại quầy"
+                        : "Đơn online"}
                     </small>
                     {order.ghnOrderCode && (
-                      <small className={cx("secondary-code")}>GHN: {order.ghnOrderCode}</small>
+                      <small className={cx("secondary-code")}>
+                        GHN: {order.ghnOrderCode}
+                      </small>
                     )}
                   </td>
                   <td>
-                    <strong className={cx("customer-name")}>{order.user?.fullname || order.toName || "Khách hàng"}</strong>
-                    <small className={cx("customer-meta")}>{order.user?.email || order.toPhone || "-"}</small>
+                    <strong className={cx("customer-name")}>
+                      {order.user?.fullname || order.toName || "Khách hàng"}
+                    </strong>
+                    <small className={cx("customer-meta")}>
+                      {order.user?.email || order.toPhone || "-"}
+                    </small>
                   </td>
                   <td>{formatDate(order.createdAt)}</td>
                   <td>{itemCount} sản phẩm</td>
-                  <td className={cx("amount")}>{formatCurrency(order.totalPrice)}</td>
+                  <td className={cx("amount")}>
+                    {formatCurrency(order.totalPrice)}
+                  </td>
                   <td>
-                    <span className={cx("status", `status-${order.status || "unknown"}`)}>
-                      {STATUS_LABELS[order.status] || order.status || "Không rõ"}
+                    <span
+                      className={cx(
+                        "status",
+                        `status-${order.status || "unknown"}`,
+                      )}
+                    >
+                      {STATUS_LABELS[order.status] ||
+                        order.status ||
+                        "Không rõ"}
                     </span>
                   </td>
                   <td>
@@ -439,7 +572,10 @@ function AdminOrders() {
                             type="button"
                             title="Xác nhận và tạo đơn GHN"
                             aria-label={`Xác nhận đơn ${order.clientOrderCode || orderId}`}
-                            disabled={confirmingOrderId === orderId || rejectingOrderId === orderId}
+                            disabled={
+                              confirmingOrderId === orderId ||
+                              rejectingOrderId === orderId
+                            }
                             onClick={() => handleConfirmOrder(order)}
                           >
                             <FontAwesomeIcon icon={faCheck} />
@@ -449,7 +585,10 @@ function AdminOrders() {
                             type="button"
                             title="Từ chối đơn và hoàn tồn kho"
                             aria-label={`Từ chối đơn ${order.clientOrderCode || orderId}`}
-                            disabled={confirmingOrderId === orderId || rejectingOrderId === orderId}
+                            disabled={
+                              confirmingOrderId === orderId ||
+                              rejectingOrderId === orderId
+                            }
                             onClick={() => handleRejectOrder(order)}
                           >
                             <FontAwesomeIcon icon={faXmark} />
@@ -462,7 +601,11 @@ function AdminOrders() {
               );
             })}
             {visibleOrders.length === 0 && (
-              <tr><td className={cx("empty-state")} colSpan="7">Không tìm thấy đơn hàng phù hợp.</td></tr>
+              <tr>
+                <td className={cx("empty-state")} colSpan="7">
+                  Không tìm thấy đơn hàng phù hợp.
+                </td>
+              </tr>
             )}
           </tbody>
         </table>
@@ -470,11 +613,21 @@ function AdminOrders() {
 
       {totalPages > 1 && (
         <nav className={cx("pagination")} aria-label="Phân trang đơn hàng">
-          <button type="button" disabled={currentPage === 1} onClick={() => setCurrentPage((page) => page - 1)}>
+          <button
+            type="button"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((page) => page - 1)}
+          >
             Trước
           </button>
-          <span>Trang {currentPage} / {totalPages}</span>
-          <button type="button" disabled={currentPage === totalPages} onClick={() => setCurrentPage((page) => page + 1)}>
+          <span>
+            Trang {currentPage} / {totalPages}
+          </span>
+          <button
+            type="button"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((page) => page + 1)}
+          >
             Sau
           </button>
         </nav>
@@ -495,7 +648,11 @@ function AdminOrders() {
 
       {/* Modal Order Details */}
       {selectedOrder && (
-        <div className={cx("modal-backdrop")} role="presentation" onMouseDown={() => setSelectedOrder(null)}>
+        <div
+          className={cx("modal-backdrop")}
+          role="presentation"
+          onMouseDown={() => setSelectedOrder(null)}
+        >
           <section
             className={cx("detail-modal")}
             role="dialog"
@@ -506,23 +663,40 @@ function AdminOrders() {
             <header className={cx("modal-header")}>
               <div>
                 <p className={cx("eyebrow")}>Chi tiết đơn hàng</p>
-                <h2 id="order-detail-title">{selectedOrder.clientOrderCode || selectedOrder._id}</h2>
+                <h2 id="order-detail-title">
+                  {selectedOrder.clientOrderCode || selectedOrder._id}
+                </h2>
               </div>
-              <button className={cx("close-button")} type="button" aria-label="Đóng" onClick={() => setSelectedOrder(null)}>
+              <button
+                className={cx("close-button")}
+                type="button"
+                aria-label="Đóng"
+                onClick={() => setSelectedOrder(null)}
+              >
                 <FontAwesomeIcon icon={faXmark} />
               </button>
             </header>
             <div className={cx("detail-grid")}>
               <div className={cx("detail-section")}>
-                <h3>{selectedOrder.source === "in_store" ? "Khách hàng" : "Người nhận"}</h3>
-                <p>{selectedOrder.toName || selectedOrder.user?.fullname || "-"}</p>
-                <p>{selectedOrder.toPhone || selectedOrder.user?.phone || "-"}</p>
+                <h3>
+                  {selectedOrder.source === "in_store"
+                    ? "Khách hàng"
+                    : "Người nhận"}
+                </h3>
+                <p>
+                  {selectedOrder.toName || selectedOrder.user?.fullname || "-"}
+                </p>
+                <p>
+                  {selectedOrder.toPhone || selectedOrder.user?.phone || "-"}
+                </p>
                 <p>
                   {selectedOrder.source === "in_store"
                     ? "Nhận tại cửa hàng"
                     : selectedOrder.toAddress || "Chưa có địa chỉ"}
                 </p>
-                <p className={cx("note")}>Ghi chú: {selectedOrder.note || "Không có"}</p>
+                <p className={cx("note")}>
+                  Ghi chú: {selectedOrder.note || "Không có"}
+                </p>
               </div>
               <div className={cx("detail-section")}>
                 <h3>Thanh toán & trạng thái</h3>
@@ -537,21 +711,28 @@ function AdminOrders() {
                     bank_transfer: "Chuyển khoản",
                     cod: "Thanh toán khi nhận hàng (COD)",
                     vnpay: "VNPAY",
-                  }[selectedOrder.paymentMethod]
-                    || (selectedOrder.paymentTypeId === 2
+                  }[selectedOrder.paymentMethod] ||
+                    (selectedOrder.paymentTypeId === 2
                       ? "Thanh toán khi nhận hàng (COD)"
                       : "VNPAY")}
                 </p>
-                {(selectedOrder.paymentTypeId === 1 || selectedOrder.source === "in_store") && (
+                {(selectedOrder.paymentTypeId === 1 ||
+                  selectedOrder.source === "in_store") && (
                   <p>
-                    Trạng thái thanh toán: {
-                      { paid: "Đã thanh toán", failed: "Thất bại", pending: "Đang chờ thanh toán" }[
-                        selectedOrder.paymentStatus || "pending"
-                      ] || "Chưa xác định"
-                    }
+                    Trạng thái thanh toán:{" "}
+                    {{
+                      paid: "Đã thanh toán",
+                      failed: "Thất bại",
+                      pending: "Đang chờ thanh toán",
+                    }[selectedOrder.paymentStatus || "pending"] ||
+                      "Chưa xác định"}
                   </p>
                 )}
-                <p>{STATUS_LABELS[selectedOrder.status] || selectedOrder.status || "Không rõ"}</p>
+                <p>
+                  {STATUS_LABELS[selectedOrder.status] ||
+                    selectedOrder.status ||
+                    "Không rõ"}
+                </p>
                 <p>Mã GHN: {selectedOrder.ghnOrderCode || "-"}</p>
                 <p>Ngày tạo: {formatDate(selectedOrder.createdAt)}</p>
               </div>
@@ -561,14 +742,31 @@ function AdminOrders() {
               {(selectedOrder.items || []).length ? (
                 <div className={cx("item-list")}>
                   {selectedOrder.items.map((item) => (
-                    <div className={cx("order-item")} key={item._id || item.code}>
-                      {item.product?.avatar && <img src={item.product.avatar} alt="" />}
+                    <div
+                      className={cx("order-item")}
+                      key={item._id || item.code}
+                    >
+                      {item.product?.avatar && (
+                        <img src={item.product.avatar} alt="" />
+                      )}
                       <div className={cx("item-copy")}>
-                        <strong>{item.title || item.product?.title || "Sản phẩm"}</strong>
-                        <span>{item.variant?.storage || ""}{item.color ? ` · ${item.color}` : ""}</span>
+                        <strong>
+                          {item.title || item.product?.title || "Sản phẩm"}
+                        </strong>
+                        <span>
+                          {item.variant?.storage || ""}
+                          {item.color ? ` · ${item.color}` : ""}
+                        </span>
                       </div>
-                      <span className={cx("item-quantity")}>x{item.quantity || 0}</span>
-                      <strong>{formatCurrency(Number(item.currentPrice || 0) * Number(item.quantity || 0))}</strong>
+                      <span className={cx("item-quantity")}>
+                        x{item.quantity || 0}
+                      </span>
+                      <strong>
+                        {formatCurrency(
+                          Number(item.currentPrice || 0) *
+                            Number(item.quantity || 0),
+                        )}
+                      </strong>
                     </div>
                   ))}
                 </div>
@@ -581,34 +779,74 @@ function AdminOrders() {
               </div>
             </div>
             {selectedOrder.returnRequest && (
-              <section className={cx("detail-section", "items-section", "return-detail")}>
+              <section
+                className={cx(
+                  "detail-section",
+                  "items-section",
+                  "return-detail",
+                )}
+              >
                 <h3>Yêu cầu trả hàng</h3>
-                <p><strong>Lý do:</strong> {selectedOrder.returnRequest.reason || "-"}</p>
-                <p><strong>Mô tả:</strong> {selectedOrder.returnRequest.description || "-"}</p>
-                <p><strong>Gửi lúc:</strong> {formatDate(selectedOrder.returnRequest.requestedAt)}</p>
+                <p>
+                  <strong>Lý do:</strong>{" "}
+                  {selectedOrder.returnRequest.reason || "-"}
+                </p>
+                <p>
+                  <strong>Mô tả:</strong>{" "}
+                  {selectedOrder.returnRequest.description || "-"}
+                </p>
+                <p>
+                  <strong>Gửi lúc:</strong>{" "}
+                  {formatDate(selectedOrder.returnRequest.requestedAt)}
+                </p>
                 {selectedOrder.returnRequest.images?.length > 0 && (
                   <div className={cx("return-images")}>
                     {selectedOrder.returnRequest.images.map((image, index) => (
-                      <a href={image} target="_blank" rel="noreferrer" key={image}>
-                        <img src={image} alt={`Ảnh tình trạng sản phẩm ${index + 1}`} />
+                      <a
+                        href={image}
+                        target="_blank"
+                        rel="noreferrer"
+                        key={image}
+                      >
+                        <img
+                          src={image}
+                          alt={`Ảnh tình trạng sản phẩm ${index + 1}`}
+                        />
                       </a>
                     ))}
                   </div>
                 )}
                 {selectedOrder.returnRequest.rejectionReason && (
-                  <p><strong>Lý do từ chối:</strong> {selectedOrder.returnRequest.rejectionReason}</p>
+                  <p>
+                    <strong>Lý do từ chối:</strong>{" "}
+                    {selectedOrder.returnRequest.rejectionReason}
+                  </p>
                 )}
                 {selectedOrder.returnRequest.instructions && (
                   <>
-                    <p><strong>Hướng dẫn:</strong> {selectedOrder.returnRequest.instructions}</p>
-                    <p><strong>Hạn mang đến:</strong> {formatDate(selectedOrder.returnRequest.dropoffDeadline)}</p>
+                    <p>
+                      <strong>Hướng dẫn:</strong>{" "}
+                      {selectedOrder.returnRequest.instructions}
+                    </p>
+                    <p>
+                      <strong>Hạn mang đến:</strong>{" "}
+                      {formatDate(selectedOrder.returnRequest.dropoffDeadline)}
+                    </p>
                   </>
                 )}
                 {selectedOrder.returnRequest.receivedAt && (
-                  <p><strong>Nhân viên tiếp nhận lúc:</strong> {formatDate(selectedOrder.returnRequest.receivedAt)}</p>
+                  <p>
+                    <strong>Nhân viên tiếp nhận lúc:</strong>{" "}
+                    {formatDate(selectedOrder.returnRequest.receivedAt)}
+                  </p>
                 )}
                 {selectedOrder.returnRequest.resolution && (
-                  <p><strong>Kết quả:</strong> {selectedOrder.returnRequest.resolution === "refund" ? "Hoàn tiền" : "Đổi hàng"}</p>
+                  <p>
+                    <strong>Kết quả:</strong>{" "}
+                    {selectedOrder.returnRequest.resolution === "refund"
+                      ? "Hoàn tiền"
+                      : "Đổi hàng"}
+                  </p>
                 )}
 
                 {selectedOrder.status === "return_request" && (
@@ -617,15 +855,24 @@ function AdminOrders() {
                       type="button"
                       className={cx("return-approve")}
                       disabled={returnSubmitting}
-                      onClick={() => handleReviewReturn(selectedOrder, "approve")}
+                      onClick={() =>
+                        handleReviewReturn(selectedOrder, "approve")
+                      }
                     >
                       Duyệt yêu cầu
                     </button>
-                    <label className={cx("return-reason-label")} htmlFor="returnRejectionReason">Lý do từ chối (bắt buộc)</label>
+                    <label
+                      className={cx("return-reason-label")}
+                      htmlFor="returnRejectionReason"
+                    >
+                      Lý do từ chối (bắt buộc)
+                    </label>
                     <textarea
                       id="returnRejectionReason"
                       value={returnRejectionReason}
-                      onChange={(event) => setReturnRejectionReason(event.target.value)}
+                      onChange={(event) =>
+                        setReturnRejectionReason(event.target.value)
+                      }
                       maxLength={500}
                       rows={3}
                       placeholder="Nêu rõ lý do để khách hàng biết"
@@ -633,8 +880,13 @@ function AdminOrders() {
                     <button
                       type="button"
                       className={cx("return-reject")}
-                      disabled={returnSubmitting || returnRejectionReason.trim().length < 5}
-                      onClick={() => handleReviewReturn(selectedOrder, "reject")}
+                      disabled={
+                        returnSubmitting ||
+                        returnRejectionReason.trim().length < 5
+                      }
+                      onClick={() =>
+                        handleReviewReturn(selectedOrder, "reject")
+                      }
                     >
                       Từ chối yêu cầu
                     </button>
@@ -642,11 +894,18 @@ function AdminOrders() {
                 )}
                 {selectedOrder.status === "return_received" && (
                   <div className={cx("return-actions")}>
-                    <label className={cx("return-reason-label")} htmlFor="returnResolution">Xử lý sau khi kiểm tra</label>
+                    <label
+                      className={cx("return-reason-label")}
+                      htmlFor="returnResolution"
+                    >
+                      Xử lý sau khi kiểm tra
+                    </label>
                     <select
                       id="returnResolution"
                       value={returnResolution}
-                      onChange={(event) => setReturnResolution(event.target.value)}
+                      onChange={(event) =>
+                        setReturnResolution(event.target.value)
+                      }
                     >
                       <option value="refund">Hoàn tiền</option>
                       <option value="exchange">Đổi hàng</option>
@@ -663,7 +922,10 @@ function AdminOrders() {
                 )}
                 {selectedOrder.status === "return_approved" && (
                   <div className={cx("return-actions")}>
-                    <p>Kiểm tra sản phẩm khách mang đến cửa hàng, sau đó ghi nhận tiếp nhận tại đây.</p>
+                    <p>
+                      Kiểm tra sản phẩm khách mang đến cửa hàng, sau đó ghi nhận
+                      tiếp nhận tại đây.
+                    </p>
                     <button
                       type="button"
                       className={cx("return-approve")}
@@ -672,15 +934,18 @@ function AdminOrders() {
                     >
                       Xác nhận đã kiểm tra và tiếp nhận
                     </button>
-                    <p>Nếu khách không mang sản phẩm đến trước hạn, đóng yêu cầu tại đây.</p>
-                      <button
-                        type="button"
-                        className={cx("return-reject")}
-                        disabled={returnSubmitting}
-                        onClick={() => handleExpireReturn(selectedOrder)}
-                      >
-                        Đóng yêu cầu hết hạn
-                      </button>
+                    <p>
+                      Nếu khách không mang sản phẩm đến trước hạn, đóng yêu cầu
+                      tại đây.
+                    </p>
+                    <button
+                      type="button"
+                      className={cx("return-reject")}
+                      disabled={returnSubmitting}
+                      onClick={() => handleExpireReturn(selectedOrder)}
+                    >
+                      Đóng yêu cầu hết hạn
+                    </button>
                   </div>
                 )}
               </section>

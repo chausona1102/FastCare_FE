@@ -9,7 +9,7 @@ import {
 
 import api from "~/api";
 import axiosClient from "~/api/axiosClient";
-import Loading from "~/components/Loading";
+import { LoadingProduct } from "~/components/Loading";
 import { useToast } from "~/contexts/ToastContext";
 import ProductForm from "./ProductForm";
 import ProductTable from "./ProductTable";
@@ -686,7 +686,7 @@ function ProductsManagement() {
   if (loading)
     return (
       <div className={cx("loading")}>
-        <Loading />
+        <LoadingProduct />
       </div>
     );
 

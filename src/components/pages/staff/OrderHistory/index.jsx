@@ -3,7 +3,7 @@ import classNames from "classnames/bind";
 
 import api from "~/api";
 import axiosClient from "~/api/axiosClient";
-import Loading from "~/components/Loading";
+import { LoadingProduct } from "~/components/Loading";
 import styles from "./OrderHistory.module.scss";
 
 const cx = classNames.bind(styles);
@@ -31,7 +31,8 @@ const formatDate = (value) => {
     : date.toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" });
 };
 
-const formatCurrency = (value) => `${Number(value || 0).toLocaleString("vi-VN")} ₫`;
+const formatCurrency = (value) =>
+  `${Number(value || 0).toLocaleString("vi-VN")} ₫`;
 
 function OrderHistory() {
   const [orders, setOrders] = useState([]);
@@ -79,7 +80,9 @@ function OrderHistory() {
         if (!controller.signal.aborted) {
           setError({
             queryKey: requestedQueryKey,
-            message: requestError.response?.data?.message || "Không thể tải lịch sử đơn hàng.",
+            message:
+              requestError.response?.data?.message ||
+              "Không thể tải lịch sử đơn hàng.",
           });
         }
       } finally {
@@ -93,10 +96,16 @@ function OrderHistory() {
 
   const visibleCount = orders.length;
   const totalItems = useMemo(
-    () => orders.reduce((total, order) => total + (order.items || []).reduce(
-      (orderTotal, item) => orderTotal + (Number(item.quantity) || 0),
-      0,
-    ), 0),
+    () =>
+      orders.reduce(
+        (total, order) =>
+          total +
+          (order.items || []).reduce(
+            (orderTotal, item) => orderTotal + (Number(item.quantity) || 0),
+            0,
+          ),
+        0,
+      ),
     [orders],
   );
 
@@ -122,7 +131,9 @@ function OrderHistory() {
       if (requestGenerationRef.current === requestGeneration) {
         setError({
           queryKey,
-          message: requestError.response?.data?.message || "Không thể tải thêm đơn hàng.",
+          message:
+            requestError.response?.data?.message ||
+            "Không thể tải thêm đơn hàng.",
         });
       }
     } finally {
@@ -136,7 +147,10 @@ function OrderHistory() {
         <div>
           <p className={cx("eyebrow")}>Quản lý đơn hàng</p>
           <h1>Lịch sử đơn hàng</h1>
-          <p className={cx("summary")}>Tra cứu các đơn đã giao, đã hủy và các trường hợp trả hàng đã hoàn tất.</p>
+          <p className={cx("summary")}>
+            Tra cứu các đơn đã giao, đã hủy và các trường hợp trả hàng đã hoàn
+            tất.
+          </p>
         </div>
       </header>
 
@@ -166,16 +180,25 @@ function OrderHistory() {
         </label>
         <label className={cx("filterField")}>
           <span>Lọc trạng thái</span>
-          <select value={status} onChange={(event) => setStatus(event.target.value)}>
+          <select
+            value={status}
+            onChange={(event) => setStatus(event.target.value)}
+          >
             {STATUS_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>{option.label}</option>
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
             ))}
           </select>
         </label>
         <span className={cx("resultCount")}>{visibleCount} đơn hàng</span>
       </div>
 
-      {error?.queryKey === queryKey && <div className={cx("alert")} role="alert">{error.message}</div>}
+      {error?.queryKey === queryKey && (
+        <div className={cx("alert")} role="alert">
+          {error.message}
+        </div>
+      )}
 
       <div className={cx("tableWrap")}>
         <table>
@@ -191,7 +214,11 @@ function OrderHistory() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td className={cx("emptyState")} colSpan="6"><Loading /></td></tr>
+              <tr>
+                <td className={cx("emptyState")} colSpan="6">
+                  <LoadingProduct />
+                </td>
+              </tr>
             ) : orders.length > 0 ? (
               orders.map((order) => {
                 const orderId = order._id || order.id;
@@ -199,35 +226,54 @@ function OrderHistory() {
                   (total, item) => total + (Number(item.quantity) || 0),
                   0,
                 );
-                const customerName = order.user?.fullname || order.toName || "Khách hàng";
+                const customerName =
+                  order.user?.fullname || order.toName || "Khách hàng";
 
                 return (
                   <tr key={orderId}>
                     <td>
-                      <span className={cx("orderCode")}>{order.clientOrderCode || order.ghnOrderCode || orderId}</span>
+                      <span className={cx("orderCode")}>
+                        {order.clientOrderCode || order.ghnOrderCode || orderId}
+                      </span>
                       <small className={cx("secondaryText")}>
-                        {order.source === "in_store" ? "Bán tại quầy" : "Đơn online"}
+                        {order.source === "in_store"
+                          ? "Bán tại quầy"
+                          : "Đơn online"}
                       </small>
-                      {order.ghnOrderCode && <small className={cx("secondaryText")}>GHN: {order.ghnOrderCode}</small>}
+                      {order.ghnOrderCode && (
+                        <small className={cx("secondaryText")}>
+                          GHN: {order.ghnOrderCode}
+                        </small>
+                      )}
                     </td>
                     <td>
                       <span className={cx("customerName")}>{customerName}</span>
-                      <small className={cx("secondaryText")}>{order.user?.phone || order.toPhone || "-"}</small>
+                      <small className={cx("secondaryText")}>
+                        {order.user?.phone || order.toPhone || "-"}
+                      </small>
                     </td>
                     <td>
                       <span>{itemCount} sản phẩm</span>
                       {order.items?.[0] && (
                         <small className={cx("secondaryText")}>
-                          {order.items[0].title || order.items[0].product?.title || "Sản phẩm"}
-                          {order.items.length > 1 ? ` và ${order.items.length - 1} mặt hàng khác` : ""}
+                          {order.items[0].title ||
+                            order.items[0].product?.title ||
+                            "Sản phẩm"}
+                          {order.items.length > 1
+                            ? ` và ${order.items.length - 1} mặt hàng khác`
+                            : ""}
                         </small>
                       )}
                     </td>
                     <td>{formatDate(order.createdAt)}</td>
-                    <td className={cx("amount")}>{formatCurrency(order.totalPrice)}</td>
+                    <td className={cx("amount")}>
+                      {formatCurrency(order.totalPrice)}
+                    </td>
                     <td>
                       <span className={cx("status", `status-${order.status}`)}>
-                        {STATUS_LABELS[order.status] || order.status || "Không xác định"}
+                        {STATUS_LABELS[order.status] ||
+                          order.status ||
+                          "Không xác định"}
                       </span>
                     </td>
                   </tr>

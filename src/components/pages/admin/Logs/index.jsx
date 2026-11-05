@@ -5,7 +5,7 @@ import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 
 import api from "~/api";
 import axiosClient from "~/api/axiosClient";
-import Loading from "~/components/Loading";
+import { LoadingProduct } from "~/components/Loading";
 import styles from "./Logs.module.scss";
 
 const cx = classNames.bind(styles);
@@ -107,7 +107,8 @@ function ActivityLogs() {
           <p className={cx("eyebrow")}>Quản trị hệ thống</p>
           <h1>Nhật ký hoạt động</h1>
           <p className={cx("summary")}>
-            Theo dõi thao tác trên sản phẩm, phiên bản, người dùng, danh mục và đơn hàng.
+            Theo dõi thao tác trên sản phẩm, phiên bản, người dùng, danh mục và
+            đơn hàng.
           </p>
         </div>
       </header>
@@ -165,12 +166,20 @@ function ActivityLogs() {
             }}
           />
         </label>
-        <button className={cx("clearButton")} type="button" onClick={clearFilters}>
+        <button
+          className={cx("clearButton")}
+          type="button"
+          onClick={clearFilters}
+        >
           Xóa lọc
         </button>
       </div>
 
-      {error && <div className={cx("alert")} role="alert">{error}</div>}
+      {error && (
+        <div className={cx("alert")} role="alert">
+          {error}
+        </div>
+      )}
 
       <div className={cx("tableContainer")}>
         <div className={cx("tableSummary")}>
@@ -191,17 +200,27 @@ function ActivityLogs() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td className={cx("stateCell")} colSpan={5}><Loading /></td>
+                  <td className={cx("stateCell")} colSpan={5}>
+                    <LoadingProduct />
+                  </td>
                 </tr>
               ) : logs.length ? (
                 logs.map((log) => (
                   <tr key={log._id}>
-                    <td className={cx("dateCell")}>{formatDateTime(log.timestamp)}</td>
+                    <td className={cx("dateCell")}>
+                      {formatDateTime(log.timestamp)}
+                    </td>
                     <td>
-                      <strong>{log.user?.fullname || log.user?.username || "Người dùng đã xóa"}</strong>
+                      <strong>
+                        {log.user?.fullname ||
+                          log.user?.username ||
+                          "Người dùng đã xóa"}
+                      </strong>
                       {log.user?.email && <small>{log.user.email}</small>}
                     </td>
-                    <td><span className={cx("actionBadge")}>{log.action}</span></td>
+                    <td>
+                      <span className={cx("actionBadge")}>{log.action}</span>
+                    </td>
                     <td>{TARGET_LABELS[log.target] || log.target || "-"}</td>
                     <td className={cx("targetId")}>{log.targetId || "-"}</td>
                   </tr>
@@ -218,7 +237,9 @@ function ActivityLogs() {
         </div>
         {totalPages > 1 && (
           <footer className={cx("pagination")}>
-            <span>Trang {page} / {totalPages}</span>
+            <span>
+              Trang {page} / {totalPages}
+            </span>
             <div>
               <button
                 type="button"

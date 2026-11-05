@@ -11,7 +11,7 @@ import {
 
 import api from "~/api";
 import axiosClient from "~/api/axiosClient";
-import Loading from "~/components/Loading";
+import { LoadingProduct } from "~/components/Loading";
 import styles from "./ParentCategories.module.scss";
 
 const cx = classNames.bind(styles);
@@ -43,7 +43,10 @@ function ParentCategories() {
         setCategories(Array.isArray(data) ? data : []);
       } catch (requestError) {
         if (!controller.signal.aborted) {
-          setError(requestError.response?.data?.message || "Không thể tải danh sách phân loại cha.");
+          setError(
+            requestError.response?.data?.message ||
+              "Không thể tải danh sách phân loại cha.",
+          );
         }
       } finally {
         if (!controller.signal.aborted) setLoading(false);
@@ -60,14 +63,19 @@ function ParentCategories() {
     return categories.filter((category) =>
       [category.name, category.slug]
         .filter(Boolean)
-        .some((value) => String(value).toLocaleLowerCase("vi").includes(keyword))
+        .some((value) =>
+          String(value).toLocaleLowerCase("vi").includes(keyword),
+        ),
     );
   }, [categories, search]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredCategories.length / ITEMS_PER_PAGE));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredCategories.length / ITEMS_PER_PAGE),
+  );
   const visibleCategories = filteredCategories.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
+    currentPage * ITEMS_PER_PAGE,
   );
 
   const resetForm = () => {
@@ -106,10 +114,15 @@ function ParentCategories() {
     try {
       if (editingCategory) {
         const categoryId = editingCategory._id || editingCategory.id;
-        const { data } = await axiosClient.patch(`${api.parentCategory}/${categoryId}`, payload);
-        setCategories((current) => current.map((category) =>
-          (category._id || category.id) === categoryId ? data : category
-        ));
+        const { data } = await axiosClient.patch(
+          `${api.parentCategory}/${categoryId}`,
+          payload,
+        );
+        setCategories((current) =>
+          current.map((category) =>
+            (category._id || category.id) === categoryId ? data : category,
+          ),
+        );
         setNotice("Đã cập nhật phân loại cha.");
       } else {
         const { data } = await axiosClient.post(api.parentCategory, payload);
@@ -119,7 +132,9 @@ function ParentCategories() {
       }
       resetForm();
     } catch (requestError) {
-      setError(requestError.response?.data?.message || "Không thể lưu phân loại cha.");
+      setError(
+        requestError.response?.data?.message || "Không thể lưu phân loại cha.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -134,20 +149,28 @@ function ParentCategories() {
     setNotice("");
     try {
       await axiosClient.delete(`${api.parentCategory}/${categoryId}`);
-      setCategories((current) => current.filter(
-        (item) => (item._id || item.id) !== categoryId
-      ));
+      setCategories((current) =>
+        current.filter((item) => (item._id || item.id) !== categoryId),
+      );
       setCurrentPage(1);
       setNotice("Đã xóa phân loại cha.");
-      if ((editingCategory?._id || editingCategory?.id) === categoryId) resetForm();
+      if ((editingCategory?._id || editingCategory?.id) === categoryId)
+        resetForm();
     } catch (requestError) {
-      setError(requestError.response?.data?.message || "Không thể xóa phân loại cha.");
+      setError(
+        requestError.response?.data?.message || "Không thể xóa phân loại cha.",
+      );
     } finally {
       setDeletingId("");
     }
   };
 
-  if (loading) return <div className={cx("loading")}><Loading /></div>;
+  if (loading)
+    return (
+      <div className={cx("loading")}>
+        <LoadingProduct />
+      </div>
+    );
 
   return (
     <section className={cx("page")}>
@@ -155,7 +178,9 @@ function ParentCategories() {
         <div>
           <p className={cx("eyebrow")}>Quản lý danh mục</p>
           <h1>Phân loại cha</h1>
-          <p className={cx("summary")}>Tạo, cập nhật và quản lý các nhóm danh mục sản phẩm.</p>
+          <p className={cx("summary")}>
+            Tạo, cập nhật và quản lý các nhóm danh mục sản phẩm.
+          </p>
         </div>
         <button
           className={cx("create-button")}
@@ -168,13 +193,23 @@ function ParentCategories() {
         </button>
       </header>
 
-      {error && <div className={cx("alert", "error")} role="alert">{error}</div>}
-      {notice && <div className={cx("alert", "success")} role="status">{notice}</div>}
+      {error && (
+        <div className={cx("alert", "error")} role="alert">
+          {error}
+        </div>
+      )}
+      {notice && (
+        <div className={cx("alert", "success")} role="status">
+          {notice}
+        </div>
+      )}
 
       {isFormOpen && (
         <form className={cx("category-form")} onSubmit={handleSubmit}>
           <div className={cx("form-heading")}>
-            <h2>{editingCategory ? "Chỉnh sửa phân loại" : "Tạo phân loại cha"}</h2>
+            <h2>
+              {editingCategory ? "Chỉnh sửa phân loại" : "Tạo phân loại cha"}
+            </h2>
             <span>Đường dẫn được tạo tự động từ tên phân loại.</span>
           </div>
           <div className={cx("form-grid")}>
@@ -183,7 +218,12 @@ function ParentCategories() {
               <input
                 name="name"
                 value={formData.name}
-                onChange={(event) => setFormData((current) => ({ ...current, name: event.target.value }))}
+                onChange={(event) =>
+                  setFormData((current) => ({
+                    ...current,
+                    name: event.target.value,
+                  }))
+                }
                 maxLength={100}
                 required
               />
@@ -194,27 +234,33 @@ function ParentCategories() {
                 name="avatar"
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
-                onChange={(event) => setFormData((current) => ({
-                  ...current,
-                  avatar: event.target.files?.[0] || null,
-                  removeAvatar: false,
-                }))}
+                onChange={(event) =>
+                  setFormData((current) => ({
+                    ...current,
+                    avatar: event.target.files?.[0] || null,
+                    removeAvatar: false,
+                  }))
+                }
               />
             </label>
           </div>
           {editingCategory?.avatar && (
             <div className={cx("image-options")}>
               <img src={editingCategory.avatar} alt="" />
-              <span>{formData.avatar ? formData.avatar.name : "Ảnh hiện tại"}</span>
+              <span>
+                {formData.avatar ? formData.avatar.name : "Ảnh hiện tại"}
+              </span>
               {!formData.avatar && (
                 <label>
                   <input
                     type="checkbox"
                     checked={formData.removeAvatar}
-                    onChange={(event) => setFormData((current) => ({
-                      ...current,
-                      removeAvatar: event.target.checked,
-                    }))}
+                    onChange={(event) =>
+                      setFormData((current) => ({
+                        ...current,
+                        removeAvatar: event.target.checked,
+                      }))
+                    }
                   />
                   Gỡ ảnh hiện tại
                 </label>
@@ -222,11 +268,23 @@ function ParentCategories() {
             </div>
           )}
           <div className={cx("form-actions")}>
-            <button className={cx("cancel-button")} type="button" onClick={resetForm}>
+            <button
+              className={cx("cancel-button")}
+              type="button"
+              onClick={resetForm}
+            >
               Hủy
             </button>
-            <button className={cx("submit-button")} type="submit" disabled={submitting}>
-              {submitting ? "Đang lưu..." : editingCategory ? "Lưu thay đổi" : "Tạo phân loại"}
+            <button
+              className={cx("submit-button")}
+              type="submit"
+              disabled={submitting}
+            >
+              {submitting
+                ? "Đang lưu..."
+                : editingCategory
+                  ? "Lưu thay đổi"
+                  : "Tạo phân loại"}
             </button>
           </div>
         </form>
@@ -246,7 +304,9 @@ function ParentCategories() {
             }}
           />
         </label>
-        <span className={cx("result-count")}>{filteredCategories.length} phân loại</span>
+        <span className={cx("result-count")}>
+          {filteredCategories.length} phân loại
+        </span>
       </div>
 
       <div className={cx("table-wrap")}>
@@ -274,7 +334,9 @@ function ParentCategories() {
                     <strong>{category.name}</strong>
                   </div>
                 </td>
-                <td><code>{category.slug || "-"}</code></td>
+                <td>
+                  <code>{category.slug || "-"}</code>
+                </td>
                 <td>
                   {category.createdAt
                     ? new Date(category.createdAt).toLocaleDateString("vi-VN")
@@ -308,7 +370,9 @@ function ParentCategories() {
             {visibleCategories.length === 0 && (
               <tr>
                 <td className={cx("empty-state")} colSpan="4">
-                  {search ? "Không tìm thấy phân loại phù hợp." : "Chưa có phân loại cha nào."}
+                  {search
+                    ? "Không tìm thấy phân loại phù hợp."
+                    : "Chưa có phân loại cha nào."}
                 </td>
               </tr>
             )}
@@ -325,7 +389,9 @@ function ParentCategories() {
           >
             Trước
           </button>
-          <span>Trang {currentPage} / {totalPages}</span>
+          <span>
+            Trang {currentPage} / {totalPages}
+          </span>
           <button
             type="button"
             disabled={currentPage === totalPages}

@@ -4,7 +4,7 @@ const cx = classNames.bind(style);
 import Title from "~/components/Title";
 import Button from "~/components/Button";
 import Cart from "~/components/Cart";
-import Loading from "~/components/Loading";
+import { LoadingProduct } from "~/components/Loading";
 import { converseVND, converseKilo } from "~/utils/functions.jsx";
 
 import api from "~/api";
@@ -453,7 +453,7 @@ function ProductDetail() {
     fetchFeedbacks();
   }, [id]);
 
-  if (!product || !currentVersion) return Loading();
+  if (!product || !currentVersion) return LoadingProduct();
   return (
     <div className={cx("wrapper")}>
       {/* Breadcrumb */}

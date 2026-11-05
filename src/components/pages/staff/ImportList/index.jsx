@@ -4,7 +4,7 @@ import classNames from "classnames/bind";
 
 import api from "~/api";
 import axiosClient from "~/api/axiosClient";
-import Loading from "~/components/Loading";
+import { LoadingProduct } from "~/components/Loading";
 import styles from "./Imports.module.scss";
 
 const cx = classNames.bind(styles);
@@ -36,7 +36,10 @@ function ImportList() {
         setRecords(Array.isArray(data) ? data : []);
       } catch (requestError) {
         if (!controller.signal.aborted) {
-          setError(requestError.response?.data?.message || "Không thể tải thông tin nhập hàng.");
+          setError(
+            requestError.response?.data?.message ||
+              "Không thể tải thông tin nhập hàng.",
+          );
         }
       } finally {
         if (!controller.signal.aborted) setLoading(false);
@@ -48,9 +51,12 @@ function ImportList() {
   }, []);
 
   const sortedRecords = useMemo(
-    () => [...records].sort((left, right) =>
-      new Date(right.effectiveAt || right.createdAt || 0) -
-      new Date(left.effectiveAt || left.createdAt || 0)),
+    () =>
+      [...records].sort(
+        (left, right) =>
+          new Date(right.effectiveAt || right.createdAt || 0) -
+          new Date(left.effectiveAt || left.createdAt || 0),
+      ),
     [records],
   );
 
@@ -78,7 +84,10 @@ function ImportList() {
   }, [search, sortedRecords]);
 
   const summary = useMemo(() => {
-    const totalQuantity = records.reduce((sum, record) => sum + (Number(record.quantity) || 0), 0);
+    const totalQuantity = records.reduce(
+      (sum, record) => sum + (Number(record.quantity) || 0),
+      0,
+    );
     const totalValue = records.reduce((sum, record) => {
       const quantity = Number(record.quantity) || 0;
       const unitCost = Number(record.unitCost) || 0;
@@ -89,7 +98,9 @@ function ImportList() {
       totalQuantity,
       totalValue,
       latestRecord: sortedRecords.length
-        ? new Date(sortedRecords[0].effectiveAt || sortedRecords[0].createdAt).toLocaleDateString("vi-VN")
+        ? new Date(
+            sortedRecords[0].effectiveAt || sortedRecords[0].createdAt,
+          ).toLocaleDateString("vi-VN")
         : "-",
     };
   }, [records, sortedRecords]);
@@ -112,7 +123,9 @@ function ImportList() {
       );
       setRecords((current) =>
         current.map((record) =>
-          record._id === recordId ? { ...record, unitCost: data.unitCost } : record,
+          record._id === recordId
+            ? { ...record, unitCost: data.unitCost }
+            : record,
         ),
       );
       setNotice("Đã bổ sung đơn giá cho phiếu nhập.");
@@ -131,7 +144,12 @@ function ImportList() {
     }
   };
 
-  if (loading) return <div className={cx("loading")}><Loading /></div>;
+  if (loading)
+    return (
+      <div className={cx("loading")}>
+        <LoadingProduct />
+      </div>
+    );
 
   return (
     <section className={cx("page")}>
@@ -139,13 +157,26 @@ function ImportList() {
         <div>
           <p className={cx("eyebrow")}>Kho hàng</p>
           <h1>Danh sách phiếu nhập</h1>
-          <p className={cx("summary")}>Theo dõi lịch sử nhập hàng, đơn giá và giá trị tồn kho theo từng phiếu.</p>
+          <p className={cx("summary")}>
+            Theo dõi lịch sử nhập hàng, đơn giá và giá trị tồn kho theo từng
+            phiếu.
+          </p>
         </div>
-        <Link className={cx("primaryButton")} to="/staff/imports/create">Tạo phiếu nhập</Link>
+        <Link className={cx("primaryButton")} to="/staff/imports/create">
+          Tạo phiếu nhập
+        </Link>
       </header>
 
-      {error && <div className={cx("alert", "error")} role="alert">{error}</div>}
-      {notice && <div className={cx("alert", "success")} role="status">{notice}</div>}
+      {error && (
+        <div className={cx("alert", "error")} role="alert">
+          {error}
+        </div>
+      )}
+      {notice && (
+        <div className={cx("alert", "success")} role="status">
+          {notice}
+        </div>
+      )}
 
       <div className={cx("summaryCards")}>
         <article className={cx("statCard")}>
@@ -160,12 +191,16 @@ function ImportList() {
         </article>
         <article className={cx("statCard")}>
           <span className={cx("label")}>Tổng giá trị</span>
-          <strong className={cx("value")}>{formatCurrency(summary.totalValue)}</strong>
+          <strong className={cx("value")}>
+            {formatCurrency(summary.totalValue)}
+          </strong>
           <small className={cx("meta")}>đã nhập</small>
         </article>
         <article className={cx("statCard")}>
           <span className={cx("label")}>Cập nhật gần nhất</span>
-          <strong className={cx("value", "compact")}>{summary.latestRecord}</strong>
+          <strong className={cx("value", "compact")}>
+            {summary.latestRecord}
+          </strong>
           <small className={cx("meta")}>mới nhất</small>
         </article>
       </div>
@@ -197,15 +232,21 @@ function ImportList() {
           </thead>
           <tbody>
             {visibleRecords.map((record, index) => {
-              const recordId = record._id || record.id || `${record.createdAt || "created"}-${index}`;
+              const recordId =
+                record._id ||
+                record.id ||
+                `${record.createdAt || "created"}-${index}`;
               const itemName = record.product?.title || "Sản phẩm";
               const sku = record.sku || record.variant?.sku || "-";
-              const totalCost = (Number(record.quantity) || 0) * (Number(record.unitCost) || 0);
+              const totalCost =
+                (Number(record.quantity) || 0) * (Number(record.unitCost) || 0);
 
               return (
                 <tr key={recordId}>
                   <td>
-                    {new Date(record.effectiveAt || record.createdAt).toLocaleString("vi-VN")}
+                    {new Date(
+                      record.effectiveAt || record.createdAt,
+                    ).toLocaleString("vi-VN")}
                     {record.isBackfill && <small>Phiếu nhập bù lịch sử</small>}
                   </td>
                   <td>
@@ -214,7 +255,9 @@ function ImportList() {
                       <small>{sku}</small>
                     </div>
                   </td>
-                  <td className={cx("quantity")}>+{Number(record.quantity) || 0}</td>
+                  <td className={cx("quantity")}>
+                    +{Number(record.quantity) || 0}
+                  </td>
                   <td>
                     {record.unitCost == null ? (
                       <form
@@ -239,7 +282,9 @@ function ImportList() {
                           type="submit"
                           disabled={updatingCostId === recordId}
                         >
-                          {updatingCostId === recordId ? "Đang lưu..." : "Bổ sung"}
+                          {updatingCostId === recordId
+                            ? "Đang lưu..."
+                            : "Bổ sung"}
                         </button>
                       </form>
                     ) : (
@@ -248,14 +293,20 @@ function ImportList() {
                   </td>
                   <td className={cx("amount")}>{formatCurrency(totalCost)}</td>
                   <td>{record.supplier || "-"}</td>
-                  <td>{record.importedBy?.fullname || record.importedBy?.username || "-"}</td>
+                  <td>
+                    {record.importedBy?.fullname ||
+                      record.importedBy?.username ||
+                      "-"}
+                  </td>
                   <td className={cx("notes")}>{record.note || "-"}</td>
                 </tr>
               );
             })}
             {visibleRecords.length === 0 && (
               <tr>
-                <td className={cx("emptyState")} colSpan="8">Không tìm thấy phiếu nhập nào phù hợp.</td>
+                <td className={cx("emptyState")} colSpan="8">
+                  Không tìm thấy phiếu nhập nào phù hợp.
+                </td>
               </tr>
             )}
           </tbody>

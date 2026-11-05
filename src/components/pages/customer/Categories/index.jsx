@@ -4,7 +4,7 @@ import axios from "axios";
 import classNames from "classnames/bind";
 
 import api from "~/api";
-import Loading from "~/components/Loading";
+import { LoadingProduct } from "~/components/Loading";
 import styles from "./Categories.module.scss";
 
 const cx = classNames.bind(styles);
@@ -30,7 +30,7 @@ function Categories() {
     fetchCategories();
   }, []);
 
-  if (loading) return Loading();
+  if (loading) return LoadingProduct();
 
   return (
     <main className={cx("wrapper")}>
@@ -39,7 +39,9 @@ function Categories() {
         <h1>Danh mục</h1>
       </div>
       {error ? (
-        <p className={cx("message")} role="alert">{error}</p>
+        <p className={cx("message")} role="alert">
+          {error}
+        </p>
       ) : categories.length ? (
         <div className={cx("grid")}>
           {categories.map((category) => {
@@ -58,7 +60,9 @@ function Categories() {
                   </span>
                 )}
                 <span className={cx("category-name")}>{category.name}</span>
-                <span className={cx("arrow")} aria-hidden="true">&#8594;</span>
+                <span className={cx("arrow")} aria-hidden="true">
+                  &#8594;
+                </span>
               </Link>
             );
           })}

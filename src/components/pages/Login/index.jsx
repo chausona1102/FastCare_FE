@@ -11,6 +11,7 @@ import { setCredentials } from "~/store/slices/authSlice";
 import { Link, useNavigate } from "react-router-dom";
 import Tippy from "@tippyjs/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { LoadingCircle } from "~/components/Loading";
 import {
   faAngleLeft,
   faCheckCircle,
@@ -22,6 +23,7 @@ function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -50,6 +52,7 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const response = await fetch(api.login, {
         method: "POST",
@@ -99,6 +102,8 @@ function Login() {
       }, 3000);
     } catch (error) {
       console.error("Error:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -152,11 +157,15 @@ function Login() {
                 <p className={cx("error-log", { show: showError })}>
                   {errorMessage}
                 </p>
-                <button type="submit" className={cx("btn-submit")}>
-                  Đăng nhập
+                <button
+                  type="submit"
+                  className={cx("btn-submit")}
+                  disabled={loading}
+                >
+                  {loading ? <LoadingCircle /> : "Đăng nhập"}
                 </button>
                 <div className={cx("forgot")}>
-                  <a href="/forgot-password">Quên mật khẩu?</a>
+                  <Link to="/forgot-password">Quên mật khẩu?</Link>
                 </div>
                 <div className={cx("more-login")}>
                   <div className={cx("dash")}></div>

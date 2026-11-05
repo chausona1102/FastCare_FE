@@ -6,14 +6,19 @@ import api from "~/api";
 import axios from "axios";
 import Cart from "~/components/Cart";
 import { formatSlugToName } from "~/utils/functions";
-import Loading from "~/components/Loading";
+import { LoadingProducts } from "~/components/Loading";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faAngleRight,
   faFilter,
   faRotateLeft,
 } from "@fortawesome/free-solid-svg-icons";
-import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import { useState, useEffect } from "react";
 
 const INITIAL_PRODUCTS_COUNT = 20;
@@ -51,7 +56,9 @@ function Products() {
     filterState.searchKeyword === searchKeyword ? filterState.price : 0;
   const selectedCategoryId = searchParams.get("brand") || "";
   const resolvedSlug = slug || "all";
-  const priceSlugIndex = PRICE_RANGES.findIndex((range) => range.slug === priceSlug);
+  const priceSlugIndex = PRICE_RANGES.findIndex(
+    (range) => range.slug === priceSlug,
+  );
   const activePriceIndex = priceSlug
     ? Math.max(priceSlugIndex, 0)
     : selectedPrice;
@@ -90,8 +97,8 @@ function Products() {
           ]);
           const categoryIds = new Set(
             (categoriesData || []).map((category) =>
-              String(category._id || category.id || category.categoryId)
-            )
+              String(category._id || category.id || category.categoryId),
+            ),
           );
           setCategoryName(categoryData.name || "Danh mục");
           setCategories(categoriesData || []);
@@ -102,22 +109,25 @@ function Products() {
                   ? product.category?._id || product.category?.id
                   : product.category;
               return categoryIds.has(String(productCategoryId));
-            })
+            }),
           );
           return;
         }
 
         if (resolvedSlug === "all") {
-          const { data: productsData } = await axios.get(`${api.product}/limit/50`);
+          const { data: productsData } = await axios.get(
+            `${api.product}/limit/50`,
+          );
           setCategories([]);
           setAllProducts(productsData || []);
           return;
         }
 
-        const [{ data: categoriesData }, { data: productsData }] = await axios.all([
-          axios.get(`${api.category}/brands/slug/${resolvedSlug}/10`),
-          axios.get(`${api.productBySlug}/${resolvedSlug}/50`),
-        ]);
+        const [{ data: categoriesData }, { data: productsData }] =
+          await axios.all([
+            axios.get(`${api.category}/brands/slug/${resolvedSlug}/10`),
+            axios.get(`${api.productBySlug}/${resolvedSlug}/50`),
+          ]);
         setCategories(categoriesData);
         setAllProducts(productsData || []);
       } catch (e) {
@@ -167,7 +177,9 @@ function Products() {
     }
   };
 
-  return loading ? Loading() : (
+  return loading ? (
+    LoadingProducts()
+  ) : (
     <div className={cx("wrapper")}>
       <div className={cx("breadcrumb")}>
         <nav className="d-flex flex-direction-row align-items-center gap-1 text-sm text-gray-500">
@@ -222,7 +234,8 @@ function Products() {
             >
               <option value="">Tất cả danh mục con</option>
               {categories.map((category) => {
-                const categoryKey = category._id || category.id || category.categoryId;
+                const categoryKey =
+                  category._id || category.id || category.categoryId;
                 return (
                   <option key={categoryKey} value={categoryKey}>
                     {category.name}
@@ -238,13 +251,16 @@ function Products() {
               setFilterState((current) => ({
                 searchKeyword,
                 brand: event.target.value,
-                price: current.searchKeyword === searchKeyword ? current.price : 0,
+                price:
+                  current.searchKeyword === searchKeyword ? current.price : 0,
               }))
             }
           >
             <option value="">Tất cả thương hiệu</option>
             {brands.map((brandName) => (
-              <option key={brandName} value={brandName}>{brandName}</option>
+              <option key={brandName} value={brandName}>
+                {brandName}
+              </option>
             ))}
           </select>
           <select
@@ -254,28 +270,37 @@ function Products() {
               const nextPriceIndex = Number(event.target.value);
               setFilterState((current) => ({
                 searchKeyword,
-                brand: current.searchKeyword === searchKeyword ? current.brand : "",
+                brand:
+                  current.searchKeyword === searchKeyword ? current.brand : "",
                 price: nextPriceIndex,
               }));
               if (priceSlug) {
                 navigate(
                   nextPriceIndex === 0
                     ? "/products"
-                    : `/prices/${PRICE_RANGES[nextPriceIndex].slug}`
+                    : `/prices/${PRICE_RANGES[nextPriceIndex].slug}`,
                 );
               }
             }}
           >
             {PRICE_RANGES.map((range, index) => (
-              <option key={range.label} value={index}>{range.label}</option>
+              <option key={range.label} value={index}>
+                {range.label}
+              </option>
             ))}
           </select>
           {(selectedBrand || activePriceIndex !== 0 || selectedCategoryId) && (
-            <button className={cx("reset-button")} type="button" onClick={resetFilters}>
+            <button
+              className={cx("reset-button")}
+              type="button"
+              onClick={resetFilters}
+            >
               <FontAwesomeIcon icon={faRotateLeft} /> Xóa lọc
             </button>
           )}
-          <span className={cx("result-count")}>{filteredProducts.length} sản phẩm</span>
+          <span className={cx("result-count")}>
+            {filteredProducts.length} sản phẩm
+          </span>
         </div>
         <div className={cx("products-grid")}>
           {visibleProducts.map((pro, index) => (
@@ -289,7 +314,8 @@ function Products() {
               discount={pro.discount}
               installment={pro.installment}
               screenSize={
-                pro.specifications?.[pro.productType]?.screenSize || pro.screenSize
+                pro.specifications?.[pro.productType]?.screenSize ||
+                pro.screenSize
               }
               rom={pro.rom}
               to={`/product-detail/${pro.id || pro._id}`}

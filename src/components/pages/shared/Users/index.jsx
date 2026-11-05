@@ -14,7 +14,7 @@ import {
 
 import api from "~/api";
 import axiosClient from "~/api/axiosClient";
-import Loading from "~/components/Loading";
+import { LoadingProduct } from "~/components/Loading";
 import styles from "./Users.module.scss";
 
 const cx = classNames.bind(styles);
@@ -63,7 +63,10 @@ function Users() {
         setUsers(Array.isArray(data) ? data : []);
       } catch (requestError) {
         if (!controller.signal.aborted) {
-          setError(requestError.response?.data?.message || "Không thể tải danh sách người dùng.");
+          setError(
+            requestError.response?.data?.message ||
+              "Không thể tải danh sách người dùng.",
+          );
         }
       } finally {
         if (!controller.signal.aborted) {
@@ -80,10 +83,13 @@ function Users() {
   }, [search, selectedRole, refreshKey, userEndpoint]);
 
   const filteredUsers = users;
-  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / USERS_PER_PAGE));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredUsers.length / USERS_PER_PAGE),
+  );
   const visibleUsers = filteredUsers.slice(
     (currentPage - 1) * USERS_PER_PAGE,
-    currentPage * USERS_PER_PAGE
+    currentPage * USERS_PER_PAGE,
   );
 
   const handleFormChange = (event) => {
@@ -124,20 +130,27 @@ function Users() {
             phone: formData.phone,
           },
         );
-        setUsers((current) => current.map((user) =>
-          (user._id || user.id) === userId ? data : user
-        ));
+        setUsers((current) =>
+          current.map((user) =>
+            (user._id || user.id) === userId ? data : user,
+          ),
+        );
         setNotice("Đã cập nhật thông tin người dùng.");
         setRefreshKey((current) => current + 1);
       } else {
         const { data } = await axiosClient.post(
           userEndpoint,
-          isStaff ? { ...formData, role: undefined } : formData
+          isStaff ? { ...formData, role: undefined } : formData,
         );
         const currentSearch = search.trim().toLocaleLowerCase("vi");
-        const newUserText = `${data.fullname || ""} ${data.username || ""} ${data.email || ""}`
-          .toLocaleLowerCase("vi");
-        if ((!selectedRole || data.role === selectedRole) && newUserText.includes(currentSearch)) {
+        const newUserText =
+          `${data.fullname || ""} ${data.username || ""} ${data.email || ""}`.toLocaleLowerCase(
+            "vi",
+          );
+        if (
+          (!selectedRole || data.role === selectedRole) &&
+          newUserText.includes(currentSearch)
+        ) {
           setUsers((current) => [data, ...current].slice(0, 50));
         }
         setNotice("Đã tạo người dùng mới.");
@@ -147,7 +160,10 @@ function Users() {
       setIsFormOpen(false);
       setCurrentPage(1);
     } catch (requestError) {
-      setError(requestError.response?.data?.message || "Không thể lưu thông tin người dùng.");
+      setError(
+        requestError.response?.data?.message ||
+          "Không thể lưu thông tin người dùng.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -162,12 +178,15 @@ function Users() {
       const { data } = isStaff
         ? await axiosClient.patch(`${userEndpoint}/${userId}/status`)
         : await axiosClient.patch(api.user, { userId });
-      setUsers((current) => current.map((item) =>
-        (item._id || item.id) === userId ? data : item
-      ));
+      setUsers((current) =>
+        current.map((item) => ((item._id || item.id) === userId ? data : item)),
+      );
       setNotice(data.isActive ? "Đã mở khóa tài khoản." : "Đã khóa tài khoản.");
     } catch (requestError) {
-      setError(requestError.response?.data?.message || "Không thể thay đổi trạng thái tài khoản.");
+      setError(
+        requestError.response?.data?.message ||
+          "Không thể thay đổi trạng thái tài khoản.",
+      );
     } finally {
       setActionUserId("");
     }
@@ -185,14 +204,20 @@ function Users() {
       setSearching(true);
       setRefreshKey((current) => current + 1);
     } catch (requestError) {
-      setError(requestError.response?.data?.message || "Không thể thay đổi vai trò.");
+      setError(
+        requestError.response?.data?.message || "Không thể thay đổi vai trò.",
+      );
     } finally {
       setActionUserId("");
     }
   };
 
   const handleSoftDelete = async (user) => {
-    if (!window.confirm(`Xóa tài khoản ${user.fullname || user.email}? Tài khoản sẽ được ẩn khỏi danh sách.`)) {
+    if (
+      !window.confirm(
+        `Xóa tài khoản ${user.fullname || user.email}? Tài khoản sẽ được ẩn khỏi danh sách.`,
+      )
+    ) {
       return;
     }
     const userId = user._id || user.id;
@@ -200,26 +225,39 @@ function Users() {
     setError("");
     setNotice("");
     try {
-      await axiosClient.delete(isStaff ? `${userEndpoint}/${userId}` : `${api.user}/${userId}`);
-      setUsers((current) => current.filter((item) => (item._id || item.id) !== userId));
+      await axiosClient.delete(
+        isStaff ? `${userEndpoint}/${userId}` : `${api.user}/${userId}`,
+      );
+      setUsers((current) =>
+        current.filter((item) => (item._id || item.id) !== userId),
+      );
       setCurrentPage(1);
       setNotice("Đã xóa mềm tài khoản.");
       setSearching(true);
       setRefreshKey((current) => current + 1);
     } catch (requestError) {
-      setError(requestError.response?.data?.message || "Không thể xóa tài khoản.");
+      setError(
+        requestError.response?.data?.message || "Không thể xóa tài khoản.",
+      );
     } finally {
       setActionUserId("");
     }
   };
 
-  if (loading) return <div className={cx("loading")}><Loading /></div>;
+  if (loading)
+    return (
+      <div className={cx("loading")}>
+        <LoadingProduct />
+      </div>
+    );
 
   return (
     <section className={cx("page")}>
       <header className={cx("page-header")}>
         <div>
-          <p className={cx("eyebrow")}>{isStaff ? "Quản lý khách hàng" : "Quản trị người dùng"}</p>
+          <p className={cx("eyebrow")}>
+            {isStaff ? "Quản lý khách hàng" : "Quản trị người dùng"}
+          </p>
           <p className={cx("summary")}>
             {isStaff
               ? "Tối đa 50 khách hàng mới nhất; nhân viên không thể thay đổi vai trò."
@@ -243,45 +281,97 @@ function Users() {
         </button>
       </header>
 
-      {error && <div className={cx("alert", "error")} role="alert">{error}</div>}
-      {notice && <div className={cx("alert", "success")} role="status">{notice}</div>}
+      {error && (
+        <div className={cx("alert", "error")} role="alert">
+          {error}
+        </div>
+      )}
+      {notice && (
+        <div className={cx("alert", "success")} role="status">
+          {notice}
+        </div>
+      )}
 
       {isFormOpen && (
         <form className={cx("create-form")} onSubmit={handleSubmitUser}>
           <div className={cx("form-heading")}>
             <h2>{editingUser ? "Chỉnh sửa thông tin" : "Tạo tài khoản"}</h2>
-            <span>{editingUser ? "Cập nhật thông tin người dùng" : "Các trường có dấu * là bắt buộc"}</span>
+            <span>
+              {editingUser
+                ? "Cập nhật thông tin người dùng"
+                : "Các trường có dấu * là bắt buộc"}
+            </span>
           </div>
           <div className={cx("form-grid")}>
             <label>
               Họ và tên *
-              <input name="fullname" value={formData.fullname} onChange={handleFormChange} autoComplete="name" required />
+              <input
+                name="fullname"
+                value={formData.fullname}
+                onChange={handleFormChange}
+                autoComplete="name"
+                required
+              />
             </label>
             <label>
               Username *
-              <input name="username" value={formData.username} onChange={handleFormChange} autoComplete="username" required />
+              <input
+                name="username"
+                value={formData.username}
+                onChange={handleFormChange}
+                autoComplete="username"
+                required
+              />
             </label>
             <label>
               Email *
-              <input name="email" type="email" value={formData.email} onChange={handleFormChange} autoComplete="email" required />
+              <input
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleFormChange}
+                autoComplete="email"
+                required
+              />
             </label>
             <label>
               Số điện thoại *
-              <input name="phone" type="tel" value={formData.phone} onChange={handleFormChange} autoComplete="tel" required />
+              <input
+                name="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={handleFormChange}
+                autoComplete="tel"
+                required
+              />
             </label>
             {!editingUser && (
               <>
                 <label>
                   Mật khẩu *
-                  <input name="password" type="password" value={formData.password} onChange={handleFormChange} autoComplete="new-password" minLength={6} required />
+                  <input
+                    name="password"
+                    type="password"
+                    value={formData.password}
+                    onChange={handleFormChange}
+                    autoComplete="new-password"
+                    minLength={6}
+                    required
+                  />
                 </label>
-                {!isStaff && <label>
-                  Vai trò *
-                  <select name="role" value={formData.role} onChange={handleFormChange}>
-                    <option value="customer">Khách hàng</option>
-                    <option value="staff">Nhân viên</option>
-                  </select>
-                </label>}
+                {!isStaff && (
+                  <label>
+                    Vai trò *
+                    <select
+                      name="role"
+                      value={formData.role}
+                      onChange={handleFormChange}
+                    >
+                      <option value="customer">Khách hàng</option>
+                      <option value="staff">Nhân viên</option>
+                    </select>
+                  </label>
+                )}
               </>
             )}
           </div>
@@ -299,8 +389,16 @@ function Users() {
                 Hủy
               </button>
             )}
-            <button className={cx("submit-button")} type="submit" disabled={submitting}>
-              {submitting ? "Đang lưu..." : editingUser ? "Lưu thay đổi" : "Tạo tài khoản"}
+            <button
+              className={cx("submit-button")}
+              type="submit"
+              disabled={submitting}
+            >
+              {submitting
+                ? "Đang lưu..."
+                : editingUser
+                  ? "Lưu thay đổi"
+                  : "Tạo tài khoản"}
             </button>
           </div>
         </form>
@@ -321,20 +419,22 @@ function Users() {
             }}
           />
         </label>
-        {!isStaff && <select
-          className={cx("role-filter")}
-          value={selectedRole}
-          aria-label="Lọc theo vai trò"
-          onChange={(event) => {
-            setSelectedRole(event.target.value);
-            setSearching(true);
-            setCurrentPage(1);
-          }}
-        >
-          <option value="">Tất cả vai trò</option>
-          <option value="staff">Nhân viên</option>
-          <option value="customer">Khách hàng</option>
-        </select>}
+        {!isStaff && (
+          <select
+            className={cx("role-filter")}
+            value={selectedRole}
+            aria-label="Lọc theo vai trò"
+            onChange={(event) => {
+              setSelectedRole(event.target.value);
+              setSearching(true);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">Tất cả vai trò</option>
+            <option value="staff">Nhân viên</option>
+            <option value="customer">Khách hàng</option>
+          </select>
+        )}
         <span className={cx("result-count")} aria-live="polite">
           {searching ? "Đang tìm..." : `${filteredUsers.length} người dùng`}
         </span>
@@ -360,8 +460,13 @@ function Users() {
                     {user.avatar ? (
                       <img className={cx("avatar")} src={user.avatar} alt="" />
                     ) : (
-                      <span className={cx("avatar", "avatar-fallback")} aria-hidden="true">
-                        {(user.fullname || user.username || "?").charAt(0).toUpperCase()}
+                      <span
+                        className={cx("avatar", "avatar-fallback")}
+                        aria-hidden="true"
+                      >
+                        {(user.fullname || user.username || "?")
+                          .charAt(0)
+                          .toUpperCase()}
                       </span>
                     )}
                     <span>
@@ -372,20 +477,29 @@ function Users() {
                 </td>
                 <td>{user.email}</td>
                 <td>{user.phone || "-"}</td>
-                {!isStaff && <td>
-                  <select
-                    className={cx("row-role")}
-                    value={user.role}
-                    aria-label={`Đổi vai trò của ${user.fullname || user.email}`}
-                    disabled={actionUserId === (user._id || user.id)}
-                    onChange={(event) => handleChangeRole(user, event.target.value)}
-                  >
-                    <option value="customer">{ROLE_LABELS.customer}</option>
-                    <option value="staff">{ROLE_LABELS.staff}</option>
-                  </select>
-                </td>}
+                {!isStaff && (
+                  <td>
+                    <select
+                      className={cx("row-role")}
+                      value={user.role}
+                      aria-label={`Đổi vai trò của ${user.fullname || user.email}`}
+                      disabled={actionUserId === (user._id || user.id)}
+                      onChange={(event) =>
+                        handleChangeRole(user, event.target.value)
+                      }
+                    >
+                      <option value="customer">{ROLE_LABELS.customer}</option>
+                      <option value="staff">{ROLE_LABELS.staff}</option>
+                    </select>
+                  </td>
+                )}
                 <td>
-                  <span className={cx("status", user.isActive ? "active" : "inactive")}>
+                  <span
+                    className={cx(
+                      "status",
+                      user.isActive ? "active" : "inactive",
+                    )}
+                  >
                     {user.isActive ? "Hoạt động" : "Đã khóa"}
                   </span>
                 </td>
@@ -401,14 +515,21 @@ function Users() {
                       <FontAwesomeIcon icon={faPen} />
                     </button>
                     <button
-                      className={cx("action-button", user.isActive ? "lock-action" : "unlock-action")}
+                      className={cx(
+                        "action-button",
+                        user.isActive ? "lock-action" : "unlock-action",
+                      )}
                       type="button"
-                      title={user.isActive ? "Khóa tài khoản" : "Mở khóa tài khoản"}
+                      title={
+                        user.isActive ? "Khóa tài khoản" : "Mở khóa tài khoản"
+                      }
                       aria-label={`${user.isActive ? "Khóa" : "Mở khóa"} ${user.fullname || user.email}`}
                       disabled={actionUserId === (user._id || user.id)}
                       onClick={() => handleToggleLock(user)}
                     >
-                      <FontAwesomeIcon icon={user.isActive ? faLock : faLockOpen} />
+                      <FontAwesomeIcon
+                        icon={user.isActive ? faLock : faLockOpen}
+                      />
                     </button>
                     <button
                       className={cx("action-button", "delete-action")}
@@ -425,7 +546,11 @@ function Users() {
               </tr>
             ))}
             {visibleUsers.length === 0 && (
-              <tr><td className={cx("empty-state")} colSpan={isStaff ? 5 : 6}>Không tìm thấy người dùng phù hợp.</td></tr>
+              <tr>
+                <td className={cx("empty-state")} colSpan={isStaff ? 5 : 6}>
+                  Không tìm thấy người dùng phù hợp.
+                </td>
+              </tr>
             )}
           </tbody>
         </table>
@@ -433,11 +558,21 @@ function Users() {
 
       {totalPages > 1 && (
         <nav className={cx("pagination")} aria-label="Phân trang người dùng">
-          <button type="button" disabled={currentPage === 1} onClick={() => setCurrentPage((page) => page - 1)}>
+          <button
+            type="button"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((page) => page - 1)}
+          >
             Trước
           </button>
-          <span>Trang {currentPage} / {totalPages}</span>
-          <button type="button" disabled={currentPage === totalPages} onClick={() => setCurrentPage((page) => page + 1)}>
+          <span>
+            Trang {currentPage} / {totalPages}
+          </span>
+          <button
+            type="button"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((page) => page + 1)}
+          >
             Sau
           </button>
         </nav>

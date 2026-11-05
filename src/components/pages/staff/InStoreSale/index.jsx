@@ -3,7 +3,7 @@ import classNames from "classnames/bind";
 
 import api from "~/api";
 import axiosClient from "~/api/axiosClient";
-import Loading from "~/components/Loading";
+import { LoadingProduct } from "~/components/Loading";
 import styles from "./InStoreSale.module.scss";
 
 const cx = classNames.bind(styles);
@@ -39,13 +39,20 @@ function InStoreSale() {
           signal: controller.signal,
         });
         if (!controller.signal.aborted) {
-          setVariants(Array.isArray(data) ? data.filter(
-            (variant) => !variant.deleteAt && !variant.product?.deletedAt
-          ) : []);
+          setVariants(
+            Array.isArray(data)
+              ? data.filter(
+                  (variant) => !variant.deleteAt && !variant.product?.deletedAt,
+                )
+              : [],
+          );
         }
       } catch (requestError) {
         if (!controller.signal.aborted) {
-          setError(requestError.response?.data?.message || "Không thể tải danh sách sản phẩm.");
+          setError(
+            requestError.response?.data?.message ||
+              "Không thể tải danh sách sản phẩm.",
+          );
         }
       } finally {
         if (!controller.signal.aborted) setLoading(false);
@@ -63,15 +70,26 @@ function InStoreSale() {
         variant.sku,
         variant.storage,
         ...(variant.colors || []),
-      ].filter(Boolean).join(" ").toLocaleLowerCase("vi");
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLocaleLowerCase("vi");
       return description.includes(keyword);
     });
   }, [search, variants]);
 
-  const cartLines = useMemo(() => cart.map((line) => ({
-    ...line,
-    variant: variants.find((variant) => getVariantId(variant) === line.variantId),
-  })).filter((line) => line.variant), [cart, variants]);
+  const cartLines = useMemo(
+    () =>
+      cart
+        .map((line) => ({
+          ...line,
+          variant: variants.find(
+            (variant) => getVariantId(variant) === line.variantId,
+          ),
+        }))
+        .filter((line) => line.variant),
+    [cart, variants],
+  );
 
   const total = cartLines.reduce(
     (sum, line) => sum + getCurrentPrice(line.variant) * line.quantity,
@@ -87,9 +105,17 @@ function InStoreSale() {
     setCart((current) => {
       const existing = current.find((line) => line.variantId === variantId);
       if (!existing) return [...current, { variantId, quantity: 1 }];
-      return current.map((line) => line.variantId === variantId
-        ? { ...line, quantity: Math.min(line.quantity + 1, Number(selectedVariant.stockQuantity)) }
-        : line);
+      return current.map((line) =>
+        line.variantId === variantId
+          ? {
+              ...line,
+              quantity: Math.min(
+                line.quantity + 1,
+                Number(selectedVariant.stockQuantity),
+              ),
+            }
+          : line,
+      );
     });
   };
 
@@ -98,9 +124,16 @@ function InStoreSale() {
     if (!line) return;
     const quantity = Number(value);
     if (!Number.isInteger(quantity) || quantity < 1) return;
-    setCart((current) => current.map((item) => item.variantId === variantId
-      ? { ...item, quantity: Math.min(quantity, Number(line.variant.stockQuantity)) }
-      : item));
+    setCart((current) =>
+      current.map((item) =>
+        item.variantId === variantId
+          ? {
+              ...item,
+              quantity: Math.min(quantity, Number(line.variant.stockQuantity)),
+            }
+          : item,
+      ),
+    );
   };
 
   const handleSubmit = async (event) => {
@@ -123,29 +156,44 @@ function InStoreSale() {
           quantity: line.quantity,
         })),
       });
-      setNotice(`Đã tạo phiếu ${data.clientOrderCode} · ${formatCurrency(data.totalPrice)}.`);
+      setNotice(
+        `Đã tạo phiếu ${data.clientOrderCode} · ${formatCurrency(data.totalPrice)}.`,
+      );
       const soldQuantities = new Map(
         cartLines.map((line) => [line.variantId, line.quantity]),
       );
-      setVariants((current) => current.map((variant) => {
-        const quantitySold = soldQuantities.get(getVariantId(variant));
-        return quantitySold
-          ? { ...variant, stockQuantity: Number(variant.stockQuantity) - quantitySold }
-          : variant;
-      }));
+      setVariants((current) =>
+        current.map((variant) => {
+          const quantitySold = soldQuantities.get(getVariantId(variant));
+          return quantitySold
+            ? {
+                ...variant,
+                stockQuantity: Number(variant.stockQuantity) - quantitySold,
+              }
+            : variant;
+        }),
+      );
       setCart([]);
       setCustomerName("");
       setCustomerPhone("");
       setSearch("");
       setSelectedVariantId("");
     } catch (requestError) {
-      setError(requestError.response?.data?.message || "Không thể tạo phiếu bán tại quầy.");
+      setError(
+        requestError.response?.data?.message ||
+          "Không thể tạo phiếu bán tại quầy.",
+      );
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (loading) return <div className={cx("loading")}><Loading /></div>;
+  if (loading)
+    return (
+      <div className={cx("loading")}>
+        <LoadingProduct />
+      </div>
+    );
 
   return (
     <section className={cx("page")}>
@@ -154,13 +202,22 @@ function InStoreSale() {
           <p className={cx("eyebrow")}>Quản lý đơn hàng</p>
           <h1>Tạo phiếu bán tại quầy</h1>
           <p className={cx("summary")}>
-            Ghi nhận giao dịch trực tiếp tại cửa hàng. Phiếu được hoàn tất và trừ tồn kho ngay sau khi lưu.
+            Ghi nhận giao dịch trực tiếp tại cửa hàng. Phiếu được hoàn tất và
+            trừ tồn kho ngay sau khi lưu.
           </p>
         </div>
       </header>
 
-      {error && <div className={cx("alert", "error")} role="alert">{error}</div>}
-      {notice && <div className={cx("alert", "success")} role="status">{notice}</div>}
+      {error && (
+        <div className={cx("alert", "error")} role="alert">
+          {error}
+        </div>
+      )}
+      {notice && (
+        <div className={cx("alert", "success")} role="status">
+          {notice}
+        </div>
+      )}
 
       <form className={cx("saleForm")} onSubmit={handleSubmit}>
         <section className={cx("panel")}>
@@ -190,7 +247,10 @@ function InStoreSale() {
             </label>
             <label>
               Phương thức thanh toán *
-              <select value={paymentMethod} onChange={(event) => setPaymentMethod(event.target.value)}>
+              <select
+                value={paymentMethod}
+                onChange={(event) => setPaymentMethod(event.target.value)}
+              >
                 <option value="cash">Tiền mặt</option>
                 <option value="bank_transfer">Chuyển khoản</option>
               </select>
@@ -218,10 +278,14 @@ function InStoreSale() {
               >
                 <option value="">Chọn sản phẩm / SKU</option>
                 {visibleVariants.map((variant) => (
-                  <option key={getVariantId(variant)} value={getVariantId(variant)}>
-                    {variant.product?.title || "Sản phẩm"} · {variant.sku || "Không có SKU"} ·
-                    {" "}{getCurrentPrice(variant).toLocaleString("vi-VN")} ₫ ·
-                    {" "}Tồn: {variant.stockQuantity || 0}
+                  <option
+                    key={getVariantId(variant)}
+                    value={getVariantId(variant)}
+                  >
+                    {variant.product?.title || "Sản phẩm"} ·{" "}
+                    {variant.sku || "Không có SKU"} ·{" "}
+                    {getCurrentPrice(variant).toLocaleString("vi-VN")} ₫ · Tồn:{" "}
+                    {variant.stockQuantity || 0}
                   </option>
                 ))}
               </select>
@@ -230,7 +294,9 @@ function InStoreSale() {
               className={cx("addButton")}
               type="button"
               onClick={addSelectedVariant}
-              disabled={!selectedVariant || Number(selectedVariant.stockQuantity) <= 0}
+              disabled={
+                !selectedVariant || Number(selectedVariant.stockQuantity) <= 0
+              }
             >
               Thêm sản phẩm
             </button>
@@ -251,10 +317,17 @@ function InStoreSale() {
                 {cartLines.map((line) => (
                   <tr key={line.variantId}>
                     <td>
-                      <strong>{line.variant.product?.title || "Sản phẩm"}</strong>
+                      <strong>
+                        {line.variant.product?.title || "Sản phẩm"}
+                      </strong>
                       <small>
-                        {[line.variant.storage, ...(line.variant.colors || []), line.variant.sku]
-                          .filter(Boolean).join(" · ") || "Phiên bản mặc định"}
+                        {[
+                          line.variant.storage,
+                          ...(line.variant.colors || []),
+                          line.variant.sku,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ") || "Phiên bản mặc định"}
                       </small>
                     </td>
                     <td>{formatCurrency(getCurrentPrice(line.variant))}</td>
@@ -267,20 +340,28 @@ function InStoreSale() {
                         max={line.variant.stockQuantity}
                         step="1"
                         value={line.quantity}
-                        onChange={(event) => updateQuantity(line.variantId, event.target.value)}
+                        onChange={(event) =>
+                          updateQuantity(line.variantId, event.target.value)
+                        }
                       />
                       <small>Tồn: {line.variant.stockQuantity}</small>
                     </td>
                     <td className={cx("amount")}>
-                      {formatCurrency(getCurrentPrice(line.variant) * line.quantity)}
+                      {formatCurrency(
+                        getCurrentPrice(line.variant) * line.quantity,
+                      )}
                     </td>
                     <td>
                       <button
                         className={cx("removeButton")}
                         type="button"
-                        onClick={() => setCart((current) => current.filter(
-                          (item) => item.variantId !== line.variantId
-                        ))}
+                        onClick={() =>
+                          setCart((current) =>
+                            current.filter(
+                              (item) => item.variantId !== line.variantId,
+                            ),
+                          )
+                        }
                         aria-label={`Xóa ${line.variant.product?.title || "sản phẩm"} khỏi phiếu`}
                       >
                         Xóa
@@ -289,7 +370,11 @@ function InStoreSale() {
                   </tr>
                 ))}
                 {cartLines.length === 0 && (
-                  <tr><td className={cx("empty")} colSpan="5">Chưa có sản phẩm trong phiếu bán.</td></tr>
+                  <tr>
+                    <td className={cx("empty")} colSpan="5">
+                      Chưa có sản phẩm trong phiếu bán.
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>
@@ -299,14 +384,18 @@ function InStoreSale() {
             <strong>{formatCurrency(total)}</strong>
           </div>
           {variants.length === 0 && (
-            <p className={cx("hint")}>Chưa có phiên bản sản phẩm đang hoạt động.</p>
+            <p className={cx("hint")}>
+              Chưa có phiên bản sản phẩm đang hoạt động.
+            </p>
           )}
         </section>
 
         <button
           className={cx("submitButton")}
           type="submit"
-          disabled={submitting || cartLines.length === 0 || variants.length === 0}
+          disabled={
+            submitting || cartLines.length === 0 || variants.length === 0
+          }
         >
           {submitting ? "Đang lưu phiếu..." : "Hoàn tất bán và trừ tồn kho"}
         </button>
