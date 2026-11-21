@@ -1,14 +1,14 @@
 .wrapper {
     position: relative;
     min-height: 100vh;
-    background: linear-gradient(135deg, #f0f4ff 0%, #e8f5e9 100%);
+    background: var(--theme-auth-gradient);
 
     .container {
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background: #fff;
+        background: var(--theme-surface);
         border-radius: 16px;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         padding: 40px;
@@ -40,12 +40,12 @@
                     padding: 5px 0;
                     font-weight: var(--fw-medium);
                     font-size: 1.5rem;
-                    color: #333;
+                    color: var(--theme-text);
                 }
 
                 input {
                     border-radius: 8px;
-                    border: 1.5px solid #ccc;
+                    border: 1.5px solid var(--theme-border);
                     padding: 10px 14px;
                     font-size: 1.5rem;
                     transition: border-color 0.2s;
@@ -101,7 +101,7 @@
     background-color: rgba(0, 0, 0, 0.5);
 
     .content {
-        background-color: #fff;
+        background-color: var(--theme-surface);
         min-width: 30vw;
         padding: 20px;
         border-radius: 8px;

@@ -14,10 +14,12 @@ import {
   faBars,
   faUserCircle,
   faShoppingCart,
+  faTimes,
   faHeart,
   faGear,
   faSignOut,
   faBagShopping,
+  faHome,
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
 import api from "~/api";
@@ -69,15 +71,22 @@ function Header() {
   return (
     <div className={cx("wrapper")}>
       <header className={cx("header")}>
-        <Link to="/">
+        <Link to="/" aria-label="Trang chủ">
           <div className={cx("logo")}>
             <Tippy
               content="Trang chủ"
               className={cx("logo-tooltip")}
               placement="bottom"
             >
-              <img src={logo} alt="logo" />
+              <span className={cx("logo-desktop")}>
+                <img src={logo} alt="" />
+              </span>
             </Tippy>
+            <FontAwesomeIcon
+              icon={faHome}
+              className={cx("logo-mobile-icon")}
+              aria-hidden="true"
+            />
           </div>
         </Link>
         <div className={cx("category-wrapper")}>
@@ -116,61 +125,116 @@ function Header() {
           </div>
         </Tippy>
         {isLoggedIn ? (
-          <div>
+          <div className={cx("profile-menu")}>
             <button
               className={cx("profile-btn")}
-              onClick={() => {
-                setIsProfileOpen(!isProfileOpen);
-              }}
+              type="button"
+              aria-label="Mở menu tài khoản"
+              aria-haspopup="true"
+              aria-expanded={isProfileOpen}
+              aria-controls="profile-dropdown"
+              onClick={() => setIsProfileOpen((open) => !open)}
             >
-              <img src={user?.avatar} alt="Avatar" />
+              {user?.avatar ? (
+                <img src={user.avatar} alt="" />
+              ) : (
+                <FontAwesomeIcon icon={faUserCircle} />
+              )}
             </button>
-            <ul className={cx("profile-dropdown", { open: isProfileOpen })}>
-              <button onClick={() => (window.location.href = "/wishlist")}>
-                <FontAwesomeIcon
-                  icon={faHeart}
-                  className={cx("profile-icon")}
-                />
-                <span>Yêu thích</span>
-              </button>
-              <button onClick={() => (window.location.href = "/cart")}>
-                <FontAwesomeIcon
-                  icon={faShoppingCart}
-                  className={cx("profile-icon")}
-                />
-                <span>Giỏ hàng</span>
-              </button>
-              <button onClick={() => (window.location.href = "/order")}>
-                <FontAwesomeIcon
-                  icon={faBagShopping}
-                  className={cx("profile-icon")}
-                />
-                <span>Đơn hàng của tôi</span>
-              </button>
-              <button onClick={() => (window.location.href = "/profile")}>
-                <FontAwesomeIcon
-                  icon={faUserCircle}
-                  className={cx("profile-icon")}
-                />
-                <span>Thông tin cá nhân</span>
-              </button>
-              <button onClick={() => (window.location.href = "/settings")}>
-                <FontAwesomeIcon icon={faGear} className={cx("profile-icon")} />
-                <span>Cài đặt</span>
-              </button>
-              <button onClick={handleLogout} className={cx("logout-btn")}>
-                <FontAwesomeIcon
-                  icon={faSignOut}
-                  className={cx("profile-icon")}
-                />
-                <span>Đăng xuất</span>
-              </button>
-            </ul>
             {isProfileOpen && (
-              <div
-                className={cx("backdrop")}
-                onClick={() => setIsProfileOpen(false)}
-              />
+              <>
+                <div
+                  className={cx("backdrop")}
+                  aria-hidden="true"
+                  onClick={() => setIsProfileOpen(false)}
+                />
+                <nav
+                  id="profile-dropdown"
+                  className={cx("profile-dropdown")}
+                  aria-label="Điều hướng tài khoản"
+                >
+                  <div className={cx("profile-card")}>
+                    <div className={cx("profile-avatar")}>
+                      {user?.avatar ? (
+                        <img src={user.avatar} alt="" />
+                      ) : (
+                        <FontAwesomeIcon icon={faUserCircle} />
+                      )}
+                    </div>
+                    <div className={cx("profile-info")}>
+                      <strong>{user?.fullname || "Tài khoản FastCare"}</strong>
+                      <span>{user?.email || "Quản lý tài khoản của bạn"}</span>
+                    </div>
+                    <button
+                      type="button"
+                      className={cx("profile-close")}
+                      aria-label="Đóng menu tài khoản"
+                      onClick={() => setIsProfileOpen(false)}
+                    >
+                      <FontAwesomeIcon icon={faTimes} />
+                    </button>
+                  </div>
+
+                  <div className={cx("profile-section")}>
+                    <span className={cx("profile-section-title")}>Mua sắm</span>
+                    <Link
+                      to="/wishlist"
+                      className={cx("profile-link")}
+                      onClick={() => setIsProfileOpen(false)}
+                    >
+                      <FontAwesomeIcon icon={faHeart} />
+                      <span>Yêu thích</span>
+                    </Link>
+                    <Link
+                      to="/cart"
+                      className={cx("profile-link")}
+                      onClick={() => setIsProfileOpen(false)}
+                    >
+                      <FontAwesomeIcon icon={faShoppingCart} />
+                      <span>Giỏ hàng</span>
+                    </Link>
+                    <Link
+                      to="/order"
+                      className={cx("profile-link")}
+                      onClick={() => setIsProfileOpen(false)}
+                    >
+                      <FontAwesomeIcon icon={faBagShopping} />
+                      <span>Đơn hàng của tôi</span>
+                    </Link>
+                  </div>
+
+                  <div className={cx("profile-section")}>
+                    <span className={cx("profile-section-title")}>
+                      Tài khoản
+                    </span>
+                    <Link
+                      to="/profile"
+                      className={cx("profile-link")}
+                      onClick={() => setIsProfileOpen(false)}
+                    >
+                      <FontAwesomeIcon icon={faUserCircle} />
+                      <span>Thông tin cá nhân</span>
+                    </Link>
+                    <Link
+                      to="/settings"
+                      className={cx("profile-link")}
+                      onClick={() => setIsProfileOpen(false)}
+                    >
+                      <FontAwesomeIcon icon={faGear} />
+                      <span>Cài đặt</span>
+                    </Link>
+                  </div>
+
+                  <button
+                    type="button"
+                    className={cx("profile-logout")}
+                    onClick={handleLogout}
+                  >
+                    <FontAwesomeIcon icon={faSignOut} />
+                    <span>Đăng xuất</span>
+                  </button>
+                </nav>
+              </>
             )}
           </div>
         ) : (

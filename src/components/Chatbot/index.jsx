@@ -236,7 +236,7 @@ function Chatbot() {
             </button>
           </form>
           <p className={cx("disclaimer")}>
-            Tin nhắn và thông tin sản phẩm liên quan được gửi tới OpenAI để tạo
+            Tin nhắn và thông tin sản phẩm liên quan được gửi tới Gemini để tạo
             câu trả lời. Không gửi thông tin tài khoản hoặc đơn hàng.
           </p>
         </section>

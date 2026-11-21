@@ -10,7 +10,7 @@ export default function CartSummary({
   const navigate = useNavigate();
 
   return (
-    <div className="card rounded-4 border-0 shadow-sm summary-card">
+    <div className="card rounded-4 shadow-sm summary-card">
       <div className="card-body p-4">
         <h4 className="mb-3">Tóm tắt đơn hàng</h4>
         <div className="d-flex justify-content-between mb-2 text-secondary">
@@ -41,7 +41,6 @@ export default function CartSummary({
           className="btn btn-danger w-100 rounded-pill py-2 fs-4"
           onClick={() => onCheckout(selectedItemIds)}
           disabled={selectedItemIds.length === 0}
-          style={{ backgroundColor: "#d70018", borderColor: "#d70018" }}
         >
           Mua hàng
         </button>

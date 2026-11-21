@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import classNames from "classnames/bind";
 
 import api from "~/api";
@@ -10,11 +10,16 @@ import styles from "./Inventory.module.scss";
 const cx = classNames.bind(styles);
 
 function Inventory() {
+  const location = useLocation();
   const [variants, setVariants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [stockFilter, setStockFilter] = useState("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -45,6 +50,9 @@ function Inventory() {
     const keyword = search.trim().toLocaleLowerCase("vi");
     return variants.filter((variant) => {
       const stock = Number(variant.stockQuantity) || 0;
+      const createdAt = variant.createdAt ? new Date(variant.createdAt) : null;
+      const endDate = dateTo ? new Date(`${dateTo}T00:00:00`) : null;
+      if (endDate) endDate.setDate(endDate.getDate() + 1);
       const text = [
         variant.product?.title,
         variant.sku,
@@ -60,14 +68,26 @@ function Inventory() {
         (stockFilter === "out" && stock === 0) ||
         (stockFilter === "low" && stock > 0 && stock <= 10) ||
         (stockFilter === "available" && stock > 10);
+      const matchesDate =
+        (!dateFrom ||
+          (createdAt && createdAt >= new Date(`${dateFrom}T00:00:00`))) &&
+        (!endDate || (createdAt && createdAt < endDate));
       return (
         !variant.deleteAt &&
         !variant.product?.deletedAt &&
         matchesSearch &&
-        matchesFilter
+        matchesFilter &&
+        matchesDate
       );
     });
-  }, [search, stockFilter, variants]);
+  }, [dateFrom, dateTo, search, stockFilter, variants]);
+
+  const pageCount = Math.ceil(visibleVariants.length / pageSize);
+  const paginatedVariants = visibleVariants.slice(
+    (page - 1) * pageSize,
+    page * pageSize,
+  );
+  const isAdminPage = location.pathname.startsWith("/admin/");
 
   if (loading)
     return (
@@ -83,12 +103,15 @@ function Inventory() {
           <p className={cx("eyebrow")}>Kho hàng</p>
           <h1>Quản lý tồn kho</h1>
           <p className={cx("summary")}>
-            Theo dõi số lượng khả dụng theo từng phiên bản sản phẩm.
+            Theo dõi tồn kho theo phiên bản sản phẩm và lọc theo ngày tạo phiên
+            bản.
           </p>
         </div>
-        <Link className={cx("primaryButton")} to="/staff/imports/create">
-          Tạo phiếu nhập
-        </Link>
+        {!isAdminPage && (
+          <Link className={cx("primaryButton")} to="/staff/imports/create">
+            Tạo phiếu nhập
+          </Link>
+        )}
       </header>
 
       {error && (
@@ -103,18 +126,50 @@ function Inventory() {
           value={search}
           placeholder="Tìm tên sản phẩm, SKU, màu hoặc bộ nhớ"
           aria-label="Tìm phiên bản sản phẩm"
-          onChange={(event) => setSearch(event.target.value)}
+          onChange={(event) => {
+            setPage(1);
+            setSearch(event.target.value);
+          }}
         />
         <select
           value={stockFilter}
           aria-label="Lọc tồn kho"
-          onChange={(event) => setStockFilter(event.target.value)}
+          onChange={(event) => {
+            setPage(1);
+            setStockFilter(event.target.value);
+          }}
         >
           <option value="all">Tất cả tồn kho</option>
           <option value="out">Hết hàng</option>
           <option value="low">Sắp hết (≤ 10)</option>
           <option value="available">Còn hàng (&gt; 10)</option>
         </select>
+        <label>
+          Tạo từ
+          <input
+            type="date"
+            value={dateFrom}
+            max={dateTo || undefined}
+            aria-label="Ngày tạo phiên bản từ"
+            onChange={(event) => {
+              setPage(1);
+              setDateFrom(event.target.value);
+            }}
+          />
+        </label>
+        <label>
+          đến
+          <input
+            type="date"
+            value={dateTo}
+            min={dateFrom || undefined}
+            aria-label="Ngày tạo phiên bản đến"
+            onChange={(event) => {
+              setPage(1);
+              setDateTo(event.target.value);
+            }}
+          />
+        </label>
         <span>{visibleVariants.length} phiên bản</span>
       </div>
 
@@ -131,7 +186,7 @@ function Inventory() {
             </tr>
           </thead>
           <tbody>
-            {visibleVariants.map((variant) => {
+            {paginatedVariants.map((variant) => {
               const stock = Number(variant.stockQuantity) || 0;
               const id = variant._id || variant.id;
               return (
@@ -163,16 +218,18 @@ function Inventory() {
                     </span>
                   </td>
                   <td>
-                    <Link
-                      to={`/staff/imports/create?variant=${encodeURIComponent(id)}`}
-                    >
-                      Nhập thêm
-                    </Link>
+                    {!isAdminPage && (
+                      <Link
+                        to={`/staff/imports/create?variant=${encodeURIComponent(id)}`}
+                      >
+                        Nhập thêm
+                      </Link>
+                    )}
                   </td>
                 </tr>
               );
             })}
-            {visibleVariants.length === 0 && (
+            {paginatedVariants.length === 0 && (
               <tr>
                 <td className={cx("emptyState")} colSpan="6">
                   Không tìm thấy phiên bản sản phẩm.
@@ -182,6 +239,31 @@ function Inventory() {
           </tbody>
         </table>
       </div>
+      {visibleVariants.length > 0 && (
+        <nav className={cx("pagination")} aria-label="Phân trang tồn kho">
+          <span>
+            Trang {page} / {pageCount} · Hiển thị{" "}
+            {Math.min(pageSize, visibleVariants.length - (page - 1) * pageSize)}{" "}
+            trên {visibleVariants.length} phiên bản
+          </span>
+          <div>
+            <button
+              type="button"
+              onClick={() => setPage((current) => current - 1)}
+              disabled={page <= 1}
+            >
+              Trước
+            </button>
+            <button
+              type="button"
+              onClick={() => setPage((current) => current + 1)}
+              disabled={page >= pageCount}
+            >
+              Sau
+            </button>
+          </div>
+        </nav>
+      )}
     </section>
   );
 }

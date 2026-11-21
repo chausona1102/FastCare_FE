@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axiosClient from "~/api/axiosClient";
 import api from "~/api";
 import { useToast } from "~/contexts/ToastContext.jsx";
+import styles from "./CheckoutOrder.module.scss";
 
 export default function CheckoutOrder() {
   const navigate = useNavigate();
@@ -64,6 +65,68 @@ export default function CheckoutOrder() {
       ),
     [selectedItems],
   );
+  const orderItems = useMemo(
+    () =>
+      selectedItems.map((item) => ({
+        product: item.product?._id || item.product,
+        variant: item.variant?._id || item.variant,
+        color: item.color || "",
+        title: item.product?.title || item.title || "Sản phẩm",
+        quantity: item.quantity || 1,
+        currentPrice: item.currentPrice || 0,
+        weight: item.product?.weight || 500,
+        height: item.product?.height || 20,
+        length: item.product?.length || 15,
+        width: item.product?.width || 20,
+      })),
+    [selectedItems],
+  );
+  const [shippingFee, setShippingFee] = useState(null);
+  const [shippingFeeLoading, setShippingFeeLoading] = useState(false);
+  const [shippingFeeError, setShippingFeeError] = useState("");
+
+  useEffect(() => {
+    if (!token || !orderItems.length) return undefined;
+
+    let active = true;
+    Promise.resolve()
+      .then(() => {
+        if (!active) return null;
+        setShippingFee(null);
+        setShippingFeeError("");
+        setShippingFeeLoading(true);
+        return axiosClient.post(
+          `${api.order}/shipping-fee`,
+          { items: orderItems },
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+      })
+      .then((response) => {
+        if (!active || !response) return;
+        const fee = Number(response.data?.shippingFee);
+        if (!Number.isFinite(fee)) {
+          throw new Error("Không nhận được phí vận chuyển hợp lệ.");
+        }
+        if (active) setShippingFee(fee);
+      })
+      .catch((error) => {
+        if (active) {
+          setShippingFeeError(
+            error?.response?.data?.message ||
+              error.message ||
+              "Không tính được phí vận chuyển.",
+          );
+        }
+      })
+      .finally(() => {
+        if (active) setShippingFeeLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [orderItems, token]);
+
   const voucherDiscount = voucher
     ? Math.min(
         totalPrice,
@@ -98,18 +161,7 @@ export default function CheckoutOrder() {
         requiredNote,
         paymentTypeId: Number(paymentTypeId),
         voucherId: voucher?._id || null,
-        items: selectedItems.map((item) => ({
-          product: item.product?._id || item.product,
-          variant: item.variant?._id || item.variant,
-          color: item.color || "",
-          title: item.product?.title || item.title || "Sản phẩm",
-          quantity: item.quantity || 1,
-          currentPrice: item.currentPrice || 0,
-          weight: item.product?.weight || 500,
-          height: item.product?.height || 20,
-          length: item.product?.length || 15,
-          width: item.product?.width || 20,
-        })),
+        items: orderItems,
       };
 
       const response = await axiosClient.post(api.order, payload, {
@@ -145,7 +197,7 @@ export default function CheckoutOrder() {
   if (!selectedItems.length) {
     return (
       <div className="container py-5">
-        <div className="alert alert-info rounded-4">
+        <div className={`alert alert-info rounded-4 ${styles.notice}`}>
           Đang chuẩn bị thông tin giỏ hàng...
         </div>
       </div>
@@ -153,10 +205,10 @@ export default function CheckoutOrder() {
   }
 
   return (
-    <div className="container py-5">
+    <div className={`container py-5 ${styles.page}`}>
       <div className="row g-4">
         <div className="col-12 col-lg-7">
-          <div className="card border-0 shadow-sm rounded-4">
+          <div className={`card border-0 shadow-sm rounded-4 ${styles.surface}`}>
             <div className="card-body p-4">
               <h2 className="fw-bold mb-4">Hoàn tất đặt hàng</h2>
 
@@ -216,7 +268,7 @@ export default function CheckoutOrder() {
         </div>
 
         <div className="col-12 col-lg-5">
-          <div className="card border-0 shadow-sm rounded-4">
+          <div className={`card border-0 shadow-sm rounded-4 ${styles.surface}`}>
             <div className="card-body p-4">
               <h4 className="fw-bold mb-3">Đơn hàng của bạn</h4>
 
@@ -256,13 +308,29 @@ export default function CheckoutOrder() {
                   <span>-{voucherDiscount.toLocaleString("vi-VN")} đ</span>
                 </div>
               )}
+              <div className="d-flex justify-content-between mb-2 text-secondary">
+                <span>Phí vận chuyển</span>
+                <span>
+                  {shippingFeeLoading
+                    ? "Đang tính..."
+                    : shippingFee === null
+                      ? "Chưa tính được"
+                      : `${shippingFee.toLocaleString("vi-VN")} đ`}
+                </span>
+              </div>
+              {shippingFeeError && (
+                <div className="alert alert-danger py-2" role="alert">
+                  {shippingFeeError}
+                </div>
+              )}
               <div className="d-flex justify-content-between fw-bold fs-5 text-danger">
                 <span>Tổng thanh toán</span>
                 <span>
-                  {Math.max(0, totalPrice - voucherDiscount).toLocaleString(
-                    "vi-VN",
-                  )}{" "}
-                  đ
+                  {shippingFee === null
+                    ? "Chưa xác định"
+                    : `${(
+                        Math.max(0, totalPrice - voucherDiscount) + shippingFee
+                      ).toLocaleString("vi-VN")} đ`}
                 </span>
               </div>
             </div>

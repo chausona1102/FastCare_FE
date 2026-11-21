@@ -1,0 +1,78 @@
+.themeSwitch {
+  position: relative;
+  width: 4.2rem;
+  height: 2.2rem;
+  margin: 0;
+  padding: 0;
+
+  input.form-check-input {
+    position: absolute;
+    inset: 0;
+    width: 4.2rem;
+    height: 2.2rem;
+    margin: 0 !important;
+    float: none;
+    padding: 0;
+    border-radius: 999px;
+    background-color: #dbeafe;
+    background-image: none;
+    border: 1px solid #bfdbfe;
+    appearance: none;
+    -webkit-appearance: none;
+    box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.12) !important;
+    cursor: pointer;
+    transition:
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      box-shadow 0.3s ease;
+
+    &:checked {
+      background-color: #334155;
+      border-color: #475569;
+    }
+
+    &:focus {
+      box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.12) !important;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #64748b;
+      outline-offset: 2px;
+    }
+  }
+
+  .themeSwitchThumb {
+    position: absolute;
+    top: 50%;
+    left: 3px;
+    display: flex;
+    width: 1.8rem;
+    height: 1.8rem;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(-50%);
+    border-radius: 50%;
+    background-color: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    color: #f59e0b;
+    font-size: 1rem;
+    line-height: 1;
+    pointer-events: none;
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease,
+      left 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+
+  input.form-check-input:checked + .themeSwitchThumb {
+    left: calc(100% - 1.8rem - 3px);
+    background-color: #1e293b;
+    color: #facc15;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.35);
+  }
+
+  &:hover .themeSwitchThumb {
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.28);
+  }
+}

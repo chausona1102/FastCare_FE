@@ -69,13 +69,13 @@ function Footer() {
         <div className={cx("container")}>
           <span>
             Công ty TNHH Thương Mại và Dịch Vụ Kỹ Thuật MTV FastCare - GPĐKKD:
-            0375319105 cấp tại Sở KH & ĐT TP. Cần Thơ.
+            037xxxx105 cấp tại Sở KH & ĐT TP. Cần Thơ.
           </span>
           <span>
             Địa chỉ văn phòng: Khu II, Đường 3/2, Phường Xuân Khánh, Quận Ninh
             Kiều, TP. Cần Thơ.
           </span>
-          <span>Điện thoại: 028.7108.9666.</span>
+          <span>Điện thoại: 028.xxxx.9999.</span>
         </div>
       </div>
     </div>

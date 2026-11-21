@@ -1,21 +1,225 @@
 .page {
   width: 100%;
   min-height: calc(100vh - var(--default-layout-header-height));
-  padding: 22px 0 64px;
-  color: #242d2c;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 36px 0 64px;
+  color: var(--theme-text);
 }
 
 .topline {
+  margin-bottom: 32px;
+}
+
+.titleGroup {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 26px;
+  align-items: center;
+  gap: 16px;
 
   h1 {
-    margin: 5px 0 0;
-    font-size: 3rem;
+    margin: 3px 0 0;
+    font-size: 3.2rem;
     font-weight: 700;
-    line-height: 1.2;
+    line-height: 1.15;
+  }
+}
+
+.titleIcon {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+  place-items: center;
+  border: 1px solid var(--theme-danger-border);
+  border-radius: 16px;
+  background: var(--theme-selected-surface);
+  color: var(--color-fastcare-500);
+  font-size: 2rem;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--color-fastcare-500);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.description {
+  margin: 13px 0 0 68px;
+  color: var(--theme-muted-text);
+  font-size: 1.4rem;
+}
+
+.settingsSection {
+  padding: 28px;
+  border: 1px solid var(--theme-border);
+  border-radius: 18px;
+  background: var(--theme-surface);
+  box-shadow: 0 12px 32px rgba(20, 28, 38, 0.05);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+
+  h2 {
+    margin: 6px 0 0;
+    font-size: 1.8rem;
+    font-weight: 650;
+  }
+}
+
+.currentTheme {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 11px;
+  border: 1px solid var(--theme-success-border);
+  border-radius: 999px;
+  background: var(--theme-success-surface);
+  color: var(--theme-success);
+  font-size: 1.2rem;
+  font-weight: 600;
+
+  &.dark {
+    border-color: var(--theme-info-border);
+    background: var(--theme-info-surface);
+    color: var(--theme-info);
+  }
+}
+
+.statusDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.themeSection {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 22px;
+  border: 1px solid var(--theme-border);
+  border-radius: 14px;
+  background: var(--theme-subtle-surface);
+}
+
+.themeIcon {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--theme-warning-surface);
+  color: var(--theme-warning);
+  font-size: 1.9rem;
+
+  &.dark {
+    background: var(--theme-info-surface);
+    color: var(--theme-info);
+  }
+}
+
+.sectionHeading {
+  min-width: 0;
+  flex: 1;
+
+  h3 {
+    margin: 0;
+    color: var(--theme-text);
+    font-size: 1.6rem;
+    font-weight: 650;
+  }
+}
+
+.sectionHeading p {
+  margin: 5px 0 0;
+  color: var(--theme-muted-text);
+  font-size: 1.3rem;
+}
+
+.saveNote {
+  display: block;
+  margin-top: 8px;
+  color: var(--theme-muted-text);
+  font-size: 1.15rem;
+}
+
+.switchControl {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 18px;
+  border-left: 1px solid var(--theme-border);
+}
+
+.switchLabel {
+  color: var(--theme-text);
+  font-size: 1.3rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 24px 0 40px;
+  }
+
+  .titleGroup {
+    gap: 12px;
+
+    h1 {
+      font-size: 2.8rem;
+    }
+  }
+
+  .titleIcon {
+    width: 46px;
+    height: 46px;
+    flex-basis: 46px;
+    border-radius: 14px;
+  }
+
+  .description {
+    margin-left: 58px;
+  }
+
+  .settingsSection {
+    padding: 20px;
+  }
+
+  .sectionHeader {
+    align-items: flex-start;
+  }
+
+  .themeSection {
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .sectionHeading {
+    flex-basis: calc(100% - 60px);
+  }
+
+  .switchControl {
+    width: 100%;
+    justify-content: space-between;
+    padding: 14px 0 0;
+    border-top: 1px solid var(--theme-border);
+    border-left: 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .sectionHeader {
+    flex-direction: column;
   }
 }

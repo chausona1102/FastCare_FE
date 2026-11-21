@@ -380,30 +380,21 @@ function Order() {
                           action.disabled ||
                           processingOrderId === (o._id || o.id)
                         }
-                        className={[
-                          "rounded px-3 py-1 fs-5 fw-bold my-1 mx-1",
-                          action.key === "return"
-                            ? "border border-danger text-danger"
-                            : "",
-                          action.key === "review"
-                            ? "border border-warning text-warning"
-                            : "",
-                          action.key === "buyAgain"
-                            ? "border border-primary text-primary"
-                            : "",
-                          action.key === "received"
-                            ? "border border-success text-success"
-                            : "",
-                          action.key === "reviewed"
-                            ? "border border-secondary text-secondary"
-                            : "",
-                          action.key === "cancel" && !action.disabled
-                            ? "border border-danger text-danger"
-                            : "",
-                          action.disabled
-                            ? "opacity-50 border border-secondary text-secondary"
-                            : "",
-                        ].join(" ")}
+                        className={`rounded px-3 py-1 fs-5 fw-bold my-1 mx-1 ${cx(
+                          "actionButton",
+                          {
+                            dangerAction:
+                              action.key === "return" ||
+                              action.key === "cancel",
+                            warningAction: action.key === "review",
+                            infoAction: action.key === "buyAgain",
+                            successAction: action.key === "received",
+                            neutralAction: action.key === "reviewed",
+                            disabledAction:
+                              action.disabled ||
+                              processingOrderId === (o._id || o.id),
+                          },
+                        )}`}
                         onClick={(e) => {
                           e.stopPropagation();
                           if (action.key === "review") openReview(o);
@@ -421,7 +412,10 @@ function Order() {
                     ))}
                     <button
                       type="button"
-                      className="rounded px-3 py-1 fs-5 fw-bold my-1 mx-1 border border-primary text-primary"
+                      className={`rounded px-3 py-1 fs-5 fw-bold my-1 mx-1 ${cx(
+                        "actionButton",
+                        "infoAction",
+                      )}`}
                       onClick={() =>
                         navigate(`/order/${o._id || o.id}`, {
                           state: { order: o },

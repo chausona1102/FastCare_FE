@@ -26,7 +26,7 @@ export default function CartItemList({
             checked={allSelected}
             onChange={onSelectAll}
             aria-label="Chọn tất cả sản phẩm"
-            style={{ accentColor: "#d70018" }}
+            style={{ accentColor: "var(--color-fastcare-500)" }}
           />
           <label className="form-check-label ms-2" htmlFor="select-all-cart">
             Chọn tất cả

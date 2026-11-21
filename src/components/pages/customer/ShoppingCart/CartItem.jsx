@@ -50,7 +50,7 @@ export default function CartItem({
 
   return (
     <div
-      className={`card border-0 rounded-4 mb-3 shadow-sm cart-item-card ${unavailable ? "unavailable" : ""}`}
+      className={`card rounded-4 mb-3 shadow-sm cart-item-card ${unavailable ? "unavailable" : ""}`}
       aria-disabled={unavailable}
     >
       <div className="card-body p-3">
@@ -64,7 +64,7 @@ export default function CartItem({
               disabled={unavailable}
               onChange={() => onToggleSelect(item._id)}
               aria-label={`Chọn sản phẩm ${productTitle}`}
-              style={{ accentColor: "#d70018" }}
+              style={{ accentColor: "var(--color-fastcare-500)" }}
             />
           </div>
 

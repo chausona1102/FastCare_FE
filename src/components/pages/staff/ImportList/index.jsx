@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import classNames from "classnames/bind";
 
 import api from "~/api";
@@ -14,41 +14,70 @@ const formatCurrency = (value) => {
   return `${numericValue.toLocaleString("vi-VN")} ₫`;
 };
 
+const getDateRange = (from, to) => {
+  const start = from ? new Date(`${from}T00:00:00`) : null;
+  const end = to ? new Date(`${to}T00:00:00`) : null;
+  if (end) end.setDate(end.getDate() + 1);
+
+  return {
+    from: start?.toISOString() || "",
+    to: end?.toISOString() || "",
+  };
+};
+
 function ImportList() {
+  const location = useLocation();
   const [records, setRecords] = useState([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [search, setSearch] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
   const [costDrafts, setCostDrafts] = useState({});
   const [updatingCostId, setUpdatingCostId] = useState("");
 
   useEffect(() => {
     const controller = new AbortController();
-
-    const loadData = async () => {
+    const timer = setTimeout(() => {
+      setLoading(true);
       setError("");
-      try {
-        const { data } = await axiosClient.get(api.imports, {
-          params: { limit: 100 },
-          signal: controller.signal,
-        });
-        setRecords(Array.isArray(data) ? data : []);
-      } catch (requestError) {
-        if (!controller.signal.aborted) {
-          setError(
-            requestError.response?.data?.message ||
-              "Không thể tải thông tin nhập hàng.",
-          );
+      const loadData = async () => {
+        try {
+          const dateRange = getDateRange(dateFrom, dateTo);
+          const { data } = await axiosClient.get(api.imports, {
+            params: {
+              page,
+              limit: pageSize,
+              search: search.trim(),
+              ...dateRange,
+            },
+            signal: controller.signal,
+          });
+          setRecords(Array.isArray(data.items) ? data.items : []);
+          setTotal(Number(data.total) || 0);
+        } catch (requestError) {
+          if (!controller.signal.aborted) {
+            setError(
+              requestError.response?.data?.message ||
+                "Không thể tải thông tin nhập hàng.",
+            );
+          }
+        } finally {
+          if (!controller.signal.aborted) setLoading(false);
         }
-      } finally {
-        if (!controller.signal.aborted) setLoading(false);
-      }
-    };
+      };
 
-    loadData();
-    return () => controller.abort();
-  }, []);
+      loadData();
+    }, search === "" ? 0 : 300);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [dateFrom, dateTo, page, search]);
 
   const sortedRecords = useMemo(
     () =>
@@ -60,28 +89,9 @@ function ImportList() {
     [records],
   );
 
-  const visibleRecords = useMemo(() => {
-    const keyword = search.trim().toLocaleLowerCase("vi");
-
-    return sortedRecords.filter((record) => {
-      if (!keyword) return true;
-
-      const text = [
-        record.product?.title,
-        record.sku,
-        record.variant?.sku,
-        record.supplier,
-        record.note,
-        record.importedBy?.fullname,
-        record.importedBy?.username,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLocaleLowerCase("vi");
-
-      return text.includes(keyword);
-    });
-  }, [search, sortedRecords]);
+  const visibleRecords = sortedRecords;
+  const pageCount = Math.ceil(total / pageSize);
+  const isAdminPage = location.pathname.startsWith("/admin/");
 
   const summary = useMemo(() => {
     const totalQuantity = records.reduce(
@@ -162,9 +172,11 @@ function ImportList() {
             phiếu.
           </p>
         </div>
-        <Link className={cx("primaryButton")} to="/staff/imports/create">
-          Tạo phiếu nhập
-        </Link>
+        {!isAdminPage && (
+          <Link className={cx("primaryButton")} to="/staff/imports/create">
+            Tạo phiếu nhập
+          </Link>
+        )}
       </header>
 
       {error && (
@@ -181,27 +193,27 @@ function ImportList() {
       <div className={cx("summaryCards")}>
         <article className={cx("statCard")}>
           <span className={cx("label")}>Tổng phiếu</span>
-          <strong className={cx("value")}>{records.length}</strong>
+          <strong className={cx("value")}>{total}</strong>
           <small className={cx("meta")}>phiếu nhập</small>
         </article>
         <article className={cx("statCard")}>
           <span className={cx("label")}>Sản phẩm nhập</span>
           <strong className={cx("value")}>{summary.totalQuantity}</strong>
-          <small className={cx("meta")}>sản phẩm</small>
+          <small className={cx("meta")}>trên trang hiện tại</small>
         </article>
         <article className={cx("statCard")}>
           <span className={cx("label")}>Tổng giá trị</span>
           <strong className={cx("value")}>
             {formatCurrency(summary.totalValue)}
           </strong>
-          <small className={cx("meta")}>đã nhập</small>
+          <small className={cx("meta")}>trên trang hiện tại</small>
         </article>
         <article className={cx("statCard")}>
           <span className={cx("label")}>Cập nhật gần nhất</span>
           <strong className={cx("value", "compact")}>
             {summary.latestRecord}
           </strong>
-          <small className={cx("meta")}>mới nhất</small>
+          <small className={cx("meta")}>trên trang hiện tại</small>
         </article>
       </div>
 
@@ -211,9 +223,38 @@ function ImportList() {
           value={search}
           placeholder="Tìm kiếm theo sản phẩm, SKU, NCC, người nhập..."
           aria-label="Tìm phiếu nhập"
-          onChange={(event) => setSearch(event.target.value)}
+          onChange={(event) => {
+            setPage(1);
+            setSearch(event.target.value);
+          }}
         />
-        <span>{visibleRecords.length} phiếu</span>
+        <label>
+          Từ
+          <input
+            type="date"
+            value={dateFrom}
+            max={dateTo || undefined}
+            aria-label="Ngày nhập từ"
+            onChange={(event) => {
+              setPage(1);
+              setDateFrom(event.target.value);
+            }}
+          />
+        </label>
+        <label>
+          đến
+          <input
+            type="date"
+            value={dateTo}
+            min={dateFrom || undefined}
+            aria-label="Ngày nhập đến"
+            onChange={(event) => {
+              setPage(1);
+              setDateTo(event.target.value);
+            }}
+          />
+        </label>
+        <span>{total} phiếu</span>
       </div>
 
       <div className={cx("tableWrap")}>
@@ -260,33 +301,39 @@ function ImportList() {
                   </td>
                   <td>
                     {record.unitCost == null ? (
-                      <form
-                        className={cx("missingCostForm")}
-                        onSubmit={(event) => updateMissingCost(event, recordId)}
-                      >
-                        <input
-                          type="number"
-                          min="0"
-                          step="1"
-                          value={costDrafts[recordId] ?? ""}
-                          aria-label={`Đơn giá nhập cho phiếu ${sku}`}
-                          onChange={(event) =>
-                            setCostDrafts((current) => ({
-                              ...current,
-                              [recordId]: event.target.value,
-                            }))
+                      isAdminPage ? (
+                        "-"
+                      ) : (
+                        <form
+                          className={cx("missingCostForm")}
+                          onSubmit={(event) =>
+                            updateMissingCost(event, recordId)
                           }
-                          required
-                        />
-                        <button
-                          type="submit"
-                          disabled={updatingCostId === recordId}
                         >
-                          {updatingCostId === recordId
-                            ? "Đang lưu..."
-                            : "Bổ sung"}
-                        </button>
-                      </form>
+                          <input
+                            type="number"
+                            min="0"
+                            step="1"
+                            value={costDrafts[recordId] ?? ""}
+                            aria-label={`Đơn giá nhập cho phiếu ${sku}`}
+                            onChange={(event) =>
+                              setCostDrafts((current) => ({
+                                ...current,
+                                [recordId]: event.target.value,
+                              }))
+                            }
+                            required
+                          />
+                          <button
+                            type="submit"
+                            disabled={updatingCostId === recordId}
+                          >
+                            {updatingCostId === recordId
+                              ? "Đang lưu..."
+                              : "Bổ sung"}
+                          </button>
+                        </form>
+                      )
                     ) : (
                       formatCurrency(record.unitCost)
                     )}
@@ -312,6 +359,31 @@ function ImportList() {
           </tbody>
         </table>
       </div>
+      {total > 0 && (
+        <nav className={cx("pagination")} aria-label="Phân trang phiếu nhập">
+          <span>
+            Trang {page} / {pageCount} · Hiển thị{" "}
+            {Math.min(pageSize, total - (page - 1) * pageSize)} trên {total}{" "}
+            phiếu
+          </span>
+          <div>
+            <button
+              type="button"
+              onClick={() => setPage((current) => current - 1)}
+              disabled={page <= 1}
+            >
+              Trước
+            </button>
+            <button
+              type="button"
+              onClick={() => setPage((current) => current + 1)}
+              disabled={page >= pageCount}
+            >
+              Sau
+            </button>
+          </div>
+        </nav>
+      )}
     </section>
   );
 }

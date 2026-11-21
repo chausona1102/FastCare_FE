@@ -245,7 +245,6 @@ function Login() {
                 >
                   {isSigningUp ? "Đang đăng ký..." : "Đăng ký"}
                 </button>
-                {isSigningUp && <LoadingCircle />}
                 <div className={cx("more-login")}>
                   <div className={cx("dash")}></div>
                   <span>Hoặc</span>
@@ -259,6 +258,7 @@ function Login() {
           </div>
         </div>
       </div>
+      {isSigningUp && <LoadingCircle />}
       <div className={cx("modal", { show: showModal })}>
         <div className={cx("content")}>
           <FontAwesomeIcon

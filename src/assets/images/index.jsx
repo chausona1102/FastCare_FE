@@ -5,13 +5,6 @@ import tiktok from "./tiktok.webp";
 import facebook from "./facebook.webp";
 import youtube from "./youtube.png";
 import avatar from "./avatar.jpg";
+import sublogo from "./sublogo.png";
 
-export {
-  logo,
-  keyboard,
-  hotGif,
-  tiktok,
-  facebook,
-  youtube,
-  avatar,
-};
+export { logo, keyboard, hotGif, tiktok, facebook, youtube, avatar, sublogo };

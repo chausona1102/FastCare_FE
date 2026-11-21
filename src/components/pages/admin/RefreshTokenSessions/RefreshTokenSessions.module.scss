@@ -2,13 +2,13 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  color: #1f2937;
+  color: var(--theme-text);
 }
 
 .pageHeader {
   h1 {
     margin: 3px 0 5px;
-    color: #182b3d;
+    color: var(--theme-text);
     font-size: 2.6rem;
   }
 }
@@ -24,7 +24,7 @@
 .summary,
 .securityNote {
   margin: 0;
-  color: #64748b;
+  color: var(--theme-muted-text);
   font-size: 1.3rem;
   line-height: 1.6;
 }
@@ -35,9 +35,9 @@
   flex-wrap: wrap;
   gap: 12px;
   padding: 14px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--theme-border);
   border-radius: 8px;
-  background: #fff;
+  background: var(--theme-surface);
 }
 
 .searchField {
@@ -47,16 +47,16 @@
   align-items: center;
   gap: 9px;
   padding: 0 11px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--theme-border);
   border-radius: 5px;
-  color: #64748b;
+  color: var(--theme-muted-text);
 
   input {
     width: 100%;
     min-height: 40px;
     border: 0;
     outline: 0;
-    color: #1f2937;
+    color: var(--theme-text);
     font: inherit;
     font-size: 1.3rem;
   }
@@ -67,17 +67,17 @@
   min-width: 180px;
   flex-direction: column;
   gap: 5px;
-  color: #64748b;
+  color: var(--theme-muted-text);
   font-size: 1.1rem;
   white-space: nowrap;
 
   input {
     min-height: 40px;
     padding: 7px 9px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--theme-border);
     border-radius: 5px;
-    background: #fff;
-    color: #1f2937;
+    background: var(--theme-surface);
+    color: var(--theme-text);
     font: inherit;
   }
 }
@@ -87,16 +87,16 @@
 .revokeButton {
   min-height: 40px;
   padding: 0 13px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--theme-border);
   border-radius: 5px;
-  background: #fff;
-  color: #334155;
+  background: var(--theme-surface);
+  color: var(--theme-text);
   font-size: 1.2rem;
   cursor: pointer;
 
   &:hover:not(:disabled) {
-    border-color: #94a3b8;
-    background: #f8fafc;
+    border-color: var(--theme-border);
+    background: var(--theme-subtle-surface);
   }
 
   &:disabled {
@@ -112,18 +112,18 @@
 
 .alert {
   padding: 12px 14px;
-  border: 1px solid #fecaca;
+  border: 1px solid var(--theme-danger-border);
   border-radius: 6px;
-  background: #fff1f2;
-  color: #b42332;
+  background: var(--theme-danger-surface);
+  color: var(--theme-danger);
   font-size: 1.3rem;
 }
 
 .tableContainer {
   overflow: hidden;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--theme-border);
   border-radius: 8px;
-  background: #fff;
+  background: var(--theme-surface);
 }
 
 .tableSummary {
@@ -132,11 +132,11 @@
   justify-content: space-between;
   gap: 12px;
   padding: 15px 16px;
-  border-bottom: 1px solid #e8edf2;
+  border-bottom: 1px solid var(--theme-border);
   font-size: 1.3rem;
 
   span {
-    color: #64748b;
+    color: var(--theme-muted-text);
     font-size: 1.2rem;
   }
 }
@@ -153,21 +153,21 @@
   th,
   td {
     padding: 13px 15px;
-    border-bottom: 1px solid #e8edf2;
+    border-bottom: 1px solid var(--theme-border);
     text-align: left;
     vertical-align: middle;
   }
 
   th {
-    background: #f8fafc;
-    color: #64748b;
+    background: var(--theme-subtle-surface);
+    color: var(--theme-muted-text);
     font-size: 1.1rem;
     font-weight: 700;
     white-space: nowrap;
   }
 
   td {
-    color: #334155;
+    color: var(--theme-text);
 
     strong,
     small {
@@ -176,7 +176,7 @@
 
     small {
       margin-top: 3px;
-      color: #94a3b8;
+      color: var(--theme-muted-text);
       font-size: 1.1rem;
     }
   }
@@ -193,15 +193,15 @@
 }
 
 .revokeButton {
-  border-color: #fecaca;
-  background: #fff1f2;
-  color: #b42332;
+  border-color: var(--theme-danger-border);
+  background: var(--theme-danger-surface);
+  color: var(--theme-danger);
   white-space: nowrap;
 }
 
 .stateCell {
   height: 120px;
-  color: #64748b !important;
+  color: var(--theme-muted-text) !important;
   text-align: center !important;
 }
 
@@ -211,8 +211,8 @@
   justify-content: space-between;
   gap: 12px;
   padding: 13px 16px;
-  border-top: 1px solid #e8edf2;
-  color: #64748b;
+  border-top: 1px solid var(--theme-border);
+  color: var(--theme-muted-text);
   font-size: 1.2rem;
 
   > div {

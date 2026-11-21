@@ -749,7 +749,7 @@ function ProductDetail() {
             />
           ))}
           <Link
-            to={`/products/${product.category.parentCategory._id}`}
+            to={`/category/${product.category.parentCategory._id}`}
             className={cx("more-btn")}
           >
             Xem thêm

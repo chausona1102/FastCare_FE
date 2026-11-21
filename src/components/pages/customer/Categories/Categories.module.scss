@@ -7,7 +7,7 @@
 
   h1 {
     margin: 4px 0 0;
-    color: #193b63;
+    color: var(--theme-info);
     font-size: 2.8rem;
     font-weight: 700;
   }
@@ -15,7 +15,7 @@
 
 .eyebrow {
   margin: 0;
-  color: #c2414d;
+  color: var(--theme-danger);
   font-size: 1.2rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -33,10 +33,10 @@
   align-items: center;
   gap: 14px;
   padding: 14px;
-  border: 1px solid #e5eaf0;
+  border: 1px solid var(--theme-border);
   border-radius: 8px;
-  background: #fff;
-  color: #193b63;
+  background: var(--theme-surface);
+  color: var(--theme-info);
   text-decoration: none;
   transition: border-color 160ms ease, transform 160ms ease;
 
@@ -54,8 +54,8 @@
   flex: 0 0 54px;
   place-items: center;
   border-radius: 8px;
-  background: #f5f7fa;
-  color: #c2414d;
+  background: var(--theme-subtle-surface);
+  color: var(--theme-danger);
   font-size: 2rem;
   font-weight: 700;
   object-fit: contain;
@@ -68,13 +68,13 @@
 }
 
 .arrow {
-  color: #c2414d;
+  color: var(--theme-danger);
   font-size: 2rem;
 }
 
 .message {
   padding: 36px 12px;
-  color: #64748b;
+  color: var(--theme-muted-text);
   text-align: center;
 }
 

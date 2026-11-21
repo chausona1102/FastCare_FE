@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
-  color: #172033;
+  color: var(--theme-text);
 }
 
 .loadingState {
@@ -19,7 +19,7 @@
 
   h1 {
     margin: 4px 0 6px;
-    color: #172033;
+    color: var(--theme-text);
     font-size: 2.8rem;
     font-weight: 700;
   }
@@ -28,16 +28,22 @@
 .eyebrow,
 .reportKicker,
 .panelEyebrow {
+  // margin: 0;
+  // color: var(--theme-muted-text);
+  // font-size: 1.1rem;
+  // font-weight: 700;
+  // letter-spacing: 0.09em;
   margin: 0;
-  color: #64748b;
+  color: var(--theme-muted-text);
   font-size: 1.1rem;
   font-weight: 700;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .pageDescription {
   margin: 0;
-  color: #718096;
+  color: var(--theme-muted-text);
   font-size: 1.4rem;
 }
 
@@ -45,17 +51,17 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #64748b;
+  color: var(--theme-muted-text);
   font-size: 1.3rem;
 
   select {
     min-width: 130px;
     padding: 11px 36px 11px 14px;
-    border: 1px solid #dbe2ea;
+    border: 1px solid var(--theme-border);
     border-radius: 9px;
     outline: none;
-    background: #fff;
-    color: #172033;
+    background: var(--theme-surface);
+    color: var(--theme-text);
     font: inherit;
     font-weight: 600;
     cursor: pointer;
@@ -73,10 +79,10 @@
   justify-content: space-between;
   gap: 16px;
   padding: 14px 18px;
-  border: 1px solid #fecaca;
+  border: 1px solid var(--theme-danger-border);
   border-radius: 10px;
-  background: #fef2f2;
-  color: #b91c1c;
+  background: var(--theme-danger-surface);
+  color: var(--theme-danger);
   font-size: 1.4rem;
 
   button {
@@ -95,13 +101,13 @@
   align-items: center;
   gap: 16px;
   padding: 20px 24px;
-  border: 1px solid #e7edf5;
+  border: 1px solid var(--theme-border);
   border-radius: 14px;
-  background: linear-gradient(110deg, #fff 0%, #f5f9ff 100%);
+  background: var(--theme-dashboard-gradient);
 
   h2 {
     margin: 5px 0 0;
-    color: #172033;
+    color: var(--theme-text);
     font-size: 2rem;
   }
 }
@@ -112,7 +118,7 @@
 }
 
 .dateRange {
-  color: #64748b;
+  color: var(--theme-muted-text);
   font-size: 1.3rem;
   white-space: nowrap;
 }
@@ -126,9 +132,9 @@
 .statCard,
 .panel {
   min-width: 0;
-  border: 1px solid #e8edf4;
+  border: 1px solid var(--theme-border);
   border-radius: 14px;
-  background: #fff;
+  background: var(--theme-surface);
   box-shadow: 0 3px 12px rgba(25, 42, 70, 0.04);
 }
 
@@ -165,7 +171,7 @@
 }
 
 .statLabel {
-  color: #64748b;
+  color: var(--theme-muted-text);
   font-size: 1.3rem;
   font-weight: 500;
 }
@@ -187,14 +193,14 @@
   display: block;
   overflow-wrap: anywhere;
   margin: 17px 0 7px;
-  color: #172033;
+  color: var(--theme-text);
   font-size: 2.4rem;
   line-height: 1.2;
 }
 
 .statCaption,
 .metricCaption {
-  color: #94a3b8;
+  color: var(--theme-muted-text);
   font-size: 1.2rem;
 }
 
@@ -216,7 +222,7 @@
 
   h3 {
     margin: 5px 0 0;
-    color: #172033;
+    color: var(--theme-text);
     font-size: 1.7rem;
     font-weight: 650;
   }
@@ -257,7 +263,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
-  color: #536176;
+  color: var(--theme-muted-text);
   font-size: 1.3rem;
 
   > span {
@@ -267,7 +273,7 @@
   }
 
   strong {
-    color: #172033;
+    color: var(--theme-text);
     font-weight: 650;
   }
 }
@@ -278,15 +284,15 @@
   border-radius: 50%;
 
   &.green {
-    background: #10b981;
+    background: var(--theme-success-action);
   }
 
   &.orange {
-    background: #f97316;
+    background: var(--theme-warning-action);
   }
 
   &.red {
-    background: #ef4444;
+    background: var(--theme-danger-action);
   }
 }
 
@@ -294,7 +300,7 @@
   overflow: hidden;
   height: 7px;
   border-radius: 99px;
-  background: #eef2f7;
+  background: var(--theme-subtle-surface);
 }
 
 .rateBar {
@@ -303,15 +309,15 @@
   border-radius: inherit;
 
   &.green {
-    background: #10b981;
+    background: var(--theme-success-action);
   }
 
   &.orange {
-    background: #f97316;
+    background: var(--theme-warning-action);
   }
 
   &.red {
-    background: #ef4444;
+    background: var(--theme-danger-action);
   }
 }
 
@@ -322,7 +328,7 @@
   margin-top: 25px;
   padding: 16px;
   border-radius: 11px;
-  background: #f8fafc;
+  background: var(--theme-subtle-surface);
 }
 
 .hotProductIcon {
@@ -332,7 +338,7 @@
   flex: 0 0 auto;
   place-items: center;
   border-radius: 12px;
-  background: #fff7ed;
+  background: var(--theme-warning-surface);
   color: #f97316;
   font-size: 2rem;
 }
@@ -346,7 +352,7 @@
 
   strong {
     overflow: hidden;
-    color: #172033;
+    color: var(--theme-text);
     font-size: 1.4rem;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -355,7 +361,7 @@
 
 .productId {
   overflow: hidden;
-  color: #94a3b8;
+  color: var(--theme-muted-text);
   font-size: 1.1rem;
   text-overflow: ellipsis;
 }
@@ -368,12 +374,12 @@
   white-space: nowrap;
 
   strong {
-    color: #ea580c;
+    color: var(--theme-warning);
     font-size: 1.8rem;
   }
 
   span {
-    color: #94a3b8;
+    color: var(--theme-muted-text);
     font-size: 1.1rem;
   }
 }
@@ -381,7 +387,7 @@
 .largeMetric {
   display: block;
   margin-top: 22px;
-  color: #172033;
+  color: var(--theme-text);
   font-size: 3.2rem;
 }
 
@@ -402,16 +408,16 @@
     gap: 6px;
     padding: 14px;
     border-radius: 10px;
-    background: #f8fafc;
+    background: var(--theme-subtle-surface);
   }
 
   strong {
-    color: #172033;
+    color: var(--theme-text);
     font-size: 2rem;
   }
 
   span {
-    color: #718096;
+    color: var(--theme-muted-text);
     font-size: 1.2rem;
   }
 }
@@ -421,20 +427,20 @@
   flex-direction: column;
   align-items: center;
   padding: 64px 20px;
-  border: 1px dashed #d8e0ea;
+  border: 1px dashed var(--theme-border);
   border-radius: 14px;
-  background: #fff;
+  background: var(--theme-surface);
   text-align: center;
 
   h2 {
     margin: 16px 0 7px;
-    color: #172033;
+    color: var(--theme-text);
     font-size: 1.8rem;
   }
 
   p {
     margin: 0;
-    color: #718096;
+    color: var(--theme-muted-text);
     font-size: 1.3rem;
   }
 }
@@ -445,7 +451,7 @@
   height: 52px;
   place-items: center;
   border-radius: 15px;
-  background: #eff6ff;
+  background: var(--theme-info-surface);
   color: #3b82f6;
   font-size: 2rem;
 }

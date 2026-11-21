@@ -12,6 +12,7 @@
   border-radius: 8px;
   border: 1.5px solid transparent;
   background: transparent;
+  // color: var(--theme-text);
   user-select: none;
   letter-spacing: 0.01em;
   transition: all 0.2s ease;
@@ -35,6 +36,7 @@
 .primary {
   background: rgba(255, 255, 255, 0.18);
   border-color: rgba(255, 255, 255, 0.35);
+  color: var(--color-white);
 
   &:hover {
     background: rgba(255, 255, 255, 0.28);
@@ -45,42 +47,56 @@
 
 .outline {
   background: transparent;
-  border-color: #ccc;
-  color: var(--secondary-clr);
+  border-color: var(--theme-border);
+  color: var(--theme-text);
 
   .title,
   .icon {
-    color: var(--secondary-clr);
+    color: currentColor;
   }
 
   &:hover {
-    background: rgba(215, 0, 24, 0.06);
+    background: var(--theme-selected-surface);
     border-color: var(--color-fastcare-200);
   }
+
   &:focus {
     border-color: var(--color-fastcare-500);
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--color-fastcare-300);
+    outline-offset: 2px;
   }
 }
 
 .secondary {
   background-color: var(--color-fastcare-500);
+  color: var(--color-white);
+
   .title,
   .icon {
-    color: white !important;  
+    color: currentColor;
   }
 
   &:hover {
-    background: rgba(215, 0, 24, 0.06);
-    border-color: var(--color-fastcare-200);
+    background: var(--color-fastcare-600);
   }
+
   &:focus {
     border-color: var(--color-fastcare-500);
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--color-fastcare-300);
+    outline-offset: 2px;
   }
 }
 
 .text {
   border-color: transparent;
   background: transparent;
+  color: var(--theme-text);
 
   &:hover {
     text-decoration: underline;
@@ -89,11 +105,10 @@
 
 .rounded {
   border-radius: 999px;
-  border-color: rgba(255, 255, 255, 0.3);
+  border-color: currentColor;
 
   &:hover {
-    border-color: rgba(255, 255, 255, 0.6);
-    background: rgba(255, 255, 255, 0.1);
+    background: color-mix(in srgb, currentColor 10%, transparent);
   }
 }
 
@@ -118,29 +133,32 @@
 
 // ─── Inner elements ──────────────────────────────────
 .title {
-  color: var(--primary-clr);
+  color: currentColor;
   text-align: center;
   line-height: 1;
 }
 
 .icon {
-  color: var(--primary-clr);
+  color: currentColor;
   display: flex;
   align-items: center;
   font-size: 1.5rem;
+
   .font-awesome {
-    cursor: url("/src/assets/icons/full_fill_cursor.svg") 2 1, auto;
+    cursor:
+      url("/src/assets/icons/full_fill_cursor.svg") 2 1,
+      auto;
   }
-} 
+}
 
 .light {
   span {
-    color: var(--secondary-clr) !important;
+    color: var(--theme-text) !important;
   }
 }
 
 .dart {
   span {
-    color: var(--primary-clr);
+    color: var(--color-white);
   }
 }

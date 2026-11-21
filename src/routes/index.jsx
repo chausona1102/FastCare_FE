@@ -38,13 +38,14 @@ import CategoriesManagement from "~/components/pages/shared/Categories";
 import ProductsManagement from "~/components/pages/shared/Products";
 import ActivityLogs from "~/components/pages/admin/Logs";
 import RefreshTokenSessions from "~/components/pages/admin/RefreshTokenSessions";
+import Leaderboard from "~/components/pages/shared/Leaderboard";
 
 // Staff-only pages
+import Inventory from "~/components/pages/staff/Inventory";
+import ImportList from "~/components/pages/staff/ImportList";
 import ProductDetailStaff from "~/components/pages/staff/ProductDetail";
 import ProductForm from "~/components/pages/staff/ProductForm";
-import Inventory from "~/components/pages/staff/Inventory";
 import Imports from "~/components/pages/staff/Imports";
-import ImportList from "~/components/pages/staff/ImportList";
 import OrderHistory from "~/components/pages/staff/OrderHistory";
 import InStoreSale from "~/components/pages/staff/InStoreSale";
 
@@ -168,6 +169,11 @@ const adminRoutes = [
     Layout: AdminLayout,
   },
   {
+    path: "/admin/leaderboard",
+    component: Leaderboard,
+    Layout: AdminLayout,
+  },
+  {
     path: "/admin/orders",
     component: AdminOrders,
     Layout: AdminLayout,
@@ -190,6 +196,16 @@ const adminRoutes = [
   {
     path: "/admin/products",
     component: ProductsManagement,
+    Layout: AdminLayout,
+  },
+  {
+    path: "/admin/inventory",
+    component: Inventory,
+    Layout: AdminLayout,
+  },
+  {
+    path: "/admin/imports",
+    component: ImportList,
     Layout: AdminLayout,
   },
   {
@@ -253,6 +269,11 @@ const staffRoutes = [
   {
     path: "/staff/users",
     component: UserManagement,
+    Layout: StaffLayout,
+  },
+  {
+    path: "/staff/leaderboard",
+    component: Leaderboard,
     Layout: StaffLayout,
   },
   {

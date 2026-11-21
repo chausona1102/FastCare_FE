@@ -5,6 +5,7 @@ import CartSummary from "./CartSummary";
 import EmptyCart from "./EmptyCart";
 import CartSkeleton from "./CartSkeleton";
 import useCart from "~/hook/useCart.jsx";
+import "./ShoppingCart.css";
 
 export default function ShoppingCart() {
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ export default function ShoppingCart() {
   };
 
   return (
-    <div className="shopping-cart-page bg-light py-5">
+    <div className="shopping-cart-page py-5">
       <div className="container">
         <div className="mb-4">
           <h1 className="fw-bold">Giỏ hàng của bạn</h1>
@@ -66,7 +67,7 @@ export default function ShoppingCart() {
         ) : (
           <div className="row gx-4 gy-4">
             <div className="col-12 col-xl-8">
-              <div className="card rounded-4 border-0 shadow-sm p-3 p-xl-4 cart-list-card">
+              <div className="card rounded-4 shadow-sm p-3 p-xl-4 cart-list-card">
                 <CartItemList
                   items={items}
                   selectedItemIds={selectedItemIds}

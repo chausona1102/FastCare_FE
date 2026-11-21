@@ -1,7 +1,7 @@
 .wrapper {
     width: 100%;
     input {
-        border: 1px solid #ccc;
+        border: 1px solid var(--theme-border);
         padding: 5px 10px;
         border-radius: 5px;
         min-width: 200px;
@@ -9,14 +9,14 @@
         max-width: 400px;
         &:focus {
             outline: none;
-            border-color: #888;
+            border-color: var(--theme-border);
         }
 
     }
     .submit {
         padding: 5px 10px;
         border-radius: 0 5px 5px 0; 
-        border: 1px solid #ccc;
+        border: 1px solid var(--theme-border);
         transition: transform 500ms ease-in-out;
         &:active {
             transform: translate(-4px);

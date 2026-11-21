@@ -8,6 +8,8 @@ import { logout } from "~/store/slices/authSlice";
 import axiosClient from "~/api/axiosClient";
 import { logo } from "~/assets/images";
 import Tippy from "@tippyjs/react";
+import { useTheme } from "~/contexts/ThemeContext";
+import SwitchTheme from "~/components/SwitchTheme";
 import {
   faHome,
   faShoppingCart,
@@ -20,12 +22,14 @@ import {
   faUsers,
   faLayerGroup,
   faMoneyBillWave,
+  faTrophy,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const cx = classNames.bind(styles);
 
 function StaffLayout({ children }) {
+  const { theme, toggleTheme } = useTheme();
   const { user } = useAuth();
   console.log("StaffLayout user:", user);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -138,6 +142,12 @@ function StaffLayout({ children }) {
           icon: faUsers,
           path: "/staff/users",
         },
+        {
+          id: "leaderboard",
+          label: "Bảng xếp hạng",
+          icon: faTrophy,
+          path: "/staff/leaderboard",
+        },
       ],
     },
   ];
@@ -221,6 +231,7 @@ function StaffLayout({ children }) {
           </button>
           <h1 className={cx("headerTitle")}>Staff Dashboard</h1>
           <div className={cx("headerRight")}>
+            <SwitchTheme theme={theme} toggle={toggleTheme} />
             <Tippy
               content={
                 user ? (

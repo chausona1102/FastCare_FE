@@ -13,12 +13,12 @@ export default function EmptyCart() {
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <rect x="10" y="20" width="160" height="110" rx="20" fill="#f7faff" />
-          <rect x="33" y="43" width="114" height="22" rx="10" fill="#dbe7ff" />
-          <rect x="33" y="75" width="96" height="18" rx="9" fill="#f7faff" />
-          <rect x="33" y="101" width="72" height="16" rx="8" fill="#f7faff" />
-          <circle cx="48" cy="94" r="8" fill="#609afa" />
-          <circle cx="132" cy="94" r="8" fill="#d70018" />
+          <rect x="10" y="20" width="160" height="110" rx="20" fill="var(--theme-subtle-surface)" />
+          <rect x="33" y="43" width="114" height="22" rx="10" fill="var(--theme-border)" />
+          <rect x="33" y="75" width="96" height="18" rx="9" fill="var(--theme-subtle-surface)" />
+          <rect x="33" y="101" width="72" height="16" rx="8" fill="var(--theme-subtle-surface)" />
+          <circle cx="48" cy="94" r="8" fill="var(--theme-info)" />
+          <circle cx="132" cy="94" r="8" fill="var(--color-fastcare-500)" />
         </svg>
       </div>
       <h4 className="mb-3">Giỏ hàng của bạn đang trống</h4>

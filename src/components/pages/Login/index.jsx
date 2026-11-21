@@ -162,7 +162,7 @@ function Login() {
                   className={cx("btn-submit")}
                   disabled={loading}
                 >
-                  {loading ? <LoadingCircle /> : "Đăng nhập"}
+                  {loading ? "Đang đăng nhập..." : "Đăng nhập"}
                 </button>
                 <div className={cx("forgot")}>
                   <Link to="/forgot-password">Quên mật khẩu?</Link>
@@ -188,6 +188,11 @@ function Login() {
           </div>
         </div>
       </div>
+      {loading && (
+        <div className={cx("loading-overlay")}>
+          <LoadingCircle />
+        </div>
+      )}
       <div className={cx("modal", { show: showModal })}>
         <div className={cx("content")}>
           <FontAwesomeIcon

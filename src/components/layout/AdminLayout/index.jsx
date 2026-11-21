@@ -5,7 +5,11 @@ import classNames from "classnames/bind";
 import { useDispatch } from "react-redux";
 import { logout } from "~/store/slices/authSlice";
 import axiosClient from "~/api/axiosClient";
+import Tippy from "@tippyjs/react";
+import { useTheme } from "~/contexts/ThemeContext";
+import { useAuth } from "~/hook/useAuth";
 import { logo } from "~/assets/images";
+import SwitchTheme from "~/components/SwitchTheme";
 import {
   faHome,
   faUsers,
@@ -20,12 +24,16 @@ import {
   faChartLine,
   faMoneyBillWave,
   faKey,
+  faTrophy,
+  faTruck,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const cx = classNames.bind(styles);
 
 function AdminLayout({ children }) {
+  const { user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const dispatch = useDispatch();
@@ -47,7 +55,18 @@ function AdminLayout({ children }) {
       id: "management",
       title: "Quản lý",
       items: [
-        { id: "users", label: "Khách hàng", icon: faUsers, path: "/admin/users" },
+        {
+          id: "users",
+          label: "Khách hàng",
+          icon: faUsers,
+          path: "/admin/users",
+        },
+        {
+          id: "leaderboard",
+          label: "Bảng xếp hạng",
+          icon: faTrophy,
+          path: "/admin/leaderboard",
+        },
         {
           id: "orders",
           label: "Đơn hàng",
@@ -65,6 +84,18 @@ function AdminLayout({ children }) {
           label: "Sản phẩm",
           icon: faBox,
           path: "/admin/products",
+        },
+        {
+          id: "inventory",
+          label: "Tồn kho",
+          icon: faBox,
+          path: "/admin/inventory",
+        },
+        {
+          id: "imports",
+          label: "Đơn nhập hàng",
+          icon: faTruck,
+          path: "/admin/imports",
         },
         {
           id: "categories",
@@ -104,7 +135,7 @@ function AdminLayout({ children }) {
 
   const handleLogout = async () => {
     try {
-      await axiosClient.post("/api/auth/logout"); 
+      await axiosClient.post("/api/auth/logout");
     } catch (err) {
       console.error("Logout error:", err);
     } finally {
@@ -179,7 +210,33 @@ function AdminLayout({ children }) {
           </button>
           <h1 className={cx("headerTitle")}>Admin Dashboard</h1>
           <div className={cx("headerRight")}>
-            <div className={cx("userAvatar")}>AD</div>
+            {/* <div className={cx("themeSwitch", "form-check form-switch")}>
+              <input
+                className={cx("form-check-input")}
+                type="checkbox"
+                id="theme-switch"
+                role="switch"
+                checked={theme === "dark"}
+                onChange={toggleTheme}
+              />
+              <span className={cx("themeSwitchThumb")} aria-hidden="true" />
+            </div> */}
+            <SwitchTheme theme={theme} toggle={toggleTheme} />
+            <Tippy
+              content={
+                user ? (
+                  <div className={cx("userTooltip")}>
+                    <p>{user.fullname}</p>
+                    <p>{user.email}</p>
+                  </div>
+                ) : (
+                  "Người dùng"
+                )
+              }
+              placement="bottom"
+            >
+              <div className={cx("userAvatar")}>AD</div>
+            </Tippy>
           </div>
         </header>
 

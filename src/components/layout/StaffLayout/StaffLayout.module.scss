@@ -1,17 +1,13 @@
 .wrapper {
   display: flex;
   min-height: 100vh;
-  background-color: #f5f5f5;
+  background-color: var(--theme-background);
 }
 
 .sidebar {
   width: 260px;
-  background: linear-gradient(
-    135deg,
-    var(--color-fastcare-600),
-    var(--color-fastcare-400)
-  );
-  color: white;
+  background: var(--theme-sidebar-background);
+  color: var(--color-white);
   position: fixed;
   left: 0;
   top: 0;
@@ -23,7 +19,7 @@
   font-weight: var(--fw-bold);
 
   .logo {
-    background-color: rgba(255, 255, 255);
+    background-color: var(--color-white);
     img {
       width: 200px;
       height: auto;
@@ -95,14 +91,14 @@
 
           &:hover {
             background-color: rgba(255, 255, 255, 0.1);
-            color: white;
+            color: var(--color-white);
             padding-left: 25px;
           }
 
           &.active {
             background-color: rgba(255, 255, 255, 0.2);
-            color: white;
-            border-left: 4px solid white;
+            color: var(--color-white);
+            border-left: 4px solid var(--color-white);
             padding-left: 16px;
           }
 
@@ -111,7 +107,7 @@
             color: rgba(255, 255, 255, 0.8);
 
             &:hover {
-              color: white;
+              color: var(--color-white);
               background-color: rgba(255, 255, 255, 0.1);
             }
           }
@@ -129,7 +125,7 @@
 }
 
 .header {
-  background: white;
+  background: var(--theme-surface);
   padding: 20px 30px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   display: flex;
@@ -138,14 +134,14 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--theme-border);
 
   .toggleSidebar {
     background: none;
     border: none;
     font-size: 1.8rem;
     cursor: pointer;
-    color: #333;
+    color: var(--theme-text);
     display: none;
     margin-right: 20px;
 
@@ -157,7 +153,7 @@
   .headerTitle {
     font-size: 2rem;
     font-weight: 600;
-    color: #333;
+    color: var(--theme-text);
     margin: 0;
     flex: 1;
   }
@@ -182,7 +178,7 @@
         border-radius: 50%;
         object-fit: cover;
       }
-      color: white;
+      color: var(--color-white);
       display: flex;
       align-items: center;
       justify-content: center;

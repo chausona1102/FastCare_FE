@@ -1,5 +1,5 @@
 body {
-    background-color: #fff;
+    background-color: var(--theme-surface);
 }
 .wrapper {
     // width: 100%;
@@ -14,22 +14,22 @@ body {
 
             a {
                 font-size: 1.3rem;
-                color: var(--active-clr);
+                color: var(--theme-info);
                 font-weight: var(--fw-regular);
 
                 &:hover {
-                    color: rgb(2, 59, 116);
+                    color: var(--theme-info-action);
                 }
             }
 
             .icon {
-                color: #ccc;
+                color: var(--theme-muted-text);
             }
 
             span {
                 font-size: 1.2rem;
                 font-weight: var(--fw-medium);
-                color: #888;
+                color: var(--theme-muted-text);
             }
 
             @media (max-width: 768px) {
@@ -42,7 +42,7 @@ body {
 .container {
     .page-title {
         margin: 20px 0 12px;
-        color: #193b63;
+        color: var(--theme-info);
         font-size: 2.4rem;
         font-weight: 700;
     }
@@ -54,26 +54,26 @@ body {
         gap: 10px;
         margin: 18px 0;
         padding: 8px 16px;
-        border: 1px solid #e8edf3;
+        border: 1px solid var(--theme-border);
         border-radius: 8px;
-        background: #f8fafc;
+        background: var(--theme-subtle-surface);
         font-size: 1.3rem;
         .filter-heading {
             display: flex;
             align-items: center;
             gap: 8px;
             margin-right: 8px;
-            color: #193b63;
+            color: var(--theme-info);
             font-weight: 600;
         }
 
         select {
             min-width: 180px;
             padding: 9px 12px;
-            border: 1px solid #d7dee8;
+            border: 1px solid var(--theme-border);
             border-radius: 5px;
-            background: #fff;
-            color: #334155;
+            background: var(--theme-surface);
+            color: var(--theme-text);
             cursor: pointer;
         }
 
@@ -81,13 +81,13 @@ body {
             padding: 9px 12px;
             border: 0;
             background: transparent;
-            color: #c2410c;
+            color: var(--theme-warning);
             cursor: pointer;
         }
 
         .result-count {
             margin-left: auto;
-            color: #64748b;
+            color: var(--theme-muted-text);
             font-size: 1.3rem;
         }
     }
@@ -101,7 +101,7 @@ body {
 
 .empty-state {
     padding: 48px 16px;
-    color: #64748b;
+    color: var(--theme-muted-text);
     text-align: center;
 }
 
@@ -112,15 +112,15 @@ body {
 
     button {
         padding: 10px 24px;
-        border: 1px solid #d7dee8;
+        border: 1px solid var(--theme-border);
         border-radius: 5px;
-        background: #fff;
-        color: #334155;
+        background: var(--theme-surface);
+        color: var(--theme-text);
         cursor: pointer;
 
         &:hover {
-            border-color: var(--active-clr);
-            background: var(--active-clr);
+            border-color: var(--theme-info-action);
+            background: var(--theme-info-action);
             color: #fff;
         }
     }
